@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>siga-doc</artifactId>
 		<groupId>siga</groupId>
-		<version>1.2-SNAPSHOT</version>
+		<version>9.4.0.0</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -59,12 +59,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.5.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc6</artifactId>
-			<version>11.2.0.3.0</version>
-			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 

@@ -37,11 +37,12 @@ import br.gov.jfrj.siga.model.Objeto;
 		@NamedQuery(name = "consultarSiglaOrgaoUsuario", query = "from CpOrgaoUsuario org where upper(org.siglaOrgaoUsu) = upper(:sigla) or upper(org.acronimoOrgaoUsu) = upper(:sigla)"),
 		@NamedQuery(name = "consultarCpOrgaoUsuario", query = "select u from CpOrgaoUsuario u order by u.siglaOrgaoUsu"), 
 		@NamedQuery(name = "consultarCpOrgaoUsuarioOrdenadoPorNome", query = "select u from CpOrgaoUsuario u order by u.nmOrgaoUsu"),
-		@NamedQuery(name = "consultarIdOrgaoUsuario", query = "from CpOrgaoUsuario org where upper(org.idOrgaoUsu) = upper(:idOrgaoUsu)"),
+		@NamedQuery(name = "consultarIdOrgaoUsuario", query = "from CpOrgaoUsuario org where org.idOrgaoUsu = :idOrgaoUsu"),
 		@NamedQuery(name = "consultarNomeOrgaoUsuario", query = "from CpOrgaoUsuario org where upper(org.nmOrgaoAI) = upper(:nome)"),
 		@NamedQuery(name = "consultarPorFiltroCpOrgaoUsuario", query = "from CpOrgaoUsuario org where (upper(org.nmOrgaoUsu) like upper('%' || :nome || '%'))	order by org.nmOrgaoUsu"),
-		@NamedQuery(name = "consultarQuantidadeCpOrgaoUsuario", query = "select count(org) from CpOrgaoUsuario org"
-				+ " where ((upper(org.nmOrgaoUsu) like upper('%' || :nome || '%')) or (upper(org.siglaOrgaoUsu) like upper('%' || :nome || '%'))) order by org.siglaOrgaoUsu")})
+		@NamedQuery(name = "consultarQuantidadeCpOrgaoUsuario", query = "select count(org) from CpOrgaoUsuario org "
+				+ "where ((upper(org.nmOrgaoUsu) like upper('%' || :nome || '%')) "
+				+ "   or (upper(org.siglaOrgaoUsu) like upper('%' || :nome || '%'))) ")})
 
 public abstract class AbstractCpOrgaoUsuario extends Objeto implements
 		Serializable {
@@ -76,6 +77,9 @@ public abstract class AbstractCpOrgaoUsuario extends Objeto implements
 
 	@Column(name = "SIGLA_ORGAO_USU", length = 15)
 	private String siglaOrgaoUsu;
+
+	@Column(name = "SIGLA_ORGAO_USU_COMPLETA", length = 15)
+	private String siglaOrgaoUsuCompleta;
 
 	@Column(name = "MUNICIPIO_ORGAO_USU", length = 50)
 	private String municipioOrgaoUsu;
@@ -149,6 +153,10 @@ public abstract class AbstractCpOrgaoUsuario extends Objeto implements
 		return siglaOrgaoUsu;
 	}
 
+	public String getSiglaOrgaoUsuCompleta() {
+		return siglaOrgaoUsuCompleta;
+	}
+
 	public String getTelOrgaoUsu() {
 		return telOrgaoUsu;
 	}
@@ -213,6 +221,10 @@ public abstract class AbstractCpOrgaoUsuario extends Objeto implements
 
 	public void setSiglaOrgaoUsu(String siglaOrgaoUsu) {
 		this.siglaOrgaoUsu = siglaOrgaoUsu;
+	}
+
+	public void setSiglaOrgaoUsuCompleta(String siglaOrgaoUsuCompleta) {
+		this.siglaOrgaoUsuCompleta = siglaOrgaoUsuCompleta;
 	}
 
 	public void setTelOrgaoUsu(String telOrgaoUsu) {

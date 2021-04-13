@@ -45,7 +45,7 @@ public class Tag {
 
 	private final HashMap properties = new HashMap();
 
-	private final ArrayList tags = new ArrayList();
+	private final ArrayList tags = new ArrayList<>();
 
 	private Style style;
 

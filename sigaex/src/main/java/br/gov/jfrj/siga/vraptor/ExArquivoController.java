@@ -31,6 +31,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.lowagie.text.pdf.codec.Base64;
+
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
@@ -42,6 +44,7 @@ import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.bluc.service.BlucService;
 import br.gov.jfrj.siga.bluc.service.HashRequest;
 import br.gov.jfrj.siga.bluc.service.HashResponse;
+import br.gov.jfrj.siga.ex.ExArquivo;
 import br.gov.jfrj.siga.ex.ExMobil;
 import br.gov.jfrj.siga.ex.ExMovimentacao;
 import br.gov.jfrj.siga.ex.ExNivelAcesso;
@@ -51,8 +54,6 @@ import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.vraptor.builder.ExDownloadRTF;
 import br.gov.jfrj.siga.vraptor.builder.ExDownloadZip;
 import br.gov.jfrj.siga.vraptor.builder.ExInputStreamDownload;
-
-import com.lowagie.text.pdf.codec.Base64;
 
 @Resource
 public class ExArquivoController extends ExController {
@@ -109,18 +110,18 @@ public class ExArquivoController extends ExController {
 			final boolean isArquivoAuxiliar = mov != null && mov.getExTipoMovimentacao().getId().equals(ExTipoMovimentacao.TIPO_MOVIMENTACAO_ANEXACAO_DE_ARQUIVO_AUXILIAR);
 			final boolean imutavel = (mov != null) && !completo && !estampar && !somenteHash && !pacoteAssinavel;
 			String cacheControl = "private";
-			final Integer grauNivelAcesso = mob.doc().getExNivelAcesso().getGrauNivelAcesso();
+			final Integer grauNivelAcesso = mob.getDoc().getExNivelAcesso().getGrauNivelAcesso();
 			if (ExNivelAcesso.NIVEL_ACESSO_PUBLICO == grauNivelAcesso || ExNivelAcesso.NIVEL_ACESSO_ENTRE_ORGAOS == grauNivelAcesso) {
 				cacheControl = "public";
 			}
 			byte ab[] = null;
 			if (isArquivoAuxiliar) {
-				ab = mov.getConteudoBlobMov2();
+				ab = mov.getConteudoBlobInicializarOuAtualizarCache();
 				return new InputStreamDownload(makeByteArrayInputStream(ab, fB64), APPLICATION_OCTET_STREAM, mov.getNmArqMov());
 			}
 			if (isPdf) {
 				if (mov != null && !completo && !estampar && hash == null) {
-					ab = mov.getConteudoBlobpdf();
+					ab = mov.getConteudoBlobPdf();
 				} else {
 					ab = Documento.getDocumento(mob, mov, completo, estampar, hash, null);
 				}
@@ -193,7 +194,7 @@ public class ExArquivoController extends ExController {
 
 	@Get("/app/arquivo/download")
 	public Download download(String arquivo, String hash, HttpServletResponse response) throws Exception {
-		boolean isZip = arquivo.endsWith(".zip");
+		boolean isZip = arquivo.endsWith(ExArquivo.EXTENSAO_ZIP);
 		boolean somenteHash = hash != null || getPar().containsKey("HASH_ALGORITHM");
 		String algoritmoHash = getAlgoritmoHash(hash);
 		ExMobil mob = Documento.getMobil(arquivo);
@@ -257,7 +258,7 @@ public class ExArquivoController extends ExController {
 
 	private String getCacheControl(ExMobil mob) {
 		String cacheControl = "private";
-		final Integer grauNivelAcesso = mob.doc().getExNivelAcesso().getGrauNivelAcesso();
+		final Integer grauNivelAcesso = mob.getDoc().getExNivelAcesso().getGrauNivelAcesso();
 		if (ExNivelAcesso.NIVEL_ACESSO_PUBLICO == grauNivelAcesso || ExNivelAcesso.NIVEL_ACESSO_ENTRE_ORGAOS == grauNivelAcesso)
 			cacheControl = "public";
 		return cacheControl;

@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.SessionFactory;
 import org.jbpm.graph.def.ProcessDefinition;
@@ -41,9 +43,8 @@ public class ConfiguracaoController extends WfController {
 	 * Inicializa os tipos de responsáveis e suas respectivas expressões, quando
 	 * houver.
 	 */
-	public ConfiguracaoController(HttpServletRequest request, Result result,
-			WfDao dao, SigaObjects so, WfUtil util) {
-		super(request, result, dao, so, util);
+	public ConfiguracaoController(HttpServletRequest request, HttpServletResponse response, Result result, WfDao dao, SigaObjects so, WfUtil util, EntityManager em) {
+		super(request, response, result, dao, so, util, em);
 
 		WfTipoResponsavel tpIndefinido = new WfTipoResponsavel(
 				TIPO_RESP_INDEFINIDO, "[Indefinido]", "");

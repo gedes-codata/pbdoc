@@ -6,12 +6,13 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import br.gov.jfrj.siga.model.Objeto;
+import org.apache.commons.lang.StringUtils;
 
 public class ActiveRecord<T extends Objeto> {
-	private Class<? extends Objeto> clazz;
 
-	public ActiveRecord(Class<? extends Objeto> clazz) {
+	private Class<T> clazz;
+
+	public ActiveRecord(Class<T> clazz) {
 		this.clazz = clazz;
 	}
 
@@ -32,7 +33,7 @@ public class ActiveRecord<T extends Objeto> {
 				.getSingleResult().toString());
 	}
 
-	public List findAll() {
+	public List<T> findAll() {
 		return em()
 				.createQuery("select e from " + clazz.getSimpleName() + " e")
 				.getResultList();
@@ -43,7 +44,7 @@ public class ActiveRecord<T extends Objeto> {
 		return (T) em().find(clazz, id);
 	}
 
-	public List findBy(String query, Object... params) {
+	public <X> List<X> findBy(String query, Object... params) {
 		Query q = em().createQuery(createFindByQuery(query, params));
 		return bindParameters(q, params).getResultList();
 	}
@@ -95,9 +96,8 @@ public class ActiveRecord<T extends Objeto> {
 
 	public String createFindByQuery(String query, Object... params) {
 		String entityName = clazz.getSimpleName();
-		String entityClass = clazz.getCanonicalName();
 
-		if (query == null || query.trim().length() == 0) {
+		if (StringUtils.isBlank(query)) {
 			return "from " + entityName;
 		}
 		if (query.matches("^by[A-Z].*$")) {
@@ -125,7 +125,6 @@ public class ActiveRecord<T extends Objeto> {
 
 	public String createDeleteQuery(String query, Object... params) {
 		String entityName = clazz.getSimpleName();
-		String entityClass = clazz.getCanonicalName();
 
 		if (query == null) {
 			return "delete from " + entityName;
@@ -149,7 +148,6 @@ public class ActiveRecord<T extends Objeto> {
 
 	public String createCountQuery(String query, Object... params) {
 		String entityName = clazz.getSimpleName();
-		String entityClass = clazz.getCanonicalName();
 
 		if (query.trim().toLowerCase().startsWith("select ")) {
 			return query;

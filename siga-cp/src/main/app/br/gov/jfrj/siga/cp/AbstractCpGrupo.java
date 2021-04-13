@@ -42,20 +42,20 @@ import br.gov.jfrj.siga.sinc.lib.Desconsiderar;
 @MappedSuperclass
 @NamedQueries({
 		@NamedQuery(name = "consultarCpGrupo", query = "from br.gov.jfrj.siga.cp.CpGrupo where dataFimGrupo is null order by siglaGrupo"),
-		@NamedQuery(name = "consultarQuantidadeCpGrupo", query = "select count(*) from br.gov.jfrj.siga.cp.CpGrupo where hisAtivo = 1"),
-		@NamedQuery(name = "consultarQuantidadeCpGrupoPorCpTipoGrupoId", query = "select count(*) from br.gov.jfrj.siga.cp.CpGrupo cpgrp where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo) and cpgrp.hisAtivo = 1"),
+		@NamedQuery(name = "consultarQuantidadeCpGrupo", query = "select count(*) from br.gov.jfrj.siga.cp.CpGrupo where hisAtivo = true"),
+		@NamedQuery(name = "consultarQuantidadeCpGrupoPorCpTipoGrupoId", query = "select count(*) from br.gov.jfrj.siga.cp.CpGrupo cpgrp where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo) and cpgrp.hisAtivo = true"),
 		@NamedQuery(name = "consultarQuantidadeCpGrupoPorCpTipoGrupoIdENome", query = "select count(*) from br.gov.jfrj.siga.cp.CpGrupo cpgrp"
 				+ "		where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo)"
 				+ "		and (upper(cpgrp.siglaGrupo) like upper('%'||:siglaGrupo||'%') or upper(cpgrp.dscGrupo) like upper('%'||:siglaGrupo||'%'))"
-				+ "		and cpgrp.hisAtivo = 1"),
+				+ "		and cpgrp.hisAtivo = true"),
 		@NamedQuery(name = "consultarCpGrupoPorCpTipoGrupoIdENome", query = "from br.gov.jfrj.siga.cp.CpGrupo cpgrp"
 				+ "		where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo)"
 				+ "		and (upper(cpgrp.siglaGrupo) like upper('%'||:siglaGrupo||'%') or upper(cpgrp.dscGrupo) like upper('%'||:siglaGrupo||'%'))"
-				+ "		and cpgrp.hisAtivo = 1" + "		order by cpgrp.siglaGrupo"),
+				+ "		and cpgrp.hisAtivo = true" + "		order by cpgrp.siglaGrupo"),
 		@NamedQuery(name = "consultarPorSiglaCpGrupo", query = "select g from br.gov.jfrj.siga.cp.CpGrupo g where"
 				+ "		upper(g.siglaGrupo) = upper(:siglaGrupo)"
 				+ "		and (:idOrgaoUsu = null or :idOrgaoUsu = 0 or g.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu)"
-				+ "       	and g.hisAtivo = 1"),
+				+ "       	and g.hisAtivo = true"),
 		@NamedQuery(name = "consultarCpGrupoPorCpTipoGrupoId", query = "from br.gov.jfrj.siga.cp.CpGrupo cpgrp "
 				+ " where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo) "
 				+ " and cpgrp.hisDtFim = null " + " order by cpgrp.siglaGrupo") })

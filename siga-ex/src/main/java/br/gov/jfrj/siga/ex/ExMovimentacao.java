@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,20 +35,19 @@ import java.util.TreeSet;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.apache.xerces.impl.dv.util.Base64;
 import org.hibernate.annotations.BatchSize;
 
 import br.gov.jfrj.itextpdf.Documento;
+import br.gov.jfrj.siga.armazenamento.zip.ZipItem;
 import br.gov.jfrj.siga.base.AplicacaoException;
+import br.gov.jfrj.siga.base.SigaMessages;
 import br.gov.jfrj.siga.dp.DpLotacao;
-import br.gov.jfrj.siga.ex.util.Compactador;
 import br.gov.jfrj.siga.ex.util.DatasPublicacaoDJE;
 import br.gov.jfrj.siga.ex.util.ProcessadorHtml;
 import br.gov.jfrj.siga.ex.util.ProcessadorReferencias;
 import br.gov.jfrj.siga.ex.util.PublicacaoDJEBL;
-import br.gov.jfrj.siga.model.dao.HibernateUtil;
 
 /**
  * A class that represents a row in the 'EX_MOVIMENTACAO' table. This class may
@@ -59,13 +59,13 @@ import br.gov.jfrj.siga.model.dao.HibernateUtil;
 @Table(name = "EX_MOVIMENTACAO", catalog = "SIGA")
 public class ExMovimentacao extends AbstractExMovimentacao implements
 		Serializable, Comparable<ExMovimentacao> {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 2559924666592487436L;
 
-	@Transient
-	private byte[] cacheConteudoBlobMov;
+	private static final Set<Long> TIPOS_MOVIMENTACAO_CANCELAMENTO = Collections.unmodifiableSet(new TreeSet<>(Arrays.asList(
+			ExTipoMovimentacao.TIPO_MOVIMENTACAO_CANCELAMENTO_DE_MOVIMENTACAO,
+			ExTipoMovimentacao.TIPO_MOVIMENTACAO_CANCELAMENTO_JUNTADA
+	)));
 
 	/**
 	 * Simple constructor of ExMovimentacao instances.
@@ -83,16 +83,13 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 	}
 
 	@Override
+	public Long getId() {
+		return this.getIdMov();
+	}
+
+	@Override
 	public Long getIdMov() {
 		return super.getIdMov();
-	}
-
-	public String getConteudoBlobString() throws UnsupportedEncodingException {
-		return new String(getConteudoBlobMov2(), "ISO-8859-1");
-	}
-
-	public String getConteudoBlobPdfB64() {
-		return Base64.encode(getConteudoBlobpdf());
 	}
 
 	/* Add customized code below */
@@ -101,20 +98,12 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 		String s = getExTipoMovimentacao().getSigla();
 		if (getCadastrante() == null || getSubscritor() == null)
 			return s;
-		if (!getSubscritor().getId().equals(getCadastrante().getId()))
+		if (!getSubscritor().getId().equals(getCadastrante().getId())
+			&& !SigaMessages.isSigaSP())
 			s = s + " de Ordem";
 		if (getExMovimentacaoCanceladora() != null)
 			s = s + " (Cancelada)";
 		return s;
-	}
-
-	public byte[] getConteudoBlobMov2() {
-
-		if (cacheConteudoBlobMov == null)
-			cacheConteudoBlobMov = br.gov.jfrj.siga.cp.util.Blob
-					.toByteArray(getConteudoBlobMov());
-		return cacheConteudoBlobMov;
-
 	}
 
 	public String getLotaPublicacao() {
@@ -153,13 +142,6 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 		return getExTipoMovimentacao().getIdTpMov();
 	}
 
-	public void setConteudoBlobMov2(byte[] blob) {
-		if (blob != null)
-			setConteudoBlobMov(HibernateUtil.getSessao().getLobHelper()
-					.createBlob(blob));
-		cacheConteudoBlobMov = blob;
-	}
-
 	/**
 	 * Retorna a data da movimentação no formato dd/mm/aa, por exemplo,
 	 * 01/02/10.
@@ -168,25 +150,25 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 	 * 
 	 */
 	public String getDtMovDDMMYY() {
-		if (getDtMov() != null) {
+		if (this.getData() != null) {
 			final SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
-			return df.format(getDtMov());
+			return df.format(this.getData());
 		}
 		return "";
 	}
 
 	public String getDtMovDDMMYYYY() {
-		if (getDtMov() != null) {
+		if (this.getData() != null) {
 			final SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-			return df.format(getDtMov());
+			return df.format(this.getData());
 		}
 		return "";
 	}
 
 	public String getDtMovYYYYMMDD() {
-		if (getDtMov() != null) {
+		if (this.getData() != null) {
 			final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			return df.format(getDtMov());
+			return df.format(this.getData());
 		}
 		return "";
 	}
@@ -305,7 +287,7 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 				 */
 			}
 
-			return s + ", " + df1.format(getDtMov()).toLowerCase();
+			return s + ", " + df1.format(this.getData()).toLowerCase();
 		} catch (Exception e) {
 			return null;
 		}
@@ -334,7 +316,6 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 	 */
 	@Override
 	public String getDescrMov() {
-		// TODO Auto-generated method stub
 		return super.getDescrMov();
 	}
 
@@ -456,7 +437,28 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 			return strReturn;
 		}
 	}
+	
+	/**
+	 * Retorna o nome do responsável pela movimentação sem a descricao.
+	 * 
+	 * @return Nome do responsável pela movimentação sem a descricao.
+	 */
+	public String getRespSemDescrString() {
+			return getOrgaoExterno().getNmOrgao();
+	}
 
+	/**
+	 * Retorna Descrição da Movimentação
+	 * 
+	 * @return Descrição da Movimentação
+	 */
+	public String getRespDescrString() {
+		if (getObsOrgao() != null) {
+			return getObsOrgao().trim();
+		}
+		return "";
+	}
+	
 	/**
 	 * Retorna o nome do responsável pela movimentação.
 	 * 
@@ -476,47 +478,27 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 	}
 
 	public void setConteudoBlobHtml(final byte[] conteudo) {
-		setConteudoBlob("doc.htm", conteudo);
+		setConteudoBlob(ZipItem.Tipo.HTM, conteudo);
 	}
 
 	public void setConteudoBlobPdf(final byte[] conteudo) {
-		setConteudoBlob("doc.pdf", conteudo);
+		setConteudoBlob(ZipItem.Tipo.PDF, conteudo);
 	}
 
 	public void setConteudoBlobForm(final byte[] conteudo) {
-		setConteudoBlob("doc.form", conteudo);
+		setConteudoBlob(ZipItem.Tipo.FORM, conteudo);
 	}
 
 	public void setConteudoBlobXML(final String nome, final byte[] conteudo) {
-		setConteudoBlob(nome + ".xml", conteudo);
+		setConteudoBlob(ZipItem.Tipo.XML.comNome(nome), conteudo);
 	}
 
 	public void setConteudoBlobRTF(final String nome, final byte[] conteudo) {
-		setConteudoBlob(nome + ".rtf", conteudo);
-	}
-
-	public void setConteudoBlob(final String nome, final byte[] conteudo) {
-		final Compactador zip = new Compactador();
-		final byte[] arqZip = getConteudoBlobMov2();
-		byte[] conteudoZip = null;
-		if (arqZip == null || (zip.listarStream(arqZip) == null)) {
-			if (conteudo != null) {
-				conteudoZip = zip.compactarStream(nome, conteudo);
-			} else {
-				conteudoZip = null;
-			}
-		} else {
-			if (conteudo != null) {
-				conteudoZip = zip.adicionarStream(nome, conteudo, arqZip);
-			} else {
-				conteudoZip = zip.removerStream(nome, arqZip);
-			}
-		}
-		setConteudoBlobMov2(conteudoZip);
+		setConteudoBlob(ZipItem.Tipo.RTF.comNome(nome), conteudo);
 	}
 
 	public byte[] getConteudoBlobHtml() {
-		return getConteudoBlob("doc.htm");
+		return getConteudoBlob(ZipItem.Tipo.HTM);
 	}
 
 	public String getConteudoBlobHtmlString() {
@@ -532,7 +514,7 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 
 	public byte[] getConteudoBlobPdfNecessario() {
 		if (getConteudoBlobHtml() == null)
-			return getConteudoBlobpdf();
+			return getConteudoBlobPdf();
 		return null;
 	}
 
@@ -545,60 +527,34 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 		return super.getExMobil().getExDocumento();
 	}
 
-	public byte[] getConteudoBlobpdf() {
-		try {
-			if (getConteudoTpMov().equals("application/zip"))
-				return getConteudoBlob("doc.pdf");
-			if (getConteudoTpMov().equals("application/pdf"))
-				return getConteudoBlobMov2();
-		} catch (Exception ex) {
-			return null;
-		}
-		return null;
+	public byte[] getConteudoBlobPdf() {
+		return getConteudoBlob(ZipItem.Tipo.PDF);
 	}
 
 	public byte[] getConteudoBlobForm() {
-		return getConteudoBlob("doc.form");
+		return getConteudoBlob(ZipItem.Tipo.FORM);
 	}
 
 	public byte[] getConteudoBlobXML() {
-		return getConteudoBlobXML("doc.xml");
+		return getConteudoBlob(ZipItem.Tipo.XML);
 	}
 
-	public byte[] getConteudoBlobXML(String nome) {
-		if (!nome.contains(".xml"))
-			nome += ".xml";
-		return getConteudoBlob(nome);
-	}
-
-	public String getConteudoXmlString(String nome)
-			throws UnsupportedEncodingException {
-
-		byte[] xmlByte = this.getConteudoBlobXML(nome);
-		if (xmlByte != null)
+	public String getConteudoXmlString(String nome) throws UnsupportedEncodingException {
+		byte[] xmlByte = this.getConteudoBlob(ZipItem.Tipo.XML.comNome(nome));
+		if (xmlByte != null) {
 			return new String(xmlByte, "ISO-8859-1");
-
+		}
 		return null;
 	}
 
 	public byte[] getConteudoBlobRTF() {
-		return getConteudoBlob("doc.rtf");
-	}
-
-	public byte[] getConteudoBlob(final String nome) {
-		final byte[] conteudoZip = getConteudoBlobMov2();
-		byte[] conteudo = null;
-		final Compactador zip = new Compactador();
-		if (conteudoZip != null) {
-			conteudo = zip.descompactarStream(conteudoZip, nome);
-		}
-		return conteudo;
+		return getConteudoBlob(ZipItem.Tipo.RTF);
 	}
 
 	public void setConteudoBlobHtmlString(final String s) throws Exception {
 		final String sHtml = (new ProcessadorHtml()).canonicalizarHtml(s,
 				false, true, false, false, false);
-		setConteudoBlob("doc.htm", sHtml.getBytes("ISO-8859-1"));
+		setConteudoBlob(ZipItem.Tipo.HTM, sHtml.getBytes("ISO-8859-1"));
 	}
 
 	/**
@@ -640,7 +596,6 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 	 */
 	public String getNmArqMovSemExtensao() {
 		String s = super.getNmArqMov();
-
 		if (s != null) {
 			s = s.trim();
 			if (s.length() == 0)
@@ -649,11 +604,9 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 			try {
 				return s.split("\\.")[0];
 			} catch (Exception e) {
-				// TODO: handle exception
+				e.printStackTrace();
 			}
-
 		}
-
 		return s;
 	}
 
@@ -763,23 +716,13 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 
 	@Override
 	public byte[] getPdf() {
-		return getConteudoBlobpdf();
+		return getConteudoBlobPdf();
 	}
 
 	@Override
 	public boolean isPdf() {
 		return (getNumPaginas() != null && getNumPaginas() > 0)
 				|| (getPdf() != null);
-	}
-
-	/**
-	 * Retorna a data da movimentação.
-	 * 
-	 * @return Data da movimentação.
-	 */
-	@Override
-	public Date getData() {
-		return getDtMov();
 	}
 
 	/**
@@ -801,10 +744,7 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 	 * @return Verdadeiro ou Falso.
 	 */
 	public boolean isCanceladora() {
-		return getExTipoMovimentacao() != null
-				&& getExTipoMovimentacao()
-						.getIdTpMov()
-						.equals(ExTipoMovimentacao.TIPO_MOVIMENTACAO_CANCELAMENTO_DE_MOVIMENTACAO);
+		return getExTipoMovimentacao() != null && TIPOS_MOVIMENTACAO_CANCELAMENTO.contains(getExTipoMovimentacao().getId());
 	}
 
 	/**
@@ -1020,18 +960,24 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 		return Documento.getAssinantesString(getApenasConferenciasCopia());
 	}
 
+	public String getAssinaturaComSenhaDataHoraString() {
+		return Documento.getAssinaturaComSenhaDataHoraString(getApenasAssinaturasComSenha());
+	}
+
 	public String getAssinantesCompleto() {
+		
 		String conferentes = getConferentesString();
 		String assinantesToken = getAssinantesComTokenString();
-		String assinantesSenha = getAssinantesComSenhaString();
 		String retorno = "";
+		String assinantesSenhaDataHora = getAssinaturaComSenhaDataHoraString();
+		
 		retorno += assinantesToken.length() > 0 ? "Assinado digitalmente por "
 				+ assinantesToken + ".\n" : "";
-		retorno += assinantesSenha.length() > 0 ? "Assinado com senha por "
-				+ assinantesSenha + ".\n" : "";
+		retorno += assinantesSenhaDataHora.length() > 0 ? "Assinado com senha por "
+				+ assinantesSenhaDataHora + ".\n" : "";
 
 		retorno += conferentes.length() > 0 ? "Autenticado digitalmente por "
-				+ conferentes + ".\n" : "";
+				+ conferentes + " em " + "dataAssinatura" + "hs.\n" : "";
 
 		return retorno;
 	}
@@ -1051,25 +997,15 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 
 	@Override
 	public boolean isRascunho() {
-		// TODO Auto-generated method stub
-		if (getExTipoMovimentacao().getIdTpMov().equals(
-				ExTipoMovimentacao.TIPO_MOVIMENTACAO_ANEXACAO)
-				&& mob().doc().isEletronico() && !isAssinada())
-			return true;
-
-		return false;
+		return ExTipoMovimentacao.TIPO_MOVIMENTACAO_ANEXACAO == getExTipoMovimentacao().getIdTpMov() && mob().getDoc().isEletronico() && !isAssinada();
 	}
 
 	@Override
 	public boolean isSemEfeito() {
 		if (getExDocumento().isSemEfeito()) {
 			// Não gera marca de "Sem Efeito em Folha de Desentranhamento"
-			if (getExTipoMovimentacao().getId() == ExTipoMovimentacao.TIPO_MOVIMENTACAO_CANCELAMENTO_JUNTADA)
-				return false;
-			else
-				return true;
+			return getExTipoMovimentacao().getId() != ExTipoMovimentacao.TIPO_MOVIMENTACAO_CANCELAMENTO_JUNTADA;
 		}
-
 		return false;
 	}
 
@@ -1130,7 +1066,6 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 	 * 
 	 */
 	public ExMobil mob() {
-		// TODO Auto-generated method stub
 		return getExMobil();
 	}
 
@@ -1140,7 +1075,6 @@ public class ExMovimentacao extends AbstractExMovimentacao implements
 		case (int) ExTipoMovimentacao.TIPO_MOVIMENTACAO_ANEXACAO:
 			return false;
 		}
-		// TODO Auto-generated method stub
 		return true;
 	}
 

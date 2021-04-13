@@ -49,8 +49,9 @@ import br.gov.jfrj.siga.model.Objeto;
 				+ "			and (:lotacao = null or :lotacao = 0 or pre.dpLotacao = :lotacao)"
 				+ "			and (:modelo=null or :modelo = 0 or pre.exModelo.hisIdIni = :modelo)"),
 		@NamedQuery(name = "excluirPorIdExPreenchimento", query = "delete from ExPreenchimento where idPreenchimento = :id") })
-public abstract class AbstractExPreenchimento extends Objeto implements
-		Serializable {
+public abstract class AbstractExPreenchimento extends Objeto implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/** The composite primary key value. */
 	@Id
@@ -71,7 +72,7 @@ public abstract class AbstractExPreenchimento extends Objeto implements
 	private String nomePreenchimento;
 
 	@Column(name = "PREENCHIMENTO_BLOB")
-	private java.sql.Blob preenchimentoBlob;
+	private byte[] preenchimentoBlob;
 
 	/**
 	 * Simple constructor of AbstractExTipoDespacho instances.
@@ -107,11 +108,11 @@ public abstract class AbstractExPreenchimento extends Objeto implements
 		this.idPreenchimento = idPreenchimento;
 	}
 
-	public java.sql.Blob getPreenchimentoBlob() {
+	public byte[] getPreenchimentoBlob() {
 		return preenchimentoBlob;
 	}
 
-	public void setPreenchimentoBlob(java.sql.Blob preenchimentoBlob) {
+	public void setPreenchimentoBlob(byte[] preenchimentoBlob) {
 		this.preenchimentoBlob = preenchimentoBlob;
 	}
 

@@ -25,6 +25,7 @@ package br.gov.jfrj.siga.vraptor;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Post;
@@ -42,9 +43,8 @@ import br.gov.jfrj.siga.util.FreemarkerIndent;
 @Resource
 public class ModeloController extends SigaController {
 
-	public ModeloController(HttpServletRequest request, Result result,
-			SigaObjects so, EntityManager em) {
-		super(request, result, CpDao.getInstance(), so, em);
+	public ModeloController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, CpDao.getInstance(), so, em);
 
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();

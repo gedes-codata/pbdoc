@@ -1,8 +1,6 @@
 package br.gov.jfrj.siga.vraptor;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
@@ -48,9 +46,8 @@ public class ExModeloController extends ExSelecionavelController {
 	private static final Logger LOGGER = Logger
 			.getLogger(ExModeloController.class);
 
-	public ExModeloController(HttpServletRequest request, Result result,
-			CpDao dao, SigaObjects so, EntityManager em) {
-		super(request, result, dao, so, em);
+	public ExModeloController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+		super(request, response, result, dao, so, em);
 	}
 
 	@Get("app/modelo/listar")

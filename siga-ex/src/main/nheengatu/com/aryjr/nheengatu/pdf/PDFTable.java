@@ -120,7 +120,7 @@ public class PDFTable extends PdfPTable {
 		ArrayList suggestedCellWidths;
 		boolean fCellWidthsAreSet = false;
 		for (int inc = 0; inc < rows.size(); inc++) {
-			suggestedCellWidths = new ArrayList();
+			suggestedCellWidths = new ArrayList<>();
 			row = (Tag) rows.get(inc);
 			// Inside a "table" only "tr", "tbody" or "thead"!!! Please!!!
 			if (!row.getName().equalsIgnoreCase("tr")) {

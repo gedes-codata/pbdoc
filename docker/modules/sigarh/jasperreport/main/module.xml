@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="sigarh.jasperreport">
+    <resources>
+		<resource-root path="jasperreports-javaflow-4.0.2.jar"/>
+		<resource-root path="jasperreports-4.0.2.jar"/>
+		<resource-root path="jasperreports-applet-4.0.2.jar"/>
+		<resource-root path="jasperreports-fonts-4.0.2.jar"/>
+		<resource-root path="iText-2.1.7.jar"/>
+		<resource-root path="commons-javaflow-20060411.jar"/>
+		<resource-root path="commons-digester-1.7.jar"/>
+		<resource-root path="groovy-all-1.7.5.jar"/>
+		<resource-root path="sigarhJasperreportFonts.jar"/>
+		<resource-root path="jdt-compiler-3.1.1.jar"/>
+    </resources>
+	
+    <dependencies>
+        <module name="javax.api"/>
+        <module name="org.apache.commons.beanutils"/>
+        <module name="org.apache.commons.collections"/>
+        <module name="org.apache.commons.logging"/>
+    </dependencies>
+</module>
+
+

@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * WikiParser.renderXHTML() is the main method of this class. It takes wiki-text
  * and returns XHTML.
@@ -1177,7 +1179,7 @@ public class WikiParser {
 	}
 
 	public static String emptyToNull(String s) {
-		return "".equals(s) ? null : s;
+		return StringUtils.EMPTY.equals(s) ? null : s;
 	}
 
 	public static String noNull(String s) {

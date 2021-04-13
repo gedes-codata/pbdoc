@@ -166,8 +166,8 @@ public class EscalaDeTrabalho extends TpModel implements ConvertableEntity  {
 		String dataFormatadaOracle = "to_date('" + dataHoraInicio + "', 'DD/MM/YYYY')";
 		List<EscalaDeTrabalho> escalas;
 
-		String qrl = "SELECT e FROM EscalaDeTrabalho e WHERE " + filtroCondutor + " trunc(dataVigenciaInicio) <= trunc(" + dataFormatadaOracle + ")"
-				+ " AND (dataVigenciaFim IS NULL OR trunc(dataVigenciaFim) >= trunc(" + dataFormatadaOracle + "))";
+		String qrl = "SELECT e FROM EscalaDeTrabalho e WHERE " + filtroCondutor + " DATE(dataVigenciaInicio) <= DATE(" + dataFormatadaOracle + ")"
+				+ " AND (dataVigenciaFim IS NULL OR DATE(dataVigenciaFim) >= DATE(" + dataFormatadaOracle + "))";
 
 		Query qry = AR.em().createQuery(qrl);
 		try {

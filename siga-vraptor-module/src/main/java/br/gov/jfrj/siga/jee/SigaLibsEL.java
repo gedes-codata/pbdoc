@@ -18,6 +18,8 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.jee;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -28,11 +30,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
-
+import org.apache.commons.lang.StringUtils;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
@@ -49,10 +47,14 @@ import br.gov.jfrj.siga.dp.CpOrgaoUsuario;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
 import br.gov.jfrj.siga.dp.dao.CpDao;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
 
 public class SigaLibsEL {
-	private static String month[] = new String[] { "Jan", "Fev", "Mar", "Abr",
-			"Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" };
+
+	private static String month[] = new String[] { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" };
 
 	public static String concat(final String s, final String s2) {
 		return s + s2;
@@ -83,8 +85,26 @@ public class SigaLibsEL {
 		return Texto.maiusculasEMinusculas(s);
 	}
 
+	public static String maiusculasEMinusculasPrimeiraPalavra(String s) {
+		String[] split = StringUtils.split(s, ' ');
+		return maiusculasEMinusculas(split[0]);
+	}
+
+	public static String maiusculasEMinusculasPrimeiraEUltimaPalavra(String s) {
+		String[] split = StringUtils.split(s, ' ');
+		if (split.length < 2) {
+			return maiusculasEMinusculas(s);
+		}
+		return maiusculasEMinusculas(split[0] + ' ' + split[split.length - 1]);
+	}
+
 	public static Object resource(String name) {
 		return Contexto.resource(name);
+	}
+
+	public static String env(String name) {
+		final String env = System.getenv(name);
+		return isBlank(env) ? null : env;
 	}
 
 	public static String espera(Date dt) {

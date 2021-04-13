@@ -5,10 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
-
-import org.hibernate.NonUniqueObjectException;
-import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.validator.util.Contracts;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -23,8 +20,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("/app/permissao")
 public class PermissaoController extends PpController {
 
-    public PermissaoController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em) {
-        super(request, result, dao, so, em);
+    public PermissaoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+        super(request, response, result, dao, so, em);
     }
     @Path("/exclui")
     public void exclui(String matricula_proibida, String sesb_proibida){

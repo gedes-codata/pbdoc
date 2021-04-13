@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Result;
 import br.gov.jfrj.siga.base.AplicacaoException;
+import br.gov.jfrj.siga.base.SigaMessages;
 import br.gov.jfrj.siga.cp.CpConfiguracao;
 import br.gov.jfrj.siga.cp.CpSituacaoConfiguracao;
 import br.gov.jfrj.siga.cp.CpTipoConfiguracao;
@@ -46,16 +47,13 @@ import br.gov.jfrj.siga.ex.ExModelo;
 import br.gov.jfrj.siga.ex.ExMovimentacao;
 import br.gov.jfrj.siga.ex.ExNivelAcesso;
 import br.gov.jfrj.siga.ex.ExTipoDocumento;
-import br.gov.jfrj.siga.ex.bl.CurrentRequest;
 import br.gov.jfrj.siga.ex.bl.Ex;
 import br.gov.jfrj.siga.ex.bl.ExConfiguracaoBL;
-import br.gov.jfrj.siga.ex.bl.RequestInfo;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.util.ExProcessadorModelo;
 
 public class ExController extends SigaController {
 
-	HttpServletResponse response;
 	ServletContext context;
 
 	static {
@@ -64,10 +62,8 @@ public class ExController extends SigaController {
 		}
 	}
 
-	public ExController(HttpServletRequest request, HttpServletResponse response, ServletContext context, Result result, CpDao dao, SigaObjects so,
-			EntityManager em) {
-		super(request, result, dao, so, em);
-		this.response = response;
+	public ExController(HttpServletRequest request, HttpServletResponse response, ServletContext context, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+		super(request, response, result, dao, so, em);
 		this.context = context;
 	}
 
@@ -234,7 +230,7 @@ public class ExController extends SigaController {
 
 	protected Map<Integer, String> getListaTipoResp() {
 		final Map<Integer, String> map = new TreeMap<Integer, String>();
-		map.put(1, "Matrícula");
+		map.put(1, SigaMessages.getMessage("usuario.matricula"));
 		map.put(2, "Órgão Integrado");
 		return map;
 	}
@@ -252,11 +248,8 @@ public class ExController extends SigaController {
 		super.assertAcesso("DOC:Módulo de Documentos;" + pathServico);
 	}
 
-	protected  HttpServletResponse getResponse() {
-		return response;
-	}
-
 	protected ServletContext getContext() {
 		return context;
 	}
+
 }

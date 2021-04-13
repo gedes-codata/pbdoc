@@ -1,5 +1,7 @@
 package br.gov.jfrj.siga.util;
 
+import static br.gov.jfrj.siga.idp.jwt.SigaJwtProvider.DEFAULT_TTL_TOKEN;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -37,7 +39,6 @@ public class SigaJwtBL {
 
 	public SigaJwtProvider getProvider(String modulo)
 			throws SigaJwtProviderException {
-		int ttl = Cp.getInstance().getProp().getJWTTokenTTL(modulo);
 		String moduloPwd = null;
 
 		if (modulo == null) {
@@ -57,7 +58,10 @@ public class SigaJwtBL {
 		}
 
 		SigaJwtOptions options = new SigaJwtOptionsBuilder()
-				.setPassword(moduloPwd).setModulo(modulo).setTTL(ttl).build();
+				.setPassword(moduloPwd)
+				.setModulo(modulo)
+				.setTTL(DEFAULT_TTL_TOKEN)
+				.build();
 		return SigaJwtProvider.getInstance(options);
 	}
 
@@ -76,8 +80,8 @@ public class SigaJwtBL {
 		return new SigaJwtBL(modulo);
 	}
 
-	public String login(String matricula, String senha) {
-		return login(matricula, null, senha, null, null, null);
+	public String login(String matricula, Long cpf, String senha) {
+		return login(matricula, cpf, null, senha, null, null, null);
 	}
 
 	/**
@@ -99,8 +103,7 @@ public class SigaJwtBL {
 	 *            - Tempo de vida do token
 	 * @return
 	 */
-	public String login(String matricula, String lotacao, String senha,
-			String configuracao, String permissoes, Integer ttl) {
+	public String login(String matricula, Long cpf, String lotacao, String senha, String configuracao, String permissoes, Integer ttl) {
 		String token = null;
 
 		GiService giService = Service.getGiService();
@@ -128,17 +131,16 @@ public class SigaJwtBL {
 			jsonPermissoes.keySet().toArray(claims);
 			mapClaims.put("perm", claims);
 
-			String subject = matricula
-					+ (lotacao != null ? ("@" + lotacao) : "");
-			token = provider.criarToken(subject, configuracao, mapClaims, ttl);
+			String subject = matricula + (lotacao != null ? ("@" + lotacao) : "");
+			token = provider.criarToken(subject, cpf, configuracao, mapClaims, ttl);
 		}
 
 		return token;
 	}
 
-	public String criarToken(String subject, String config,
+	public String criarToken(String subject, Long cpf, String config,
 			Map<String, Object> claimsMap, Integer ttl) {
-		return provider.criarToken(subject, config, claimsMap, ttl);
+		return provider.criarToken(subject, cpf, config, claimsMap, ttl);
 	}
 
 	private boolean naoTemPermissao(JSONObject jsonPermissoes, String item) {

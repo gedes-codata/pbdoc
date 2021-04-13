@@ -18,6 +18,9 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.base;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.stripToNull;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -44,11 +47,33 @@ public class Contexto {
 	}
 	
 	public static String urlBase(HttpServletRequest request) {
-		String urlBase = System.getProperty("siga.base.url");
-		if (urlBase == null || urlBase.trim().length() == 0)
-			urlBase = request.getScheme() + "://"
-					+ request.getServerName() + ":"
-					+ request.getServerPort();
-		return urlBase;
+		return urlBase(request, true);
 	}
+
+	public static String urlBase(HttpServletRequest request, boolean considerarPropriedadeSigaBaseUrl) {
+		String baseUrl = stripToNull(System.getProperty("siga.base.url"));
+		String visibleSchema = null;
+		if (baseUrl != null) {
+			if (considerarPropriedadeSigaBaseUrl) {
+				return baseUrl;
+			}
+			visibleSchema = baseUrl.substring(0, baseUrl.indexOf("://"));
+		}
+		return baseUrlFrom(request, visibleSchema);
+	}
+
+	public static String baseUrlFrom(HttpServletRequest request, String visibleScheme) {
+		StringBuilder baseUrlBuilder = new StringBuilder()
+			.append(isNotEmpty(visibleScheme) ? visibleScheme : request.getScheme())
+			.append("://")
+			.append(request.getServerName());
+
+		int requestPort = request.getServerPort();
+		if (80 != requestPort) {
+			baseUrlBuilder.append(":").append(requestPort);
+		}
+
+		return baseUrlBuilder.toString();
+	}
+
 }

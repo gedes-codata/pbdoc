@@ -31,7 +31,6 @@ import org.hibernate.annotations.BatchSize;
 
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.dp.DpLotacao;
-import br.gov.jfrj.siga.model.dao.HibernateUtil;
 
 /**
  * A class that represents a row in the 'EX_TIPO_DESPACHO' table. This class may
@@ -65,18 +64,17 @@ public class ExPreenchimento extends AbstractExPreenchimento implements
 	 */
 
 	public byte[] getPreenchimentoBA() throws AplicacaoException {
-		if (this.cachePreenchimentoBA == null)
-			if (getPreenchimentoBlob() != null)
-				this.cachePreenchimentoBA = br.gov.jfrj.siga.cp.util.Blob
-						.toByteArray(getPreenchimentoBlob());
+		if (this.cachePreenchimentoBA == null && getPreenchimentoBlob() != null) {
+			this.cachePreenchimentoBA = getPreenchimentoBlob();
+		}
 		return this.cachePreenchimentoBA;
 
 	}
 
 	public void setPreenchimentoBA(byte[] blob) {
-		if (blob != null)
-			setPreenchimentoBlob(HibernateUtil.getSessao().getLobHelper()
-					.createBlob(blob));
+		if (blob != null) {
+			setPreenchimentoBlob(blob);
+		}
 	}
 
 	public ExPreenchimento() {

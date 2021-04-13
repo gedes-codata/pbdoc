@@ -18,10 +18,10 @@
  ******************************************************************************/
 package br.gov.jfrj.ldap.conf;
 
-import java.util.Map;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.base.Criptografia;
 import br.gov.jfrj.siga.model.prop.ModeloPropriedade;
@@ -77,27 +77,25 @@ public class LdapProperties extends ModeloPropriedade {
 
 	public String getSenhaLdap()  {
 		try {
-			String senhaCriptografada = this.obterPropriedade(
-					"senha");
-			if(senhaCriptografada != null){
-				senhaCriptografada= senhaCriptografada.trim();
-				return descriptografarSenha(senhaCriptografada);
-			}else{
+			String senhaCriptografada = this.obterPropriedade("senha");
+			if(senhaCriptografada != null) {
+				return descriptografarSenha(senhaCriptografada.trim());
+			} else {
 				return null;
 			}
 		} catch (Exception e) {
 			throw new AplicacaoException("Erro ao obter a senha LDAP", 9, e);
 		}
 	}
-
-	protected String descriptografarSenha(String senhaCriptografada)
-			 {
-		BASE64Encoder enc = new BASE64Encoder();
-		BASE64Decoder dec = new BASE64Decoder();
+	
+	protected String descriptografarSenha(String senhaCriptografada) {
+		Encoder enc = Base64.getEncoder();
+		Decoder dec = Base64.getDecoder();
 		try {
-			return new String(Criptografia.desCriptografar(dec
-					.decodeBuffer(senhaCriptografada), enc.encode(CHAVE_CRIPTO
-					.getBytes())));
+			return new String(Criptografia.desCriptografar(
+					dec.decode(senhaCriptografada),
+					enc.encodeToString(CHAVE_CRIPTO.getBytes()
+			)));
 		} catch (Exception e) {
 			throw new AplicacaoException("Erro ao descriptografar a senha LDAP", 9, e);
 		} 

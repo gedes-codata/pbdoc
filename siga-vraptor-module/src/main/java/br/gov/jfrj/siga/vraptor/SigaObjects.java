@@ -1,8 +1,9 @@
 package br.gov.jfrj.siga.vraptor;
 
-import java.util.List;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,21 +34,20 @@ public class SigaObjects implements ConheceUsuario {
 		return SigaObjects.log;
 	}
 
-	private HttpServletRequest request;
-
 	private DpPessoa cadastrante;
 
 	private DpPessoa titular;
 
 	private DpLotacao lotaTitular;
 
+	private List<DpLotacao> outrasLotacoes;
+
 	private CpIdentidade identidadeCadastrante;
 
 	private String mensagem;
 
-	public SigaObjects(HttpServletRequest request) throws Exception {
+	public SigaObjects() throws Exception {
 		super();
-		this.request = request;
 		carregaPerfil();
 	}
 
@@ -71,8 +71,9 @@ public class SigaObjects implements ConheceUsuario {
 	}
 
 	protected void carregaPerfil() throws Exception {
-		if (ContextoPersistencia.getUserPrincipal() == null)
+		if (ContextoPersistencia.getUserPrincipal() == null) {
 			return;
+		}
 
 		// autenticação por formulário
 		String principal = ContextoPersistencia.getUserPrincipal();
@@ -89,6 +90,15 @@ public class SigaObjects implements ConheceUsuario {
 
 	public DpLotacao getLotaTitular() {
 		return lotaTitular;
+	}
+
+	public List<DpLotacao> getOutrasLotacoes() {
+		return nonNull(outrasLotacoes) ? outrasLotacoes : emptyList();
+	}
+
+	@Override
+	public void setOutrasLotacoes(List<DpLotacao> outrasLotacoes) {
+		this.outrasLotacoes = outrasLotacoes;
 	}
 
 	public String getMensagem() {

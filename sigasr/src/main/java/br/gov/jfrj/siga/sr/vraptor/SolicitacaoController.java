@@ -14,9 +14,13 @@ import java.util.TreeSet;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
+
+import com.google.gson.Gson;
 
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -26,7 +30,6 @@ import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.Validator;
 import br.com.caelum.vraptor.interceptor.download.ByteArrayDownload;
 import br.com.caelum.vraptor.interceptor.download.Download;
-import br.com.caelum.vraptor.validator.ValidationMessage;
 import br.com.caelum.vraptor.view.Results;
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.cp.CpComplexo;
@@ -68,13 +71,9 @@ import br.gov.jfrj.siga.sr.model.vo.SrListaVO;
 import br.gov.jfrj.siga.sr.model.vo.SrSolicitacaoListaVO;
 import br.gov.jfrj.siga.sr.util.SrSolicitacaoFiltro;
 import br.gov.jfrj.siga.sr.util.SrViewUtil;
-import br.gov.jfrj.siga.sr.validator.SrError;
 import br.gov.jfrj.siga.sr.validator.SrValidator;
 import br.gov.jfrj.siga.uteis.PessoaLotaFuncCargoSelecaoHelper;
 import br.gov.jfrj.siga.vraptor.SigaObjects;
-
-import com.google.gson.Gson;
-
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Resource
@@ -101,8 +100,8 @@ public class SolicitacaoController extends SrController {
 
     private Validator validator;
 
-    public SolicitacaoController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em,  SrValidator srValidator, Validator validator) {
-        super(request, result, dao, so, em, srValidator);
+    public SolicitacaoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em,  SrValidator srValidator, Validator validator) {
+        super(request, response, result, dao, so, em, srValidator);
         this.validator = validator;
         
         result.on(AplicacaoException.class).forwardTo(this).appexception();
@@ -341,18 +340,18 @@ public class SolicitacaoController extends SrController {
 	private boolean validarFormEditar(SrSolicitacao solicitacao) throws Exception {
         if (solicitacao.getSolicitante() == null || solicitacao.getSolicitante().getId() == null) 
         	srValidator.addError("solicitacao.solicitante", "Solicitante n\u00e3o informado");
-            
-        if (solicitacao.getDescrSolicitacao() == null || "".equals(solicitacao.getDescrSolicitacao().trim())) 
+
+        if (solicitacao.getDescrSolicitacao() == null || StringUtils.EMPTY.equals(solicitacao.getDescrSolicitacao().trim())) 
         	srValidator.addError("solicitacao.descrSolicitacao", "Descri&ccedil&atilde;o n&atilde;o informada");	
 
-        if (solicitacao.getTelPrincipal() == null || "".equals(solicitacao.getTelPrincipal().trim())) 
+        if (solicitacao.getTelPrincipal() == null || StringUtils.EMPTY.equals(solicitacao.getTelPrincipal().trim())) 
         	srValidator.addError("solicitacao.telPrincipal", "Telefone n&atilde;o informado");	
 
-        if (solicitacao.getEndereco() == null || "".equals(solicitacao.getEndereco().trim())) 
+        if (solicitacao.getEndereco() == null || StringUtils.EMPTY.equals(solicitacao.getEndereco().trim())) 
         	srValidator.addError("solicitacao.endereco", "Endere&ccedil;o de atendimento n&atilde;o informado");	
 
         validarFormReclassificar(solicitacao);
-        
+
         return !srValidator.hasErrors(); 
     }
 	
@@ -373,7 +372,7 @@ public class SolicitacaoController extends SrController {
             if (Boolean.TRUE.equals(obrigatorio.get(atributo.getKey()))) 
                 if (atributo.getValue() != null && 
                 	(atributo.getValue().getValorAtributo() == null || 
-                		"".equals(atributo.getValue().getValorAtributo().trim()))) 
+                		StringUtils.EMPTY.equals(atributo.getValue().getValorAtributo().trim()))) 
                 	srValidator.addError("solicitacao.atributoSolicitacaoList[" + index + "].valorAtributo", "Atributo n&atilde;o informado");
             index++;
         }

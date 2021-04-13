@@ -18,8 +18,6 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.cp;
 
-import java.sql.Blob;
-
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
@@ -48,9 +46,9 @@ public abstract class AbstractCpModelo extends HistoricoAuditavelSuporte {
 	private java.lang.Long idMod;
 
 	/** The value of the simple conteudoBlobMod property. */
-	@Basic(fetch = FetchType.LAZY)
+	@Basic(fetch = FetchType.EAGER)
 	@Column(name = "CONTEUDO_BLOB_MOD")
-	private Blob conteudoBlobMod;
+	private byte[] conteudoBlobMod;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_ORGAO_USU")
@@ -70,7 +68,7 @@ public abstract class AbstractCpModelo extends HistoricoAuditavelSuporte {
 	 * 
 	 * @return java.lang.String
 	 */
-	public Blob getConteudoBlobMod() {
+	public byte[] getConteudoBlobMod() {
 		return this.conteudoBlobMod;
 	}
 
@@ -88,7 +86,7 @@ public abstract class AbstractCpModelo extends HistoricoAuditavelSuporte {
 	 * 
 	 * @param conteudoBlobMod
 	 */
-	public void setConteudoBlobMod(Blob conteudoBlobMod) {
+	public void setConteudoBlobMod(byte[] conteudoBlobMod) {
 		this.conteudoBlobMod = conteudoBlobMod;
 	}
 

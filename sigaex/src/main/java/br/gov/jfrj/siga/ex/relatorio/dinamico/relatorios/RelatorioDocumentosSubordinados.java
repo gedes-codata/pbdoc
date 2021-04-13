@@ -18,6 +18,8 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.ex.relatorio.dinamico.relatorios;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +31,7 @@ import java.util.Set;
 
 import net.sf.jasperreports.engine.JRException;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.Transaction;
 
@@ -115,7 +118,7 @@ public class RelatorioDocumentosSubordinados extends RelatorioTemplate {
 		else
 			todasLotas = lotacaoSet;
 		for (DpLotacao lot : todasLotas) {
-			if (listaLotacoes != "")
+			if (isNotBlank(listaLotacoes))
 				listaLotacoes += ",";
 			listaLotacoes += lot.getIdInicial().toString();
 		}
@@ -274,7 +277,7 @@ public class RelatorioDocumentosSubordinados extends RelatorioTemplate {
 		else
 			todasLotas = lotacaoSet;
 		for (DpLotacao lot : todasLotas) {
-			if (listaLotacoes != "")
+			if (isNotBlank(listaLotacoes))
 				listaLotacoes += ",";
 			listaLotacoes += lot.getIdInicial().toString();
 		}
@@ -385,7 +388,7 @@ public class RelatorioDocumentosSubordinados extends RelatorioTemplate {
 			Set<DpLotacao> todosSubordinados = getSetoresSubordinados(lotacaoSet);
 
 			for (DpLotacao lot : todosSubordinados) {
-				if (lotacoes != "") {
+				if (isNotBlank(lotacoes)) {
 					lotacoes += " or lot.id=" + lot.getIdInicial().toString();
 				} else {
 					lotacoes = "and (lot.id=" + lot.getIdInicial().toString();
@@ -394,7 +397,7 @@ public class RelatorioDocumentosSubordinados extends RelatorioTemplate {
 			lotacoes += ")";
 		} else {
 			for (DpLotacao lot : lotacaoSet) {
-				if (lotacoes != "") {
+				if (isNotBlank(lotacoes)) {
 					lotacoes += " or lot.id=" + lot.getIdInicial().toString();
 				} else {
 					lotacoes = "and (lot.id=" + lot.getIdInicial().toString();

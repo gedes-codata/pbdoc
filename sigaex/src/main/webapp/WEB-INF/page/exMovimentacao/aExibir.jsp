@@ -11,12 +11,9 @@
 	<script type="text/javascript" language="Javascript1.1">
 		/*  converte para maiúscula a sigla do estado  */
 		function converteUsuario(nomeusuario) {
-			re = /^[a-zA-Z]{2}\d{3,6}$/;
-			ret2 = /^[a-zA-Z]{1}\d{3,6}$/;
 			tmp = nomeusuario.value;
-			if (tmp.match(re) || tmp.match(ret2)) {
-				nomeusuario.value = tmp.toUpperCase();
-			}
+			nomeusuario.value = tmp.toUpperCase();
+			
 		}
 	</script>
 	<c:if test="${not doc.eletronico}">
@@ -328,10 +325,18 @@ function visualizarImpressao() {
 				</div>		
 				<tags:assinatura_botoes
 					assinar="true"
+					assinarComSenha="${f:podeAssinarMovimentacaoComSenha(titular,lotaTitular,mov)}"
+					idMovimentacao="${mov.idMov}" />
+				<!-- 				
+				Atenticar removido por não haver a necessidade de uso imediato	
+				<tags:assinatura_botoes
+					assinar="true"
 					autenticar="${mov.exTipoMovimentacao.idTpMov==2}"
 					assinarComSenha="${f:podeAssinarMovimentacaoComSenha(titular,lotaTitular,mov)}"
 					autenticarComSenha="${f:podeAutenticarMovimentacaoComSenha(titular,lotaTitular,mov)}" 
 					idMovimentacao="${mov.idMov}" />
+					
+					 -->
 				<p>
 					<b>Link para assinatura externa: </b>
 					${enderecoAutenticacao} (informar o código ${mov.siglaAssinaturaExterna})

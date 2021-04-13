@@ -307,7 +307,7 @@ public class ServicoVeiculo extends TpModel implements Comparable<ServicoVeiculo
 	}
 
 	public static List<ServicoVeiculo> buscarEmAndamento() {
-		return ServicoVeiculo.AR.find("trunc(dataHoraFim) = trunc(sysdate)").fetch();
+		return ServicoVeiculo.AR.find("DATE(dataHoraFim) = DATE(CURRENT_TIMESTAMP)").fetch();
 	}
 
 	public static ServicoVeiculo buscar(String sequence) throws Exception {
@@ -364,8 +364,8 @@ public class ServicoVeiculo extends TpModel implements Comparable<ServicoVeiculo
 
 		String qrl = 	"SELECT s FROM ServicoVeiculo s WHERE " + filtroVeiculo +
 					    "  situacaoServico NOT IN ('" + EstadoServico.CANCELADO + "','" + EstadoServico.REALIZADO + "')" +
-						" AND trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracle + ")" +
-						" AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracle + "))";
+						" AND DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracle + ")" +
+						" AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracle + "))";
 
 		Query qry = AR.em().createQuery(qrl);
 		try {

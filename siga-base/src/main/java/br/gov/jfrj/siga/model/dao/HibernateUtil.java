@@ -25,6 +25,8 @@
  */
 package br.gov.jfrj.siga.model.dao;
 
+import javax.persistence.EntityManager;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -54,6 +56,10 @@ public class HibernateUtil {
 	public static Session getSessao() {
 		Session s = (Session) (ContextoPersistencia.em().getDelegate());
 		return s;
+	}
+
+	public static EntityManager getEntityManager() {
+		return ContextoPersistencia.em();
 	}
 
 }

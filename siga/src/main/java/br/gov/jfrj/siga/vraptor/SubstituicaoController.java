@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.BooleanUtils;
 
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Post;
@@ -46,14 +50,14 @@ public class SubstituicaoController extends SigaController {
 	
 	private Map<Integer, String> getListaTipo() {
 		final Map<Integer, String> map = new TreeMap<Integer, String>();
-		map.put(1, "Matrícula");
+		map.put(1, "Usuário");
 		map.put(2, "Órgão Integrado");
 		return map;
 	}	
 		
 
-	public SubstituicaoController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em) {
-		super(request, result, CpDao.getInstance(), so, em);
+	public SubstituicaoController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, CpDao.getInstance(), so, em);
 
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();
@@ -90,16 +94,14 @@ public class SubstituicaoController extends SigaController {
 	    	    	isSubstLotacao = true;	
 	    
 	    for (DpSubstituicao subst : todasSubst) {	
-	    	if (substituicao == "true") {
+	    	if ("true".equals(substituicao)) {
 	    		if (isSubstLotacao && subst.getTitular() != null)
 	    			continue;	    		
 	    	}
-	    		
-	    	if (subst.getLotaSubstituto() != null && subst.getLotaSubstituto().isFechada()
-	    			&& substituicao == "false")	    		
+
+	    	if (subst.getLotaSubstituto() != null && subst.getLotaSubstituto().isFechada() && "false".equals(substituicao))
 	    		continue;
-	    	if (subst.getSubstituto() != null && (subst.getSubstituto().isFechada() 
-	    			|| subst.getSubstituto().isBloqueada()) && substituicao == "false")
+	    	if (subst.getSubstituto() != null && (subst.getSubstituto().isFechada() || subst.getSubstituto().isBloqueada()) && "false".equals(substituicao))
 	    		continue;
 	    	if (subst.isEmVoga() || subst.isFutura()) {
 	    		subst.setLotaSubstituto(subst.getLotaSubstituto() != null ? subst.getLotaSubstituto().getLotacaoAtual() : null);
@@ -311,27 +313,27 @@ public class SubstituicaoController extends SigaController {
 
 			subst = dao().gravar(subst);
 			
-			Set<DpPessoa> pessoasParaEnviarEmail;
+			Set<DpPessoa> pessoasParaEnviarEmail = new HashSet<DpPessoa>();
 			
-			String textoEmail = "Informamos que a matrícula: "  + getCadastrante().getSesbPessoa() + getCadastrante().getMatricula()
+			String textoEmail = "Informamos que o usuário: "  + getCadastrante().getSesbPessoa() + getCadastrante().getMatricula()
 			        + " - " + getCadastrante().getNomePessoa()  
 					+ " cadastrou uma substituição da ";
-			
 					
+						
 					if (tipoSubstituto == 1) {
-						textoEmail = textoEmail + " matrícula: " + subst.getSubstituto().getSesbPessoa() + subst.getSubstituto().getMatricula() + " - " + subst.getSubstituto().getNomePessoa();
-						pessoasParaEnviarEmail = subst.getSubstituto().getLotacao().getDpPessoaLotadosSet();
+						textoEmail = textoEmail + " usuário: " + subst.getSubstituto().getSesbPessoa() + subst.getSubstituto().getMatricula() + " - " + subst.getSubstituto().getNomePessoa();
+						pessoasParaEnviarEmail.add(subst.getSubstituto());
 						
 					} else {
 						textoEmail = textoEmail + " lotação: " + subst.getLotaSubstituto().getSigla() + " - " + subst.getLotaSubstituto().getNomeLotacao();
-						pessoasParaEnviarEmail = subst.getLotaSubstituto().getDpPessoaLotadosSet();
+						pessoasParaEnviarEmail.addAll(subst.getLotaSubstituto().getDpPessoaLotadosSet());
 					}
 					
 					textoEmail = textoEmail + " para";
 					
 					if (tipoTitular ==1) {
-						textoEmail = textoEmail + " matricula: " + subst.getTitular().getSesbPessoa() + subst.getTitular().getMatricula() + " - " + subst.getTitular().getNomePessoa();;
-						pessoasParaEnviarEmail.addAll(subst.getTitular().getLotacao().getDpPessoaLotadosSet());
+						textoEmail = textoEmail + " usuário: " + subst.getTitular().getSesbPessoa() + subst.getTitular().getMatricula() + " - " + subst.getTitular().getNomePessoa();;
+						pessoasParaEnviarEmail.add(subst.getTitular());
 					} else {
 						textoEmail = textoEmail + " lotação: " + subst.getLotaTitular().getSigla() + " - " + subst.getLotaTitular().getNomeLotacao();
 						pessoasParaEnviarEmail.addAll(subst.getLotaTitular().getDpPessoaLotadosSet());
@@ -375,7 +377,7 @@ public class SubstituicaoController extends SigaController {
 		if (referer != null)
 			result.redirectTo(referer);
 		else
-			result.redirectTo(PrincipalController.class).principal(false);
+			result.redirectTo(PrincipalController.class).principal(false, false);
 	}	
 	
 	private void gravarFinalizar() {
@@ -428,7 +430,7 @@ public class SubstituicaoController extends SigaController {
 		if (referer != null)
 			result.redirectTo(referer);
 		else
-			result.redirectTo(PrincipalController.class).principal(false);
+			result.redirectTo(PrincipalController.class).principal(false,false);
 	}	
 	
 	public void exclui(Long id) throws Exception {
@@ -451,7 +453,7 @@ public class SubstituicaoController extends SigaController {
 				if (referer != null)
 					result.redirectTo(referer);
 				else
-					result.redirectTo(PrincipalController.class).principal(false);
+					result.redirectTo(PrincipalController.class).principal(false,false);
 			} else
 				throw new AplicacaoException("Usuário não tem permissão para excluir esta substituição");	
 		} else

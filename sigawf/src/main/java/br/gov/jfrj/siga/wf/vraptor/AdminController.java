@@ -1,14 +1,15 @@
 package br.gov.jfrj.siga.wf.vraptor;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jbpm.file.def.FileDefinition;
 import org.jbpm.graph.def.Node;
@@ -20,7 +21,6 @@ import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.interceptor.download.ByteArrayDownload;
-import br.com.caelum.vraptor.interceptor.download.InputStreamDownload;
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.base.Data;
 import br.gov.jfrj.siga.vraptor.SigaObjects;
@@ -31,9 +31,8 @@ import br.gov.jfrj.siga.wf.util.WfContextBuilder;
 @Resource
 public class AdminController extends WfController {
 
-	public AdminController(HttpServletRequest request, Result result,
-			WfDao dao, SigaObjects so, WfUtil util) {
-		super(request, result, dao, so, util);
+	public AdminController(HttpServletRequest request, HttpServletResponse response, Result result, WfDao dao, SigaObjects so, WfUtil util, EntityManager em) {
+		super(request, response, result, dao, so, util, em);
 	}
 
 	public void administrar() {

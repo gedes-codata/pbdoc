@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.0" name="sigarh.utils">
+    <resources>
+		<resource-root path="dwr.jar"/>
+		<resource-root path="xmlpull_1_1_3_1.jar"/>
+		<resource-root path="kxml2.jar"/>
+		<resource-root path="jdtcore-3.1.0.jar"/>
+    </resources>
+	
+	<dependencies>
+		<module name="org.apache.commons.collections"/>
+		<module name="org.apache.commons.logging"/>
+		<module name="org.apache.commons.beanutils"/>
+    </dependencies>
+	
+</module>
+
+
+

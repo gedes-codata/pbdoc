@@ -36,11 +36,15 @@ import br.gov.jfrj.siga.dp.dao.CpDao;
 import br.gov.jfrj.siga.model.Assemelhavel;
 import br.gov.jfrj.siga.sinc.lib.SincronizavelSuporte;
 
+
+
 @Entity
 @Cacheable
-@Cache(region = CpDao.CACHE_QUERY_SUBSTITUICAO, usage = CacheConcurrencyStrategy.TRANSACTIONAL)
+@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 @Table(name = "CP_IDENTIDADE", schema = "CORPORATIVO")
 public class CpIdentidade extends AbstractCpIdentidade {
+
+	public static final String MASTER_LOGIN_IDENTIDADE = "ZZZ99999";
 
 	public DpPessoa getPessoaAtual() {
 		return CpDao.getInstance().consultarPorIdInicial(
@@ -112,16 +116,16 @@ public class CpIdentidade extends AbstractCpIdentidade {
 	// de HistoricoSuporte.
 	//
 	@Column(name = "HIS_ATIVO")
-	private Integer hisAtivo;
+	private boolean hisAtivo;
 
 	@Override
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.hisAtivo = super.getHisAtivo();
 		return this.hisAtivo;
 	}
 
 	@Override
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		super.setHisAtivo(hisAtivo);
 		this.hisAtivo = getHisAtivo();
 	}

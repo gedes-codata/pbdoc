@@ -1,12 +1,14 @@
 package br.gov.jfrj.siga.sr.vraptor;
 
 import static br.gov.jfrj.siga.sr.util.SrSigaPermissaoPerfil.ADM_ADMINISTRAR;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -18,15 +20,11 @@ import br.gov.jfrj.siga.cp.model.DpPessoaSelecao;
 import br.gov.jfrj.siga.dp.CpOrgaoUsuario;
 import br.gov.jfrj.siga.dp.dao.CpDao;
 import br.gov.jfrj.siga.sr.annotation.AssertAcesso;
-import br.gov.jfrj.siga.sr.model.SrAcao;
-import br.gov.jfrj.siga.sr.model.SrAtributo;
 import br.gov.jfrj.siga.sr.model.SrAtributo;
 import br.gov.jfrj.siga.sr.model.SrConfiguracao;
 import br.gov.jfrj.siga.sr.model.SrObjetivoAtributo;
-import br.gov.jfrj.siga.sr.model.SrSolicitacao;
 import br.gov.jfrj.siga.sr.model.SrTipoAtributo;
 import br.gov.jfrj.siga.sr.model.vo.SelecionavelVO;
-import br.gov.jfrj.siga.sr.util.Util;
 import br.gov.jfrj.siga.sr.validator.SrValidator;
 import br.gov.jfrj.siga.uteis.PessoaLotaFuncCargoSelecaoHelper;
 import br.gov.jfrj.siga.vraptor.SigaObjects;
@@ -36,8 +34,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 public class AtributoController extends SrController {
 
 
-	public AtributoController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, CpDao.getInstance(), so, em, srValidator);
+	public AtributoController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, CpDao.getInstance(), so, em, srValidator);
 
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();
@@ -138,15 +136,17 @@ public class AtributoController extends SrController {
 		List<SrAtributo> atributos = null;
 		SrAtributo filtro = new SrAtributo();
 		
-		if (Util.notNullAndEmpty(sigla))
+		if (isNotBlank(sigla)) {
 			filtro.setSigla(sigla);
-		if (Util.notNullAndEmpty(nomeAtributo))
+		}
+		if (isNotBlank(nomeAtributo)) {
 			filtro.setNomeAtributo(nomeAtributo);
+		}
 		
 		try {
 			atributos = filtro.buscar();			
 		} catch (Exception e) {
-			atributos = new ArrayList<SrAtributo>();
+			atributos = new ArrayList<>();
 		}
 		
 		result.include("atributos", atributos);

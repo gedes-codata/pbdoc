@@ -103,6 +103,14 @@ public class CpOrgaoUsuario extends AbstractCpOrgaoUsuario implements
 		setSiglaOrgaoUsu(sigla);
 	}
 
+	public String getSiglaCompleta() {
+		return getSiglaOrgaoUsuCompleta();
+	}
+
+	public void setSiglaCompleta (String siglaComp) {
+		setSiglaOrgaoUsuCompleta(siglaComp);
+	}
+	
 	public String getDescricao() {
 		return getNmOrgaoUsu();
 	}

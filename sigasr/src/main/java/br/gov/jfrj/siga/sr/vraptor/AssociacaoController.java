@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -34,8 +35,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 public class AssociacaoController extends SrController {
 
 
-	public AssociacaoController(HttpServletRequest request, Result result,  SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, CpDao.getInstance(), so, em, srValidator);
+	public AssociacaoController(HttpServletRequest request, HttpServletResponse response, Result result,  SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, CpDao.getInstance(), so, em, srValidator);
 
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();

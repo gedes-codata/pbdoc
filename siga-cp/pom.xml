@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>siga-doc</artifactId>
 		<groupId>siga</groupId>
-		<version>1.2-SNAPSHOT</version>
+		<version>9.4.0.0</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -42,11 +42,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
 		</dependency>
@@ -55,7 +50,18 @@
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
 		</dependency>
+
 		
+		<dependency>
+		    <groupId>com.sun.jersey</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>1.9.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-collections4</artifactId>
@@ -65,7 +71,6 @@
 		<dependency>
 		    <groupId>org.apache.poi</groupId>
 		    <artifactId>poi</artifactId>
-		    <version>3.12</version>
 		</dependency>
 		
 		<dependency>
@@ -107,6 +112,10 @@
 		<dependency>
 			<groupId>siga</groupId>
 			<artifactId>siga-rel</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>siga</groupId>
+			<artifactId>siga-ldap</artifactId>
 		</dependency>
 		
 		<dependency>
@@ -185,7 +194,7 @@
 						<configuration>
 							<images>
 								<image>
-									<name>wnameless/oracle-xe-11g:latest</name>
+									<name>christophesurmont/oracle-xe-11g</name>
 									<alias>db.server</alias>
 									<run>
 										<ports>
@@ -236,12 +245,9 @@
 						<version>1.5</version>
 
 						<dependencies>
-							<!-- specify the dependent JDBC driver here -->
 							<dependency>
-								<groupId>com.oracle</groupId>
-								<artifactId>ojdbc6</artifactId>
-								<version>11.2.0.3.0</version>
-								<scope>runtime</scope>
+								<groupId>org.postgresql</groupId>
+								<artifactId>postgresql</artifactId>
 							</dependency>
 						</dependencies>
 
@@ -304,17 +310,8 @@
 								<goals>
 									<goal>migrate</goal>
 								</goals>
-
 							</execution>
 						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>com.oracle</groupId>
-								<artifactId>ojdbc6</artifactId>
-								<version>11.2.0.3.0</version>
-								<scope>runtime</scope>
-							</dependency>
-						</dependencies>
 					</plugin>
 				</plugins>
 			</build>

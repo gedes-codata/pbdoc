@@ -68,7 +68,7 @@ public class ExGraphRelacaoDocs extends ExGraph {
 				setEstilo(ESTILO_TRACEJADO);
 				setDirected(true).setAoContrario(true);
 			} else if (tipo.equals("paternidade")) {
-				setTooltip(mob2.doc().isProcesso() ? "Subprocesso"
+				setTooltip(mob2.getDoc().isProcesso() ? "Subprocesso"
 						: "Documento filho");
 				setDirected(false);
 			}
@@ -95,65 +95,65 @@ public class ExGraphRelacaoDocs extends ExGraph {
 
 		// Apensações
 		for (ExMobil apenso : mobBase.getApensos(false, true)) {
-			adicionar(new NodoMob(apenso, pessVendo, mobBase.doc()));
+			adicionar(new NodoMob(apenso, pessVendo, mobBase.getDoc()));
 			adicionar(new TransicaoMob(mobBase, apenso, "apensacao"));
 		}
 		ExMobil mestre = mobBase.getMestre();
-		if (mestre != null && !mestre.doc().equals(mobBase)) {
-			adicionar(new NodoMob(mestre, pessVendo, mobBase.doc()));
+		if (mestre != null && !mestre.getDoc().equals(mobBase)) {
+			adicionar(new NodoMob(mestre, pessVendo, mobBase.getDoc()));
 			adicionar(new TransicaoMob(mestre, mobBase, "apensacao"));
 		}
 
 		// Vinculações
 		for (ExMobil vinculado : mobBase.getVinculados()) {
-			adicionar(new NodoMob(vinculado, pessVendo, mobBase.doc()));
+			adicionar(new NodoMob(vinculado, pessVendo, mobBase.getDoc()));
 			adicionar(new TransicaoMob(mobBase, vinculado, "vinculacao"));
 		}
 
 		// Juntadas
 		ExMobil pai = mobBase.getExMobilPai();
 		if (pai != null) {
-			adicionar(new NodoMob(pai, pessVendo, mobBase.doc()));
+			adicionar(new NodoMob(pai, pessVendo, mobBase.getDoc()));
 			adicionar(new TransicaoMob(pai, mobBase, "juntada"));
 		}
 
 		// Incluir os documentos filhos juntados (ou não) enquanto o principal não estiver assinado
-		if (mobBase.doc().isPendenteDeAssinatura()) {
+		if (mobBase.getDoc().isPendenteDeAssinatura()) {
 			for (ExMobil m : mobBase.getJuntados()) {
-				adicionar(new NodoMob(m, pessVendo, mobBase.doc()));
+				adicionar(new NodoMob(m, pessVendo, mobBase.getDoc()));
 				adicionar(new TransicaoMob(mobBase, m, "juntada"));
 			}
 		}
 
 		// Paternidades
-		for (ExDocumento sub : mobBase.doc().getMobilGeral()
+		for (ExDocumento sub : mobBase.getDoc().getMobilGeral()
 				.getExDocumentoFilhoSet()) {
 			boolean jaTemNodo = false;
 			for (Nodo n : getNodos())
-				if (((NodoMob) n).getMob().doc().equals(sub)) {
+				if (((NodoMob) n).getMob().getDoc().equals(sub)) {
 					jaTemNodo = true;
 					break;
 				}
 			if (!jaTemNodo) {
 				adicionar(new NodoMob(sub.getMobilGeral(), pessVendo,
-						mobBase.doc()));
+						mobBase.getDoc()));
 				adicionar(new TransicaoMob(mobBase, sub.getMobilGeral(),
 						"paternidade"));
 			}
 		}
 
-		if (mobBase.doc().getExMobilPai() != null) {
+		if (mobBase.getDoc().getExMobilPai() != null) {
 			boolean jaTemNodo = false;
 			for (Nodo n : getNodos())
-				if (((NodoMob) n).getMob().doc()
-						.equals(mobBase.doc().getExMobilPai().doc())) {
+				if (((NodoMob) n).getMob().getDoc()
+						.equals(mobBase.getDoc().getExMobilPai().getDoc())) {
 					jaTemNodo = true;
 					break;
 				}
 			if (!jaTemNodo) {
-				adicionar(new NodoMob(mobBase.doc().getExMobilPai(), pessVendo,
-						mobBase.doc()));
-				adicionar(new TransicaoMob(mobBase.doc().getExMobilPai(),
+				adicionar(new NodoMob(mobBase.getDoc().getExMobilPai(), pessVendo,
+						mobBase.getDoc()));
+				adicionar(new TransicaoMob(mobBase.getDoc().getExMobilPai(),
 						mobBase, "paternidade"));
 			}
 		}

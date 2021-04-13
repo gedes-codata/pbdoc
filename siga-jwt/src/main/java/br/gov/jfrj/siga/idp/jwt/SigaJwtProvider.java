@@ -22,49 +22,41 @@ import com.auth0.jwt.JWTVerifyException;
  */
 public class SigaJwtProvider {
 
-	static final String PROVIDER_ISSUER = "sigaidp";
-	private long defaultTTLToken = 3600; // default 1 hora
+	public static final String PROVIDER_ISSUER = "sigaidp";
+	public static final int DEFAULT_TTL_TOKEN = 3600; // default 1 hora
+	public static final int DEFAULT_TTL_TOKEN_RENEW = (DEFAULT_TTL_TOKEN * 50) / 100;
+	public static final String SIGA_JWT_AUDIENCE = System.getProperty("idp.jwt.modulo.cookie.domain");
+
+	private long defaultTTLToken = DEFAULT_TTL_TOKEN;
 	private SigaJwtOptions options;
 
-	private SigaJwtProvider(SigaJwtOptions options)
-			throws SigaJwtProviderException {
+	private SigaJwtProvider(SigaJwtOptions options) throws SigaJwtProviderException {
 		try {
 			this.options = options;
 			defaultTTLToken = options.getTtlToken();
 		} catch (Exception e) {
-			throw new SigaJwtProviderException(
-					"Problema ao definir o algoritimo", e);
+			throw new SigaJwtProviderException("Problema ao definir o algoritimo", e);
 		}
 	}
 
-	public static SigaJwtProvider getInstance(SigaJwtOptions options)
-			throws SigaJwtProviderException {
+	public static SigaJwtProvider getInstance(SigaJwtOptions options) throws SigaJwtProviderException {
 		return new SigaJwtProvider(options);
 	}
 
-	/**
-	 * Cria um token JWT
-	 * 
-	 * @param subject
-	 *            - para quem o token se destina
-	 * @param config
-	 *            - Configurações informadas pelo requisitante do token. Serve
-	 *            de referência caso seja necessário reproduzir um token
-	 *            semelhante.
-	 * @param ttl
-	 *            - Tempo de vida do token
-	 * @return token assinado
-	 */
-	public String criarToken(String subject, String config,
-			Map<String, Object> claimsMap, Integer ttl) {
+	public String criarToken(String subject, Long cpf, String config, Map<String, Object> claimsMap, Integer ttl) {
 		final JWTSigner signer = new JWTSigner(options.getPassword());
-		final HashMap<String, Object> claims = new HashMap<String, Object>();
+		final HashMap<String, Object> claims = new HashMap<>();
 
 		setTimes(claims, ttl);
 
 		claims.put("sub", subject);
+		claims.put("cpf", cpf);
 		claims.put("iss", PROVIDER_ISSUER);
 		claims.put("mod", options.getModulo());
+
+		if ("GOVSP".equals(System.getProperty("siga.local")) && SIGA_JWT_AUDIENCE != null) {
+			claims.put("aud", SIGA_JWT_AUDIENCE);
+		}
 
 		if (claimsMap != null) {
 			for (String claimName : claimsMap.keySet()) {
@@ -80,14 +72,12 @@ public class SigaJwtProvider {
 	}
 
 	public String renovarToken(String token, Integer ttl)
-			throws InvalidKeyException, NoSuchAlgorithmException,
-			IllegalStateException, SignatureException, IOException,
-			JWTVerifyException {
+			throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, IOException, JWTVerifyException {
+
 		final JWTSigner signer = new JWTSigner(options.getPassword());
 		Map<String, Object> claims = validarToken(token);
 		setTimes(claims, ttl);
 		return signer.sign(claims);
-
 	}
 
 	public void setTimes(final Map<String, Object> claims, final Integer ttl) {
@@ -98,21 +88,17 @@ public class SigaJwtProvider {
 		claims.put("exp", exp);
 	}
 
-	private long getTTL(Integer ttl) {
-		if (ttl != null && ttl < defaultTTLToken) {
-			return ttl;
+	public Map<String, Object> validarToken(String token) throws InvalidKeyException, NoSuchAlgorithmException,
+			IllegalStateException, SignatureException, IOException, JWTVerifyException {
+
+		final JWTVerifier verifier;
+		if ("GOVSP".equals(System.getProperty("siga.local")) && SIGA_JWT_AUDIENCE != null) {
+			verifier = new JWTVerifier(options.getPassword(), SIGA_JWT_AUDIENCE);
 		} else {
-			return defaultTTLToken;
+			verifier = new JWTVerifier(options.getPassword());
 		}
-	}
 
-	public Map<String, Object> validarToken(String token)
-			throws InvalidKeyException, NoSuchAlgorithmException,
-			IllegalStateException, SignatureException, IOException,
-			JWTVerifyException {
-		final JWTVerifier verifier = new JWTVerifier(options.getPassword());
 		return verifier.verify(token);
-
 	}
 
 }

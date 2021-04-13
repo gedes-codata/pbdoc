@@ -32,7 +32,7 @@
 		<![CDATA[
 			select ti.* from jbpm_variableaccess va, jbpm_task ta, jbpm_taskinstance ti, jbpm_processinstance pi, jbpm_variableinstance vi
 			where va.taskcontroller_ = ta.taskcontroller_ and ti.task_ = ta.id_ and pi.id_ = ti.procinst_ and vi.processinstance_ = pi.id_
-			and ti.issignalling_ = 1 and va.mappedname_ like 'doc_%' and vi.stringvalue_ like :siglaDoc	
+			and ti.issignalling_ = true and va.mappedname_ like 'doc_%' and vi.stringvalue_ like :siglaDoc	
 		]]>
 	</sql-query>
 </hibernate-mapping>

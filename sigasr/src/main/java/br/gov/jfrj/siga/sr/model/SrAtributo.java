@@ -1,5 +1,8 @@
 package br.gov.jfrj.siga.sr.model;
 
+import static br.gov.jfrj.siga.base.Texto.removeAcento;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +25,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import br.gov.jfrj.siga.base.Texto;
 import br.gov.jfrj.siga.cp.CpTipoConfiguracao;
 import br.gov.jfrj.siga.cp.model.HistoricoSuporte;
 import br.gov.jfrj.siga.dp.DpLotacao;
@@ -307,16 +309,16 @@ public class SrAtributo extends HistoricoSuporte implements SrSelecionavel, Sele
 		List<SrAtributo> todosOsAtributos = listarParaSolicitacao(mostrarDesativados);
 		List<SrAtributo> atributosFiltrados = new ArrayList<SrAtributo>();
 		
-		if (getNomeAtributo() == null || "".equals(getNomeAtributo()))
+		if (isBlank(getNomeAtributo())) {
 			return todosOsAtributos;
+		}
 		
-		for (SrAtributo atributo : todosOsAtributos)
-			if (Texto.removeAcento(atributo.getNomeAtributo())
-					.toLowerCase()
-					.contains( Texto.removeAcento(this.getNomeAtributo())
-									.toLowerCase()) )
+		for (SrAtributo atributo : todosOsAtributos) {
+			if (removeAcento(atributo.getNomeAtributo()).toLowerCase().contains(
+					removeAcento(this.getNomeAtributo()).toLowerCase())) {
 				atributosFiltrados.add(atributo);
-		
+			}
+		}
 		return atributosFiltrados;
 	}
 	

@@ -44,8 +44,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import net.sf.ehcache.CacheManager;
-
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.cfg.Configuration;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -75,6 +74,7 @@ import br.gov.jfrj.siga.sinc.lib.Sincronizador;
 import br.gov.jfrj.siga.sinc.lib.Sincronizavel;
 import br.gov.jfrj.siga.sinc.lib.SincronizavelComparator;
 import br.gov.jfrj.siga.util.ImportarXmlProperties;
+import net.sf.ehcache.CacheManager;
 
 public class SigaCpSinc {
 
@@ -681,7 +681,7 @@ public class SigaCpSinc {
 			throws Exception {
 		if (dscTpPessoa == null)
 			return null;
-		if ("".equals(dscTpPessoa))
+		if (StringUtils.EMPTY.equals(dscTpPessoa))
 			return null;
 		for (CpTipoPessoa tp : tiposPessoa) {
 			if (tp.getDscTpPessoa().equalsIgnoreCase(dscTpPessoa)) {
@@ -711,7 +711,7 @@ public class SigaCpSinc {
 			throws Exception {
 		if (dscTpPapel == null)
 			return null;
-		if ("".equals(dscTpPapel))
+		if (StringUtils.EMPTY.equals(dscTpPapel))
 			return null;
 		for (CpTipoPapel tp : tiposPapel) {
 			if (tp.getDscTpPapel().equalsIgnoreCase(dscTpPapel)) {
@@ -726,7 +726,7 @@ public class SigaCpSinc {
 			throws Exception {
 		if (dscTpLotacao == null)
 			return null;
-		if ("".equals(dscTpLotacao))
+		if (StringUtils.EMPTY.equals(dscTpLotacao))
 			return null;
 		for (CpTipoLotacao tl : tiposLotacao) {
 			if (tl.getDscTpLotacao().equalsIgnoreCase(dscTpLotacao)) {

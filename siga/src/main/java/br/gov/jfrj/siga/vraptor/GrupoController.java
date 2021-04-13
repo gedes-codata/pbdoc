@@ -36,8 +36,11 @@ import java.util.TreeMap;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.PropertyUtils;
+
+import com.google.common.base.Optional;
 
 import br.com.caelum.vraptor.Result;
 import br.gov.jfrj.siga.base.AplicacaoException;
@@ -66,14 +69,10 @@ import br.gov.jfrj.siga.model.Objeto;
 import br.gov.jfrj.siga.model.Selecionavel;
 import br.gov.jfrj.siga.model.dao.ModeloDao;
 
-import com.google.common.base.Optional;
+public abstract class GrupoController<T extends CpGrupo> extends GiSelecionavelControllerSupport<T, CpGrupoDaoFiltro> {
 
-public abstract class GrupoController<T extends CpGrupo> extends
-		GiSelecionavelControllerSupport<T, CpGrupoDaoFiltro> {
-
-	public GrupoController(HttpServletRequest request, Result result,
-			CpDao dao, SigaObjects so, EntityManager em) {
-		super(request, result, dao, so, em);
+	public GrupoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+		super(request, response, result, dao, so, em);
 	}
 
 	/**

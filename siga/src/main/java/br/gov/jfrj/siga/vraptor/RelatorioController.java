@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRException;
 import br.com.caelum.vraptor.Get;
@@ -50,8 +51,8 @@ import br.gov.jfrj.siga.relatorio.PermissaoUsuarioRelatorio;
 
 @Resource
 public class RelatorioController extends SigaController {
-	public RelatorioController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em) {
-		super(request, result, CpDao.getInstance(), so, em);
+	public RelatorioController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, CpDao.getInstance(), so, em);
 		
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();

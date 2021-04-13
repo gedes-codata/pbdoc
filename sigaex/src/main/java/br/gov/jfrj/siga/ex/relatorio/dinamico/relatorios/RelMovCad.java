@@ -5,13 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
-
-import net.sf.jasperreports.engine.JRException;
 
 import org.hibernate.Query;
 
@@ -24,8 +20,8 @@ import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.ex.ExDocumento;
 import br.gov.jfrj.siga.ex.ExMobil;
 import br.gov.jfrj.siga.ex.ExMovimentacao;
-import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.dao.HibernateUtil;
+import net.sf.jasperreports.engine.JRException;
 
 public class RelMovCad extends RelatorioTemplate {
 

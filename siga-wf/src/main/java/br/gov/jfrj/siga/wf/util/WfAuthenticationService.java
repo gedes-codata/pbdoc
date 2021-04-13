@@ -18,6 +18,11 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.wf.util;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
+
+import java.util.List;
+
 import org.jbpm.security.authentication.DefaultAuthenticationService;
 
 import br.gov.jfrj.siga.acesso.ConheceUsuario;
@@ -42,6 +47,7 @@ public class WfAuthenticationService extends DefaultAuthenticationService
 	DpPessoa cadastrante = null;
 	DpPessoa titular = null;
 	DpLotacao lotaTitular = null;
+	List<DpLotacao> outrasLotacoes;
 	CpIdentidade identidadeCadastrante = null;
 
 	/**
@@ -125,4 +131,15 @@ public class WfAuthenticationService extends DefaultAuthenticationService
 	public void setIdentidadeCadastrante(CpIdentidade identidadeCadastrante) {
 		this.identidadeCadastrante = identidadeCadastrante;
 	}
+
+	@Override
+	public List<DpLotacao> getOutrasLotacoes() {
+		return nonNull(outrasLotacoes) ? outrasLotacoes : emptyList();
+	}
+
+	@Override
+	public void setOutrasLotacoes(List<DpLotacao> outrasLotacoes) {
+		this.outrasLotacoes = outrasLotacoes;
+	}
+
 }

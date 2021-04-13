@@ -107,7 +107,7 @@ public class FuncoesEL {
 	 */
 	public static List<Comment> ordenarComentarios(TaskInstance taskInstance) {
 		if (taskInstance.getComments() == null)
-			return new ArrayList(0);
+			return new ArrayList<>(0);
 		Comment[] lista = new Comment[taskInstance.getComments().size()];
 		taskInstance.getComments().toArray(lista);
 

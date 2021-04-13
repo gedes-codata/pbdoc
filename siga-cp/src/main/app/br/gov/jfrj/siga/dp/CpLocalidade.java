@@ -53,7 +53,7 @@ public class CpLocalidade extends AbstractCpLocalidade implements Serializable,
 			return Cp.getInstance().getProp().obterMunicipios();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ArrayList();
+			return new ArrayList<>();
 		}
 	}
 

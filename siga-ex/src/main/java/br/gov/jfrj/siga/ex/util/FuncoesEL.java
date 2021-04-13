@@ -642,8 +642,7 @@ public class FuncoesEL {
 		String stringAux1;
 		String stringAux2;
 		for (int i = 0; i < strSplit.length; i++) {
-			if (strSplit[i] != "de" || strSplit[i] != "do"
-					|| strSplit[i] != "da") {
+			if (!"de".equals(strSplit[i]) || !"do".equals(strSplit[i]) || !"da".equals(strSplit[i])) {
 				stringAux1 = strSplit[i].substring(0, 1);
 				stringAux2 = strSplit[i].substring(1).toLowerCase();
 				stringFinal = stringFinal + stringAux1 + stringAux2 + " ";
@@ -877,6 +876,16 @@ public class FuncoesEL {
 		attrs.put("valFullText", valFullText);
 		attrs.put("nmMod", "macro extensaoBuscaTextual");
 		attrs.put("template", "[@extensaoBuscaTextual/]");
+		return p.processarModelo(orgao, attrs, null);
+	}
+	
+	public static String obterExtensaoBuscaTextualbs4(CpOrgaoUsuario orgao,
+			String valFullText) throws Exception {
+		ProcessadorModeloFreemarker p = new ProcessadorModeloFreemarker();
+		Map attrs = new HashMap();
+		attrs.put("valFullText", valFullText);
+		attrs.put("nmMod", "macro extensaoBuscaTextualbs4");
+		attrs.put("template", "[@extensaoBuscaTextualbs4/]");
 		return p.processarModelo(orgao, attrs, null);
 	}
 

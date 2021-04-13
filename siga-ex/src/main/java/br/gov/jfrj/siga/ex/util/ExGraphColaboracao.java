@@ -79,7 +79,7 @@ public class ExGraphColaboracao extends ExGraph {
 
 			// olhar a frente para ver se existe alguma Solicitação de Alteração
 			// e processá-la antes de atualizar o mapa
-			for (; k < l.size() && mov.getDtMov().equals(l.get(k).getDtMov()); k++) {
+			for (; k < l.size() && mov.getData().equals(l.get(k).getData()); k++) {
 				ExParte parte = ExParte.create(l.get(k).getDescrMov());
 				ExParte anterior = map.get(parte.getId());
 				
@@ -120,7 +120,7 @@ public class ExGraphColaboracao extends ExGraph {
 			}
 
 			// atualizar o mapa de situação das partes
-			for (; j < l.size() && mov.getDtMov().equals(l.get(j).getDtMov()); j++) {
+			for (; j < l.size() && mov.getData().equals(l.get(j).getData()); j++) {
 				ExParte p = ExParte.create(l.get(j).getDescrMov());
 				map.put(p.getId(), p);
 				System.out.println("mapa: " + p.getString());

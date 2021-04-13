@@ -18,17 +18,52 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.cp.bl;
 
+import static java.lang.Character.toUpperCase;
+import static org.apache.commons.lang.StringUtils.stripToNull;
+
 // TODO: _LAGS - eliminar (deixar a String livre) - Ver com Renato o CpDao.criarHibernateCfg(String) já existe para a passagem de datasource 
 public enum CpAmbienteEnumBL {
-	PRODUCAO("prod"), HOMOLOGACAO("homolo"), TREINAMENTO("treina"), DESENVOLVIMENTO(
-			"desenv");
-	private final String sigla;
 
-	CpAmbienteEnumBL(String sigla) {
+	PRODUCAO("prod", "Produção"),
+	HOMOLOGACAO("homolo", "Homologação"),
+	TREINAMENTO("treina", "Treinamento"),
+	DESENVOLVIMENTO("desenv", "Desenvolvimento");
+
+	private final String sigla;
+	private final String nome;
+
+	CpAmbienteEnumBL(String sigla, String nome) {
 		this.sigla = sigla;
+		this.nome = nome;
 	}
 
 	public String getSigla() {
 		return sigla;
 	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public static CpAmbienteEnumBL pelaPrimeiraLetra(String propriedade) {
+		propriedade = stripToNull(propriedade);
+		if (propriedade == null) {
+			throw new IllegalArgumentException("Propriedade do ambiente não pode ser nulo.");
+		}
+
+		char primeiraLetra = toUpperCase(propriedade.charAt(0));
+		switch (primeiraLetra) {
+		case 'P':
+			return PRODUCAO;
+		case 'H':
+			return HOMOLOGACAO;
+		case 'T':
+			return TREINAMENTO;
+		case 'D':
+			return DESENVOLVIMENTO;
+		default:
+			throw new IllegalArgumentException("Ambiente " + propriedade + " não especificado entre os conhecidos: " + values() + ".");
+		}
+	}
+
 }

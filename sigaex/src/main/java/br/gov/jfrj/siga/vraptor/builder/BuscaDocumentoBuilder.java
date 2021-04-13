@@ -48,7 +48,7 @@ public final class BuscaDocumentoBuilder {
 		}
 
 		if (mob != null) {
-			doc = mob.doc();
+			doc = mob.getDoc();
 		}
 		if (doc != null && mob == null) {
 			mob = doc.getMobilGeral();

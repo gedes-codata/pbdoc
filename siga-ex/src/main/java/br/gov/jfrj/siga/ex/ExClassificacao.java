@@ -22,9 +22,7 @@
 package br.gov.jfrj.siga.ex;
 
 import java.io.Serializable;
-import java.util.Set;
 
-import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -34,8 +32,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import br.gov.jfrj.siga.base.AplicacaoException;
-import br.gov.jfrj.siga.dp.DpPessoa;
-import br.gov.jfrj.siga.dp.dao.CpDao;
 import br.gov.jfrj.siga.ex.util.MascaraUtil;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.Assemelhavel;
@@ -114,6 +110,10 @@ public class ExClassificacao extends AbstractExClassificacao implements
 	 */
 	public void setSigla(final String sigla) {
 		setCodificacao(sigla);
+	}
+
+	public String getPrimeiraDescricao() {
+		return ExDao.getInstance().consultarDescricaoPrimeiraExClassificacao(this);
 	}
 
 	/**
@@ -202,16 +202,16 @@ public class ExClassificacao extends AbstractExClassificacao implements
 	// Solução para não precisar criar HIS_ATIVO em todas as tabelas que herdam de HistoricoSuporte.
 	//
 	@Column(name = "HIS_ATIVO")
-	private Integer hisAtivo;
+	private boolean hisAtivo;
 
 	@Override
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.hisAtivo = super.getHisAtivo();
 		return this.hisAtivo;
 	}
 	
 	@Override
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		super.setHisAtivo(hisAtivo);
 		this.hisAtivo = getHisAtivo();
 	}

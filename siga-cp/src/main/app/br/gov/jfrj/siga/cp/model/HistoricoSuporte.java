@@ -53,13 +53,13 @@ public abstract class HistoricoSuporte extends Objeto implements Historico, Asse
 
 	@Desconsiderar
 	@Transient
-	private Integer hisAtivoFake;
+	private boolean hisAtivoFake;
 
 	/**
 	 * Atribui o hisAtivo já que o mesmo é sempre calculado
 	 */
 	public void updateAtivo() {
-		this.hisAtivoFake = this.hisDtFim == null ? 1 : 0;
+		this.hisAtivoFake = this.hisDtFim == null;
 	}
 
 	public Long getHisIdIni() {
@@ -88,7 +88,7 @@ public abstract class HistoricoSuporte extends Objeto implements Historico, Asse
 		this.updateAtivo();
 	}
 
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.updateAtivo();
 		return hisAtivoFake;
 	}
@@ -97,7 +97,7 @@ public abstract class HistoricoSuporte extends Objeto implements Historico, Asse
 		return this.hisDtFim == null;
 	}
 
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		this.updateAtivo();
 	}
 

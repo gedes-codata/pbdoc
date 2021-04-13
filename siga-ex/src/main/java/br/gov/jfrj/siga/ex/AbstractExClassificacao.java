@@ -35,11 +35,13 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.Where;
 
 import br.gov.jfrj.siga.cp.model.HistoricoAuditavelSuporte;
 import br.gov.jfrj.siga.ex.util.MascaraUtil;
@@ -55,7 +57,7 @@ import br.gov.jfrj.siga.hibernate.ExDao;
 		@NamedQuery(name = "consultarExClassificacaoComExcecao", query = "from ExClassificacao cl "
 				+ "	      where cl.codificacao like :mascara"
 				+ "	      	and cl.codificacao != :exceto"
-				+ "	       	and cl.hisAtivo = 1"
+				+ "	       	and cl.hisAtivo = true"
 				+ "	       	order by cl.descrClassificacao"),
 		@NamedQuery(name = "consultarPorFiltroExClassificacao", query = "select distinct(cla) from ExClassificacao cla ,ExVia v "
 				+ "		where 	("
@@ -64,12 +66,12 @@ import br.gov.jfrj.siga.hibernate.ExDao;
 				+ "			(cla.codificacao = :descrClassificacao)"
 				+ "		)"
 				+ "			and cla.codificacao like :mascara"
-				+ "	    	and cla.hisAtivo = 1"
+				+ "	    	and cla.hisAtivo = true"
 				+ "	       	and cla.idClassificacao = v.exClassificacao.idClassificacao "
-				+ "	       	and v.hisAtivo = 1" + "	    	order by codificacao"),
+				+ "	       	and v.hisAtivo = true" + "	    	order by cla.codificacao"),
 		@NamedQuery(name = "consultarFilhosExClassificacao", query = "select distinct(cla) from ExClassificacao cla "
 				+ "		where cla.codificacao like :mascara"
-				+ "	    	and cla.hisAtivo = 1" + "	    	order by codificacao"),
+				+ "	    	and cla.hisAtivo = true" + "	    	order by cla.codificacao"),
 		@NamedQuery(name = "consultarQuantidadeExClassificacao", query = "select count(distinct cla) from ExClassificacao cla ,ExVia v "
 				+ "		where 	("
 				+ "			(upper(cla.descrClassificacao) like upper('%' || :descrClassificacao || '%')) or"
@@ -77,21 +79,21 @@ import br.gov.jfrj.siga.hibernate.ExDao;
 				+ "			(cla.codificacao = :descrClassificacao)"
 				+ "		)"
 				+ "			and cla.codificacao like :mascara"
-				+ "	    	and cla.hisAtivo = 1"
+				+ "	    	and cla.hisAtivo = true"
 				+ "	       	and cla.idClassificacao = v.exClassificacao.idClassificacao "
-				+ "	       	and v.hisAtivo = 1"),
+				+ "	       	and v.hisAtivo = true"),
 		@NamedQuery(name = "consultarPorSiglaExClassificacao", query = "select cla from ExClassificacao cla "
-				+ " 		where cla.codificacao = :codificacao and cla.hisAtivo = 1"),
+				+ " 		where cla.codificacao = :codificacao and cla.hisAtivo = true"),
 		@NamedQuery(name = "consultarAtualPorId", query = "select cla from ExClassificacao cla "
 				+ " 		where  cla.hisIdIni = :hisIdIni"
-				+ "    	and cla.hisAtivo = 1"),
+				+ "    	and cla.hisAtivo = true"),
 		@NamedQuery(name = "consultarDescricaoExClassificacao", query = "select descrClassificacao from ExClassificacao cla"
 				+ "		where cla.codificacao in (:listaCodificacao)"
-				+ "		and cla.hisAtivo = 1 " + "		order by codificacao"),
+				+ "		and cla.hisAtivo = true " + "		order by cla.codificacao"),
 		@NamedQuery(name = "consultarExClassificacaoPorMascara", query = "select distinct(cla) from ExClassificacao cla left join fetch cla.exViaSet"
 				+ "		where cla.codificacao like :mascara"
 				+ "			and (upper(cla.descrClassificacao) like upper('%' || :descrClassificacao || '%'))"
-				+ "	    	and cla.hisAtivo = 1" + "	    	order by codificacao") })
+				+ "	    	and cla.hisAtivo = true" + "	    	order by cla.codificacao") })
 public abstract class AbstractExClassificacao extends HistoricoAuditavelSuporte
 		implements Serializable {
 
@@ -101,7 +103,7 @@ public abstract class AbstractExClassificacao extends HistoricoAuditavelSuporte
 	@Column(name = "ID_CLASSIFICACAO", unique = true, nullable = false)
 	private Long idClassificacao;
 
-	@Column(name = "CODIFICACAO", nullable = false, length = 11)
+	@Column(name = "CODIFICACAO", nullable = false, length = 13)
 	private String codificacao;
 
 	@Column(name = "DESCR_CLASSIFICACAO", nullable = false, length = 4000)
@@ -117,9 +119,13 @@ public abstract class AbstractExClassificacao extends HistoricoAuditavelSuporte
 	@Column(name = "OBS", length = 4000)
 	private String obs;
 
+	@OrderBy(value="nmMod")
+	@Where(clause="HIS_ATIVO='TRUE'")
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "exClassificacao")
 	private Set<ExModelo> exModeloSet;
 
+	@OrderBy(value="nmMod")
+	@Where(clause="HIS_ATIVO='TRUE'")
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "exClassCriacaoVia")
 	private Set<ExModelo> exModeloCriacaoViaSet;
 

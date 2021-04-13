@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -22,8 +23,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("/app/sala")
 public class SalaController extends PpController {
 
-    public SalaController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em) {
-        super(request, result, PpDao.getInstance(), so, em);
+    public SalaController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+        super(request, response, result, PpDao.getInstance(), so, em);
     }
 
     @Path("/incluir")

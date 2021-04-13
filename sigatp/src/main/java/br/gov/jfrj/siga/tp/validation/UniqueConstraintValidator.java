@@ -175,6 +175,6 @@ public class UniqueConstraintValidator implements ConstraintValidator<Unique, Tp
 	}
 
 	private boolean isUniqueColumn() {
-		return !"".equals(unique.uniqueColumn());
+		return !StringUtils.EMPTY.equals(unique.uniqueColumn());
 	}
 }

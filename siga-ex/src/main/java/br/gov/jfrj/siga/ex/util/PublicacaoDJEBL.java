@@ -105,7 +105,7 @@ public class PublicacaoDJEBL {
 			final ExMobil docVia;
 			docVia = exDao.consultarPorSigla(daoViaFiltro);
 
-			if (docVia != null && !docVia.doc().isDJEPublicado())
+			if (docVia != null && !docVia.getDoc().isDJEPublicado())
 				Ex.getInstance().getBL().registrarDisponibilizacaoPublicacao(docVia, data, paginaDaPublicacao);
 		}
 	}
@@ -164,14 +164,14 @@ public class PublicacaoDJEBL {
 		 * , "http://tempuri.org/", "RecebeDocumentos",
 		 * "http://tempuri.org/RecebeDocumentos"); Object obj = axis .call(new
 		 * Object[] { org.bouncycastle.util.encoders.Base64
-		 * .encode(mov.getConteudoBlobMov2()) });
+		 * .encode(mov.getConteudoBlobMov()) });
 		 */
 
 		log.info("DJE: prestes a chamarrrr serviço");
 		try {
 			AxisClientAlternativo cliente = new AxisClientAlternativo(SigaExProperties.getServidorDJE(), "RecebeDocumentos", true);
 
-			cliente.setParam(new Object[] { mov.getConteudoBlobMov2() });
+			cliente.setParam(new Object[] { mov.getConteudoBlobInicializarOuAtualizarCache() });
 			Object o = cliente.call();
 			return new String((byte[]) o);
 		} catch (Throwable t) {

@@ -8,7 +8,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jbpm.graph.def.ProcessDefinition;
 import org.jbpm.instantiation.Delegation;
@@ -28,9 +30,8 @@ import br.gov.jfrj.siga.wf.util.WfContextBuilder;
 @Resource
 public class EdicaoController extends WfController {
 
-	public EdicaoController(HttpServletRequest request, Result result,
-			WfDao dao, SigaObjects so, WfUtil util) {
-		super(request, result, dao, so, util);
+	public EdicaoController(HttpServletRequest request, HttpServletResponse response, Result result, WfDao dao, SigaObjects so, WfUtil util, EntityManager em) {
+		super(request, response, result, dao, so, util, em);
 	}
 
 	@Get

@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -22,9 +23,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("app/solicitacao/conhecimento")
 public class ConhecimentoController extends SrController {
 
-	public ConhecimentoController(HttpServletRequest request, Result result,
-			SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, SrDao.getInstance(), so, em, srValidator);
+	public ConhecimentoController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, SrDao.getInstance(), so, em, srValidator);
 	}
 
 	@AssertAcesso(EDTCONH_CRIAR_CONHECIMENTOS)

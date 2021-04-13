@@ -27,6 +27,8 @@ package br.gov.jfrj.siga.model.dao;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
@@ -148,8 +150,13 @@ public abstract class ModeloDao {
 	/**
 	 * @return Retorna o atributo sessao.
 	 */
+	@Deprecated
 	public Session getSessao() {
 		return HibernateUtil.getSessao();
+	}
+
+	public EntityManager getEntityManager() {
+		return HibernateUtil.getEntityManager();
 	}
 
 	public <T> T gravar(final T entidade) {

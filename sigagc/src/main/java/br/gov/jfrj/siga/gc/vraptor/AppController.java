@@ -1,5 +1,7 @@
 package br.gov.jfrj.siga.gc.vraptor;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -18,9 +20,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -32,12 +38,9 @@ import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
 import br.com.caelum.vraptor.view.HttpResult;
 import br.com.caelum.vraptor.view.Results;
 import br.gov.jfrj.siga.base.AplicacaoException;
-import br.gov.jfrj.siga.cp.CpGrupo;
 import br.gov.jfrj.siga.cp.CpIdentidade;
 import br.gov.jfrj.siga.cp.CpPerfil;
 import br.gov.jfrj.siga.cp.model.CpPerfilSelecao;
-import br.gov.jfrj.siga.cp.model.DpCargoSelecao;
-import br.gov.jfrj.siga.cp.model.DpFuncaoConfiancaSelecao;
 import br.gov.jfrj.siga.cp.model.DpLotacaoSelecao;
 import br.gov.jfrj.siga.cp.model.DpPessoaSelecao;
 import br.gov.jfrj.siga.dp.CpMarcador;
@@ -67,18 +70,14 @@ import br.gov.jfrj.siga.vraptor.LoadOptional;
 import br.gov.jfrj.siga.vraptor.SigaIdDescr;
 import br.gov.jfrj.siga.vraptor.SigaObjects;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 @Resource
 public class AppController extends GcController {
 
 	private GcBL bl;
 	private Correio correio;
 
-	public AppController(HttpServletRequest request, Result result, GcBL bl,
-			SigaObjects so, EntityManager em, Correio correio) {
-		super(request, result, so, em);
+	public AppController(HttpServletRequest request, HttpServletResponse response, Result result, GcBL bl, SigaObjects so, EntityManager em, Correio correio) {
+		super(request, response, result, so, em);
 		this.bl = bl;
 		this.correio = correio;
 	}
@@ -523,14 +522,11 @@ public class AppController extends GcController {
 			filtro.getLotacao().getLotacaoInicial().setLotacoesPosteriores(lotacaoIni.getLotacoesPosteriores());
 		}
         
-		List<SigaIdDescr> anos = new ArrayList<SigaIdDescr>();
+		List<SigaIdDescr> anos = new ArrayList<>();
 		int ano = bl.dt().getYear() + 1900;
 		for (int i = 0; i < 10; i++) {
 			anos.add(new SigaIdDescr(ano - i, ano - i));
 		}
-
-		if (filtro == null)
-			filtro = new GcInformacaoFiltro();
 
 		result.include("lista", lista);
 		result.include("marcadores", marcadores);
@@ -596,8 +592,7 @@ public class AppController extends GcController {
 			}
 		}
 
-		if (classificacao == null || classificacao.isEmpty()
-				|| classificacao == "") {
+		if (isEmpty(classificacao)) {
 			arvore.build();
 		} else {
 			arvore.build(classificacao);

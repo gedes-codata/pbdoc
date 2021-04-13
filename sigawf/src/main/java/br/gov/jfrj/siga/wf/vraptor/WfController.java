@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jbpm.db.GraphSession;
 import org.jbpm.graph.def.ProcessDefinition;
@@ -14,7 +16,6 @@ import br.com.caelum.vraptor.Result;
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
-import br.gov.jfrj.siga.dp.dao.CpDao;
 import br.gov.jfrj.siga.vraptor.SigaController;
 import br.gov.jfrj.siga.vraptor.SigaObjects;
 import br.gov.jfrj.siga.wf.dao.WfDao;
@@ -32,9 +33,8 @@ public class WfController extends SigaController {
 	
 	protected WfUtil util;
 
-	public WfController(HttpServletRequest request, Result result, WfDao dao,
-			SigaObjects so, WfUtil util) {
-		super(request, result, (CpDao) dao, so, null);
+	public WfController(HttpServletRequest request, HttpServletResponse response, Result result, WfDao dao, SigaObjects so, WfUtil util, EntityManager em) {
+		super(request, response, result, dao, so, em);
 		this.util = util;
 
 		result.include("processDefinitions", getProcessDefinitions());

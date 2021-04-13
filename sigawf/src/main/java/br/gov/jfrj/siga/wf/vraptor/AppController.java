@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.jbpm.context.def.VariableAccess;
@@ -44,9 +46,8 @@ public class AppController extends WfController {
 
 	private static final String WF_REDIRECT_TO = "wf_redirect_to";
 
-	public AppController(HttpServletRequest request, Result result, WfDao dao,
-			SigaObjects so, WfUtil util) {
-		super(request, result, dao, so, util);
+	public AppController(HttpServletRequest request, HttpServletResponse response, Result result, WfDao dao, SigaObjects so, WfUtil util, EntityManager em) {
+		super(request, response, result, dao, so, util, em);
 	}
 
 	public void resumo() throws Exception {

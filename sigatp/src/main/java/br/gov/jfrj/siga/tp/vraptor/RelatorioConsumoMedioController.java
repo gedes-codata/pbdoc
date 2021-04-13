@@ -71,7 +71,7 @@ public class RelatorioConsumoMedioController extends TpController {
 
     private String tratarMensagemValidacaoRelatorio(String msgErro) {
         String msgErroTratada = msgErro;
-        if (!"".equals(msgErroTratada)) {
+        if (!StringUtils.EMPTY.equals(msgErroTratada)) {
             boolean plural = StringUtils.countMatches(msgErroTratada, ",") > 1 ? true : false;
             msgErroTratada = msgErroTratada.substring(0, msgErroTratada.length() - 2);
             msgErroTratada += " deve" + (plural ? "m" : "") + " ser preenchido" + (plural ? "s" : "");

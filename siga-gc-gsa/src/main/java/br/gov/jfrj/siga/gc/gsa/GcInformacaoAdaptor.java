@@ -84,7 +84,7 @@ public class GcInformacaoAdaptor extends AbstractAdaptor implements Adaptor {
 		Date currentDate = null;
 		Connection conn = null;
 		Statement stmt = null;
-		String query = "SELECT SYSDATE FROM DUAL";
+		String query = "SELECT CURRENT_TIMESTAMP AS \"SYSDATE\"";
 		try {
 			conn = getConnection();
 			stmt = conn.createStatement();

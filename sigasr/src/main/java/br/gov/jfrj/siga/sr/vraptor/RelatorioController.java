@@ -14,37 +14,30 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRParameter;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.interceptor.download.Download;
 import br.com.caelum.vraptor.interceptor.download.InputStreamDownload;
-import br.gov.jfrj.siga.cp.model.DpLotacaoSelecao;
 import br.gov.jfrj.siga.dp.CpOrgaoUsuario;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.dao.CpDao;
-import br.gov.jfrj.siga.model.ContextoPersistencia;
 import br.gov.jfrj.siga.sr.annotation.AssertAcesso;
 import br.gov.jfrj.siga.sr.reports.SrRelAtendimento;
 import br.gov.jfrj.siga.sr.validator.SrValidator;
 import br.gov.jfrj.siga.vraptor.SigaObjects;
+import net.sf.jasperreports.engine.JRParameter;
 
 @Resource
 @Path("app/relatorio")
 public class RelatorioController extends SrController {
 
-	private HttpServletResponse response;
-	
-	public RelatorioController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator,
-			HttpServletResponse response) {
-		super(request, result, dao, so, em, srValidator);
-		this.response = response;
+	public RelatorioController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, dao, so, em, srValidator);
 	}
 
 	private static final String APPLICATION_EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-	@SuppressWarnings("unchecked")
 	@AssertAcesso(REL_RELATORIOS)
 	@Path("/atendimentos")
 	public void exibirRelAtendimentos() {

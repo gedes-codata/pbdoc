@@ -30,6 +30,7 @@ import java.util.TreeMap;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.logging.Logger;
 
@@ -51,8 +52,8 @@ public class ExEmailNotificacaoController extends SigaController{
 	private static final Logger LOGGER = Logger.getLogger(ExEmailNotificacaoController.class);
 	private static final String VERIFICADOR_ACESSO = "DOC:Módulo de Documentos;FE:Ferramentas;EMAIL:Email de Notificação";
 
-	public ExEmailNotificacaoController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em) {
-		super(request, result, CpDao.getInstance(), so, em);
+	public ExEmailNotificacaoController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, CpDao.getInstance(), so, em);
 	}
 
 	public ExEmailNotificacao daoEmail(long id) {

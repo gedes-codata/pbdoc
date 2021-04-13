@@ -10,6 +10,7 @@ import java.util.TreeMap;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -45,9 +46,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Resource
 public class CorporativoController extends SrController {
 
-	public CorporativoController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em,
-			SrValidator srValidator, Validator validator) {
-		super(request, result, dao, so, em, srValidator);
+	public CorporativoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator, Validator validator) {
+		super(request, response, result, dao, so, em, srValidator);
 	}
 
 	@Get

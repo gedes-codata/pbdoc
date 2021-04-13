@@ -33,6 +33,9 @@ import java.util.TreeMap;
  * 
  */
 public abstract class ModeloPropriedade {
+
+	public static final String AMBIENTE_PADRAO = "prod";
+
 	private Properties propriedades = null;
 	protected String[] prefixo;
 

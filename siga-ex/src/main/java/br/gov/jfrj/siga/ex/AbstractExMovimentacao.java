@@ -21,11 +21,12 @@
  */
 package br.gov.jfrj.siga.ex;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.Serializable;
-import java.sql.Blob;
+import java.nio.file.Path;
 import java.util.Date;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -81,42 +82,42 @@ import br.gov.jfrj.siga.dp.DpPessoa;
 		@NamedQuery(name = "consultarParaArquivarIntermediarioEmLote", query = "select mob, mar from ExMobil mob join mob.exMarcaSet mar"
 				+ "                where mar.cpMarcador.idMarcador=51              "
 				+ "                and mar.dpLotacaoIni.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu"
-				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < sysdate)"
-				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > sysdate)"
+				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < CURRENT_TIMESTAMP)"
+				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > CURRENT_TIMESTAMP)"
 				+ "                order by mob.exDocumento.dtDoc asc"),
 
 		@NamedQuery(name = "consultarQuantidadeParaArquivarIntermediarioEmLote", query = "select count(*) from ExMobil mob join mob.exMarcaSet mar"
 				+ "                where mar.cpMarcador.idMarcador=51              "
 				+ "                and mar.dpLotacaoIni.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu"
-				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < sysdate)"
-				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > sysdate)" + "                )"),
+				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < CURRENT_TIMESTAMP)"
+				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > CURRENT_TIMESTAMP)" + "                )"),
 		// Somente os "a recolher para arquivo permanente"
 		@NamedQuery(name = "consultarParaArquivarPermanenteEmLote", query = "select mob, mar from ExMobil mob join mob.exMarcaSet mar"
 				+ "                where mar.cpMarcador.idMarcador=50      "
 				+ "                and mar.dpLotacaoIni.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu"
-				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < sysdate)"
-				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > sysdate)"
+				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < CURRENT_TIMESTAMP)"
+				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > CURRENT_TIMESTAMP)"
 				+ "                order by mob.exDocumento.dtDoc asc"),
 		@NamedQuery(name = "consultarQuantidadeParaArquivarPermanenteEmLote", query = "select count(*) from ExMobil mob join mob.exMarcaSet mar"
 				+ "                where mar.cpMarcador.idMarcador=50              "
 				+ "                and mar.dpLotacaoIni.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu"
-				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < sysdate)"
-				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > sysdate)" + "                )"),
+				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < CURRENT_TIMESTAMP)"
+				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > CURRENT_TIMESTAMP)" + "                )"),
 		// Somente os "a eliminar"
 		@NamedQuery(name = "consultarAEliminar", query = "select mob, mar from ExMobil mob join mob.exMarcaSet mar"
 				+ "                where (mar.cpMarcador.idMarcador=7)"
 				+ "                and mar.dpLotacaoIni.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu"
 				+ "                and (:dtIni is null or mob.exDocumento.dtDoc >= :dtIni)"
 				+ "                and (:dtFim is null or mob.exDocumento.dtDoc <= :dtFim)"
-				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < sysdate)"
-				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > sysdate)"),
+				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < CURRENT_TIMESTAMP)"
+				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > CURRENT_TIMESTAMP)"),
 		@NamedQuery(name = "consultarQuantidadeAEliminar", query = "select count(*) from ExMobil mob join mob.exMarcaSet mar"
 				+ "                where mar.cpMarcador.idMarcador=7              "
 				+ "                and mar.dpLotacaoIni.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu"
 				+ "                and (:dtIni is null or mob.exDocumento.dtDoc >= :dtIni)"
 				+ "                and (:dtFim is null or mob.exDocumento.dtDoc <= :dtFim)"
-				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < sysdate)"
-				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > sysdate)" + "                )"),
+				+ "                and (mar.dtIniMarca is null or mar.dtIniMarca < CURRENT_TIMESTAMP)"
+				+ "                and (mar.dtFimMarca is null or mar.dtFimMarca > CURRENT_TIMESTAMP)" + "                )"),
 		// Somente os "em edital de eliminação"
 		@NamedQuery(name = "consultarEmEditalEliminacao", query = "select mob, mar" + "                from ExMobil mob"
 				+ "                join mob.exMarcaSet mar" + "                join mob.exDocumento doc"
@@ -162,6 +163,11 @@ import br.gov.jfrj.siga.dp.DpPessoa;
 				+ "                where mov.cadastrante.idPessoaIni=:pessoaIni and mov.dtIniMov=to_date(:data, 'DD/MM/YYYY HH24:MI:SS')          "
 				+ "                ) order by mov.idMov"), })
 public abstract class AbstractExMovimentacao extends ExArquivo implements Serializable {
+
+	private static final long serialVersionUID = -534578189011463850L;
+
+	public static final String NOME_TIPO_DIRETORIO = "ANEXOS";
+
 	@Id
 	@SequenceGenerator(sequenceName = "EX_MOVIMENTACAO_SEQ", name = "EX_MOVIMENTACAO_SEQ")
 	@GeneratedValue(generator = "EX_MOVIMENTACAO_SEQ")
@@ -172,12 +178,8 @@ public abstract class AbstractExMovimentacao extends ExArquivo implements Serial
 	@JoinColumn(name = "id_cadastrante")
 	private DpPessoa cadastrante;
 
-	@Column(name = "conteudo_blob_mov")
-	@Basic(fetch = FetchType.LAZY)
-	private Blob conteudoBlobMov;
-
 	@Column(name = "conteudo_tp_mov", length = 128)
-	private String conteudoTpMov;
+	private String mimeType;
 
 	@BatchSize(size=1)
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "exMovimentacaoRef")
@@ -360,12 +362,8 @@ public abstract class AbstractExMovimentacao extends ExArquivo implements Serial
 		return cadastrante;
 	}
 
-	public Blob getConteudoBlobMov() {
-		return conteudoBlobMov;
-	}
-
-	public String getConteudoTpMov() {
-		return conteudoTpMov;
+	public String getMimeType() {
+		return mimeType;
 	}
 
 	public String getDescrMov() {
@@ -384,8 +382,14 @@ public abstract class AbstractExMovimentacao extends ExArquivo implements Serial
 		return dtIniMov;
 	}
 
-	public Date getDtMov() {
-		return dtMov;
+	@Override
+	public Date getData() {
+		return this.dtMov;
+	}
+
+	@Override
+	public void setData(Date data) {
+		this.dtMov = data;
 	}
 
 	public ExMovimentacao getExMovimentacaoCanceladora() {
@@ -436,12 +440,8 @@ public abstract class AbstractExMovimentacao extends ExArquivo implements Serial
 		this.cadastrante = cadastrante;
 	}
 
-	public void setConteudoBlobMov(Blob conteudoBlobMov) {
-		this.conteudoBlobMov = conteudoBlobMov;
-	}
-
-	public void setConteudoTpMov(final String conteudoTpMov) {
-		this.conteudoTpMov = conteudoTpMov;
+	public void setMimeType(final String mimeType) {
+		this.mimeType = mimeType;
 	}
 
 	public void setDescrMov(final String descrMov) {
@@ -458,10 +458,6 @@ public abstract class AbstractExMovimentacao extends ExArquivo implements Serial
 
 	public void setDtIniMov(final Date dtIniMov) {
 		this.dtIniMov = dtIniMov;
-	}
-
-	public void setDtMov(final Date dtMov) {
-		this.dtMov = dtMov;
 	}
 
 	public void setExMovimentacaoCanceladora(final ExMovimentacao exMovimentacaoCanceladora) {
@@ -679,4 +675,14 @@ public abstract class AbstractExMovimentacao extends ExArquivo implements Serial
 	public void setAuditHash(String auditHash) {
 		this.auditHash = auditHash;
 	}
+
+	@Override
+	public Path getPathConteudo(Path base) {
+		ExDocumento documento = ofNullable(this.getExMobil())
+				.map(ExMobil::getDoc)
+				.orElseThrow(() -> new IllegalArgumentException(String.format(ERRO_CAMINHO_ARQUIVO, NOME_TIPO_DIRETORIO, this.getId(), "MOVIMENTAÇÃO DOCUMENTO")));
+
+		return this.getPathConteudo(documento, NOME_TIPO_DIRETORIO, base);
+	}
+
 }

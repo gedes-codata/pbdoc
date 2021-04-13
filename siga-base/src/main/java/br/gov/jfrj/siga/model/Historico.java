@@ -50,7 +50,7 @@ public interface Historico extends Assemelhavel {
 	public void setHisDtFim(Date hisDtFim);
 
 	@Column(name = "his_ativo", nullable = false)
-	public Integer getHisAtivo();
+	public boolean getHisAtivo();
 
-	public void setHisAtivo(Integer hisAtivo);
+	public void setHisAtivo(boolean hisAtivo);
 }

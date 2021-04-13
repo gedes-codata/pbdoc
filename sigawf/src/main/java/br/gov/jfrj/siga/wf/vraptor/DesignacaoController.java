@@ -27,7 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.SessionFactory;
 import org.jbpm.graph.def.ProcessDefinition;
@@ -55,12 +57,12 @@ import br.gov.jfrj.siga.wf.util.WfTipoResponsavel;
 @Resource
 public class DesignacaoController extends WfController {
 
-	private static int TIPO_RESP_INDEFINIDO = 0;
-	private static int TIPO_RESP_MATRICULA = 1;
-	private static int TIPO_RESP_LOTACAO = 2;
-	private static int TIPO_RESP_LOTA_SUP = 3;
-	private static int TIPO_RESP_SUP_HIER = 4;
-	private static int TIPO_RESP_EXPRESSAO = 5;
+	private static final int TIPO_RESP_INDEFINIDO = 0;
+	private static final int TIPO_RESP_MATRICULA = 1;
+	private static final int TIPO_RESP_LOTACAO = 2;
+	private static final int TIPO_RESP_LOTA_SUP = 3;
+	private static final int TIPO_RESP_SUP_HIER = 4;
+	private static final int TIPO_RESP_EXPRESSAO = 5;
 
 	private List<WfTipoResponsavel> listaTipoResponsavel = new ArrayList<WfTipoResponsavel>();
 	private Map<Integer, WfTipoResponsavel> mapaTipoResponsavel = new HashMap<Integer, WfTipoResponsavel>();
@@ -71,9 +73,8 @@ public class DesignacaoController extends WfController {
 	 * Inicializa os tipos de responsáveis e suas respectivas expressões, quando
 	 * houver.
 	 */
-	public DesignacaoController(HttpServletRequest request, Result result,
-			WfDao dao, SigaObjects so, WfUtil util) {
-		super(request, result, dao, so, util);
+	public DesignacaoController(HttpServletRequest request, HttpServletResponse response, Result result, WfDao dao, SigaObjects so, WfUtil util, EntityManager em) {
+		super(request, response, result, dao, so, util, em);
 
 		WfTipoResponsavel tpIndefinido = new WfTipoResponsavel(
 				TIPO_RESP_INDEFINIDO, "[Indefinido]", "");

@@ -1,5 +1,8 @@
 package br.gov.jfrj.siga.gc.util;
 
+import static org.apache.commons.lang.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +16,9 @@ import br.gov.jfrj.siga.gc.model.GcInformacao;
 import br.gov.jfrj.siga.gc.model.GcTag;
 
 public class GcArvore extends TreeMap<GcTag, GcArvoreNo> {
+
+	private static final long serialVersionUID = 1L;
+
 	final HashMap<GcTag, Long> mapFreq = new HashMap<GcTag, Long>();
 	final HashMap<GcInformacao, List<GcTag>> mapInf = new HashMap<GcInformacao, List<GcTag>>();
 	final GcArvoreNo raiz = new GcArvoreNo();
@@ -155,7 +161,7 @@ public class GcArvore extends TreeMap<GcTag, GcArvoreNo> {
 			for (int i = 0; i < ident; i++)
 				sb.append("  ");
 			
-			if( (no.tag.getTitulo() == "Conhecimentos_Sem_Classificacao") && (texto== null || texto=="" || texto.isEmpty())){
+			if(equalsIgnoreCase("Conhecimentos_Sem_Classificacao", no.tag.getTitulo()) && isBlank(texto)){
 				sb.append("<li style='display:none'><b>");
 				sb.append(no.tag.getTitulo());
 				for (GcTag tagIrmao : no.tagsIrmaos) {

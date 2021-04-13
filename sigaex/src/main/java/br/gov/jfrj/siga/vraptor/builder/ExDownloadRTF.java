@@ -28,7 +28,7 @@ public class ExDownloadRTF extends ExInputStreamDownload {
 	
 	@Override
 	protected String getFileName() {
-		String filename = mob.doc().getCodigo() + ".rtf";
+		String filename = mob.getDoc().getCodigo() + ".rtf";
 		return hash != null ? MessageFormat.format("{0}.{1}", filename, hash.toLowerCase()) : filename;
 	}
 }

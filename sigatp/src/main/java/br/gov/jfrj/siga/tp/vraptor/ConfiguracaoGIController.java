@@ -99,7 +99,7 @@ public class ConfiguracaoGIController extends TpController {
         /*
          * insert into corporativo.cp_configuracao ( id_configuracao, his_id_ini, id_tp_configuracao, id_sit_configuracao, id_servico, dt_ini_vig_configuracao, his_idc_ini,id_pessoa, id_complexo )
          * values( corporativo.cp_configuracao_seq.nextval, corporativo.cp_configuracao_seq.currval, 200, 1, (select id_servico from corporativo.cp_servico where
-         * sigla_servico='SIGA-TP-ADMMISSAOCOMPLEXO'), sysdate, 13332, (select id_pessoa from corporativo.dp_pessoa where matricula = '10596' and data_fim_pessoa is null and id_orgao_usu = 1), 1 );
+         * sigla_servico='SIGA-TP-ADMMISSAOCOMPLEXO'), CURRENT_TIMESTAMP, 13332, (select id_pessoa from corporativo.dp_pessoa where matricula = '10596' and data_fim_pessoa is null and id_orgao_usu = 1), 1 );
          */
         cpConfiguracao.setId(0L);
         result.include(CP_CONFIGURACAO, cpConfiguracao);

@@ -549,7 +549,7 @@ public class diff_match_patch {
 	protected LinesToCharsResult diff_linesToChars(String text1, String text2) {
 		List<String> lineArray = new ArrayList<String>();
 		Map<String, Integer> lineHash = new HashMap<String, Integer>();
-		// e.g. linearray[4] == "Hello\n"
+		// e.g. "Hello\n".equals(linearray[4])
 		// e.g. linehash.get("Hello\n") == 4
 
 		// "\x00" is a valid character, but various debuggers don't like it.

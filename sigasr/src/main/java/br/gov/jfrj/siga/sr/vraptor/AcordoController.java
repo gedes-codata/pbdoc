@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -37,8 +38,8 @@ public class AcordoController extends SrController {
 
     private static final String ACORDOS = "acordos";
 
-    public AcordoController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
-        super(request, result, dao, so, em, srValidator);
+    public AcordoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
+        super(request, response, result, dao, so, em, srValidator);
         result.on(AplicacaoException.class).forwardTo(this).appexception();
         result.on(Exception.class).forwardTo(this).exception();
     }

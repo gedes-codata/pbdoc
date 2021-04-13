@@ -59,7 +59,7 @@ public class AndamentoController extends TpController {
             }
 
             if (andamento.getEstadoRequisicao() == EstadoRequisicao.CANCELADA || andamento.getEstadoRequisicao() == EstadoRequisicao.REJEITADA) {
-                error(null == andamento.getDescricao() || "".equals(andamento.getDescricao()), ANDAMENTO, "views.erro.campoObrigatorio");
+                error(null == andamento.getDescricao() || StringUtils.EMPTY.equals(andamento.getDescricao()), ANDAMENTO, "views.erro.campoObrigatorio");
                 redirecionarSeErroAoSalvar(andamento);
             }
 

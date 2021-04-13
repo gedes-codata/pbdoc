@@ -51,7 +51,7 @@ public class LinkTag extends TagSupport {
 	}
 
 	private void validarAtributos() throws JspException {
-		if((null == comando || "".equals(comando)) || (null == parteTextoLink || "".equals(parteTextoLink)))
+		if((null == comando || StringUtils.EMPTY.equals(comando)) || (null == parteTextoLink || StringUtils.EMPTY.equals(parteTextoLink)))
 			throw new JspException(MessagesBundle.getMessage("tpTags.parametrosInvalidos.exception"));
 	}
 

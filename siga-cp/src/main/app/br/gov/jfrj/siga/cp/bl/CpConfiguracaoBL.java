@@ -66,7 +66,7 @@ public class CpConfiguracaoBL {
 	public static final long MATRICULA_USUARIO_ROOT = 99999L;
 	public static final long CPF_ROOT = 11111111111L;
 	public static final long ID_ORGAO_ROOT = 9999999999L;
-	public static final String SIGLA_ORGAO_ROOT = "ZZ";
+	public static final String SIGLA_ORGAO_ROOT = "ZZZ";
 
 	protected Date dtUltimaAtualizacaoCache = null;
 	protected boolean cacheInicializado = false;
@@ -957,7 +957,7 @@ public class CpConfiguracaoBL {
 				DpPessoa pesAtual = CpDao.getInstance().consultarPorIdInicial(
 						c.getDpPessoa().getIdInicial());
 				if (c.getDpPessoa().equivale(pesAtual)) {
-					if (c.getHisAtivo() == 1
+					if (c.getHisAtivo()
 							&& pesAtual.getDataFim() == null
 							&& c.getLotacao().getIdInicial()
 									.equals(lot.getIdInicial())) {
@@ -985,7 +985,7 @@ public class CpConfiguracaoBL {
 							CpTipoConfiguracao.TIPO_CONFIG_UTILIZAR_SERVICO_OUTRA_LOTACAO);
 			for (CpConfiguracao c : configs) {
 				DpLotacao lotacaoAtual = c.getLotacao().getLotacaoAtual();
-				if (c.getHisAtivo() == 1
+				if (c.getHisAtivo()
 						&& lotacaoAtual.getDataFim() == null
 						&& c.getDpPessoa().getIdInicial()
 								.equals(pes.getIdInicial())) {

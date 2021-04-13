@@ -6,8 +6,11 @@ function displayPersonalizacao(thisElement) {
 	var thatElement = document.getElementById('tr_personalizacao');
 	if (thisElement.checked)
 		thatElement.style.display = '';
-	else
+	else {
 		thatElement.style.display = 'none';
+		document.getElementById('personalizarFuncao').value = '';
+		document.getElementById('personalizarUnidade').value = '';
+	}
 }
 
 function personalizacaoSeparar() {
@@ -86,21 +89,36 @@ function gravarDoc() {
 	frm.submit();
 }
 
+function gravarDocEAssinar() {
+	clearTimeout(saveTimer);
+	if (!validar(false)) {
+		triggerAutoSave();
+		return false;
+	}
+	frm.action = 'gravarAssinar';
+	window.customOnsubmit = function() {
+		return true;
+	};
+	if (typeof (frm.submitsave) != "undefined")
+		frm.submit = frm.submitsave;
+
+	// Dispara a função onSave() do editor, caso exista
+	if (typeof (onSave) == "function")
+		onSave();
+		
+	frm.submit();
+}
+
 function validar(silencioso) {
 	personalizacaoJuntar();
 	
-	var descr = document.getElementsByName('exDocumentoDTO.descrDocumento')[0].value;
 	var eletroHidden = document.getElementById('eletronicoHidden');
 	var eletro1 = document.getElementById('eletronicoCheck1');
 	var eletro2 = document.getElementById('eletronicoCheck2');
 	var subscritor = document.getElementById('formulario_exDocumentoDTO.subscritorSel_id');
 	var temCossignatarios = document.getElementById('temCossignatarios');
-	var descricaoAutomatica = document.getElementById('descricaoAutomatica');
-	if (descricaoAutomatica == null && (descr == null || descr == "")) {
-		aviso("Preencha o campo Descrição antes de gravar o documento.",
-				silencioso);
-		return false;
-	}
+
+	
 	if ((temCossignatarios && temCossignatarios.value === 'true') && (!subscritor || !subscritor.value)) {
 		aviso("É necessário informar um subscritor, pois o documento possui cossignatários",silencioso);
 		return false;

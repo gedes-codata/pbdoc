@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import junit.framework.TestCase;
 import br.gov.jfrj.siga.cp.CpPapel;
 import br.gov.jfrj.siga.dp.CpOrgaoUsuario;
 import br.gov.jfrj.siga.dp.DpCargo;
@@ -34,13 +33,12 @@ import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
 import br.gov.jfrj.siga.ex.ExDocumento;
 import br.gov.jfrj.siga.ex.ExMovimentacao;
-import br.gov.jfrj.siga.ex.util.FuncoesEL;
-import br.gov.jfrj.siga.ex.util.ProcessadorModeloFreemarker;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.Diagram;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
+import junit.framework.TestCase;
 
 public class ModeloTest extends TestCase {
 

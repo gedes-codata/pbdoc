@@ -1,5 +1,7 @@
 package br.gov.jfrj.siga.cp.util;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
@@ -24,6 +27,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.base.Texto;
+import br.gov.jfrj.siga.cp.CpIdentidade;
+import br.gov.jfrj.siga.cp.CpTipoIdentidade;
+import br.gov.jfrj.siga.cp.bl.SituacaoFuncionalEnum;
 import br.gov.jfrj.siga.dp.CpLocalidade;
 import br.gov.jfrj.siga.dp.CpOrgaoUsuario;
 import br.gov.jfrj.siga.dp.CpUF;
@@ -32,43 +38,138 @@ import br.gov.jfrj.siga.dp.DpFuncaoConfianca;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
 import br.gov.jfrj.siga.dp.dao.CpDao;
+import br.gov.jfrj.siga.dp.dao.DpPessoaDaoFiltro;
 
 public class Excel {
 	
 	public InputStream uploadLotacao(File file, CpOrgaoUsuario orgaoUsuario, String extensao) {
 		InputStream retorno = null;
-		retorno = uploadExcelLotacao(file, orgaoUsuario);
-		
+		if(".txt".equalsIgnoreCase(extensao) || ".csv".equalsIgnoreCase(extensao)) {
+			retorno = uploadCVS(file, orgaoUsuario);
+		} else if(".xlsx".equals(extensao)){
+			retorno = uploadExcelLotacao(file, orgaoUsuario);
+		}
 		return retorno;
 	}
 	
+	public InputStream uploadCVS(File file, CpOrgaoUsuario orgaoUsuario) {
+		Scanner sc = null;
+        Integer linha=0;
+        String campo = "";
+        StringBuffer problemas = new StringBuffer();
+        List<String> nomes = new ArrayList<String>();
+        List<String> siglas = new ArrayList<String>();
+        List<CpLocalidade> localidades = new ArrayList<CpLocalidade>();
+        DpLotacao lotacao = new DpLotacao();
+        CpLocalidade localidade = new CpLocalidade();
+        CpUF uf = new CpUF();
+        uf.setIdUF(26L);
+        List<DpLotacao> listaLotacaoGravar = new ArrayList<DpLotacao>();
+        Date data = new Date(System.currentTimeMillis());
+		try {
+            sc = new Scanner(file);
+            while (sc.hasNextLine()) {
+            	localidade = new CpLocalidade();
+            	lotacao = new DpLotacao();
+            	linha++;
+                String aux = sc.nextLine();
+                String[] parts = aux.split(";");
+                
+                if(parts.length > 3) {
+                	problemas.append("Linha " + linha +": Quantidade de registros da linha inválida" + System.getProperty("line.separator"));
+                }
+                
+                //NOME DA LOTACAO
+                campo = parts[0];
+                problemas.append(validarNomeLotacao(nomes, campo.trim(), orgaoUsuario, linha, lotacao, 100));
+				
+				//SIGLA DA LOTACAO
+				campo = parts[1];
+				problemas.append(validarSiglaLotacao(siglas, campo.trim(), orgaoUsuario, linha, lotacao, 20));
+				
+				//LOCALIDADE DA LOTACAO
+				if(parts.length < 3) {
+                	problemas.append("Linha " + linha +": LOCALIDADE em branco" + System.getProperty("line.separator"));
+                	continue;
+                }
+				campo = parts[2];
+				localidade.setUF(uf);
+				localidade.setNmLocalidade(campo);
+				problemas.append(validarLocalidadeLotacao(localidades, linha, localidade));
+							
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
+					DpLotacao lot = new DpLotacao();
+					lot.setNomeLotacao(parts[0].trim());
+					lot.setSiglaLotacao(parts[1].toUpperCase().trim());
+					
+					for (CpLocalidade lo : localidades) {
+						if(lo.getNmLocalidade().equalsIgnoreCase(localidade.getNmLocalidade())) {
+							lot.setLocalidade(lo);		
+						}
+					}
+					
+					if(lot.getLocalidade() == null || lot.getLocalidade().getIdLocalidade() == null) {
+						lot.setLocalidade(CpDao.getInstance().consultarLocalidadesPorNomeUF(localidade));
+					}
+					
+					lot.setDataInicio(data);
+					lot.setOrgaoUsuario(orgaoUsuario);
+					listaLotacaoGravar.add(lot);
+					
+				}
+            }
+            if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
+	            try {
+	            	for (DpLotacao dpLotacao : listaLotacaoGravar) {
+		            	CpDao.getInstance().iniciarTransacao();
+		    			CpDao.getInstance().gravar(dpLotacao);
+		    			
+	    				if(dpLotacao.getIdLotacaoIni() == null && dpLotacao.getId() != null) {
+	    					dpLotacao.setIdLotacaoIni(dpLotacao.getId());
+	    					dpLotacao.setIdeLotacao(dpLotacao.getId().toString());
+	        				CpDao.getInstance().gravar(dpLotacao);
+	        			}
+					}
+	    			CpDao.getInstance().commitTransacao();			
+	    		} catch (final Exception e) {
+	    			CpDao.getInstance().rollbackTransacao();
+	    			throw new AplicacaoException("Erro na gravação", 0, e);
+	    		}
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("Não foi possível econtrar arquivo: " + e.getMessage());
+        } catch (Exception e) {
+			System.err.println(e.getMessage());
+        } finally {
+            if (sc != null) {
+                sc.close();
+            }
+        }
+		if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
+			return null;
+		}
+    	return new ByteArrayInputStream(problemas.toString().getBytes());
+	}
+	
 	public String validarNomeLotacao(List<String> nomes, String nomeLotacao, CpOrgaoUsuario orgaoUsuario, Integer linha, DpLotacao lotacao, Integer tamanho) {
-		if("".equals(nomeLotacao)) {
+		if(StringUtils.EMPTY.equals(nomeLotacao)) {
 			return "Linha " + linha +": NOME em branco" + System.getProperty("line.separator");
 		} 
 		
 		if(nomeLotacao.length() > tamanho){
 			return "Linha " + linha +": NOME com mais de 100 caracteres" + System.getProperty("line.separator");
 		}
-		lotacao.setOrgaoUsuario(orgaoUsuario);
-		lotacao.setNomeLotacao(Texto.removeAcento(Texto.removerEspacosExtra(nomeLotacao).trim()));
-		lotacao = CpDao.getInstance().consultarPorNomeOrgao(lotacao);
-		if(lotacao != null) {
-			return "Linha " + linha +": NOME já cadastrado" + System.getProperty("line.separator");
+
+		if(nomeLotacao != null && !nomeLotacao.matches("[a-zA-ZàáâãéêíóôõúçÀÁÂÃÉÊÍÓÔÕÚÇ 0-9.,/-]+")) {
+			return "Linha " + linha +": NOME com caracteres não permitidos" + System.getProperty("line.separator");
 		}
-		if(!validarCaracterEspecial(nomeLotacao)) {
-			return "Linha " + linha +": NOME com caracteres especiais" + System.getProperty("line.separator");
-		}
-		if(nomes.contains(nomeLotacao)) {
-			return "Linha " + linha +": NOME repetido em outra linha do arquivo" + System.getProperty("line.separator");
-		} else {
-			nomes.add(nomeLotacao);	
-		}
+		nomes.add(Texto.removeAcento(Texto.removerEspacosExtra(nomeLotacao).trim().toUpperCase()));	
+
 		return "";
 	}
 	
 	public String validarSiglaLotacao(List<String>siglas, String siglaLotacao, CpOrgaoUsuario orgaoUsuario, Integer linha, DpLotacao lotacao, Integer tamanho) {
-		if("".equals(siglaLotacao)) {
+		if(StringUtils.EMPTY.equals(siglaLotacao)) {
 			return "Linha " + linha +": SIGLA em branco" + System.getProperty("line.separator");			
 		} 
 		
@@ -82,20 +183,20 @@ public class Excel {
 		if(lotacao != null) {
 			return "Linha " + linha +": SIGLA já cadastrada" + System.getProperty("line.separator");
 		}
-		if(!validarCaracterEspecial(siglaLotacao) || siglaLotacao.contains(" ")) {
-			return "Linha " + linha +": SIGLA com caracteres especiais" + System.getProperty("line.separator");
+		if(siglaLotacao != null && !siglaLotacao.matches("[a-zA-ZçÇ0-9,/-]+")) {
+			return "Linha " + linha +": SIGLA com caracteres não permitidos" + System.getProperty("line.separator");
 		} 
 		
-		if(siglas.contains(siglaLotacao)) {
+		if(siglas.contains(Texto.removeAcento(Texto.removerEspacosExtra(siglaLotacao).trim().toUpperCase()))) {
 			return "Linha " + linha +": SIGLA repetida em outra linha do arquivo" + System.getProperty("line.separator");
 		} else {
-			siglas.add(siglaLotacao);	
+			siglas.add(Texto.removeAcento(Texto.removerEspacosExtra(siglaLotacao).trim().toUpperCase()));	
 		}
 		return "";
 	}
     
 	public String validarLocalidadeLotacao(List<CpLocalidade> localidades, Integer linha, CpLocalidade loc) {
-		if("".equals(loc.getNmLocalidade())) {
+		if(StringUtils.EMPTY.equals(loc.getNmLocalidade())) {
 			return "Linha " + linha +": LOCALIDADE em branco" + System.getProperty("line.separator");
 		} else if(loc.getNmLocalidade() == null){
 			return "Linha " + linha +": LOCALIDADE com mais de 256 caracteres" + System.getProperty("line.separator");
@@ -132,10 +233,10 @@ public class Excel {
 			Iterator<Row> rowIterator = mySheet.iterator(); 
 			String celula;
 			Integer linha = 0;
-			List<CpLocalidade> localidades = new ArrayList();
-			List<String> nomes = new ArrayList();
-			List<String> siglas = new ArrayList();
-			List<DpLotacao> lista = new ArrayList(); 
+			List<CpLocalidade> localidades = new ArrayList<>();
+			List<String> nomes = new ArrayList<>();
+			List<String> siglas = new ArrayList<>();
+			List<DpLotacao> lista = new ArrayList<>(); 
 			CpLocalidade loc = new CpLocalidade();
 			Date data = new Date(System.currentTimeMillis());
 			
@@ -152,7 +253,7 @@ public class Excel {
 				celula = retornaConteudo(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
 				problemas += validarNomeLotacao(nomes, celula.trim(), orgaoUsuario, linha, lotacao, 100);
 				
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					lot.setNomeLotacao(celula.trim());
 				}
 
@@ -160,7 +261,7 @@ public class Excel {
 				celula = retornaConteudo(row.getCell(1, Row.CREATE_NULL_AS_BLANK));
 				problemas += validarSiglaLotacao(siglas, celula.trim(), orgaoUsuario, linha, lotacao, 20);
 				
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					lot.setSiglaLotacao(celula.toUpperCase().trim());
 				}
 				
@@ -170,7 +271,7 @@ public class Excel {
 				loc.setNmLocalidade(celula);
 				problemas += validarLocalidadeLotacao(localidades, linha, loc);
 				
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					for (CpLocalidade lo : localidades) {
 						if(lo.getNmLocalidade().equalsIgnoreCase(loc.getNmLocalidade())) {
 							lot.setLocalidade(lo);		
@@ -186,7 +287,7 @@ public class Excel {
 					lista.add(lot);
 				}
 			}
-			if(problemas == null || "".equals(problemas.toString())) {
+			if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 				try {
 	            	for (DpLotacao dpLotacao : lista) {
 		            	CpDao.getInstance().iniciarTransacao();
@@ -204,19 +305,19 @@ public class Excel {
 	    			throw new AplicacaoException("Erro na gravação", 0, e);
 	    		}
 			}
+			if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
+	    		return null;
+	    	}
+	    	inputStream = new ByteArrayInputStream(problemas.getBytes("ISO-8859-1"));
 		} catch (Exception ioe) {
             ioe.printStackTrace();
         }
-    	if(problemas == null || "".equals(problemas.toString())) {
-    		return null;
-    	}
-    	inputStream = new ByteArrayInputStream(problemas.getBytes());
     	return inputStream;
     }
     
     public Boolean validarCaracterEspecial(String celula) {
     	Boolean retorno = Boolean.TRUE;
-    	if(!celula.matches("[a-zA-ZáâãéêíóôõúçÁÂÃÉÊÍÓÔÕÚÇ 0-9]+")) {
+    	if(!celula.matches("[a-zA-ZáâãéêíóôõúçÁÂÃÉÊÍÓÔÕÚÇ 0-9.]+")) {
     		retorno = Boolean.FALSE;
     	}
     	return retorno;
@@ -246,26 +347,24 @@ public class Excel {
     	return retorno;
     }
     
-    public InputStream uploadFuncao(File file, CpOrgaoUsuario orgaoUsuario, String extensao) {
+    public InputStream uploadFuncao(InputStream sourceInputStream, CpOrgaoUsuario orgaoUsuario, String extensao) {
 		InputStream retorno = null;
-		retorno = uploadExcelFuncao(file, orgaoUsuario);
+		retorno = uploadExcelFuncao(sourceInputStream, orgaoUsuario);
 
 		return retorno;
 	}
     
-    public InputStream uploadExcelFuncao(File file, CpOrgaoUsuario orgaoUsuario) {
+    public InputStream uploadExcelFuncao(InputStream sourceInputStream, CpOrgaoUsuario orgaoUsuario) {
     	InputStream inputStream = null;
     	StringBuffer problemas = new StringBuffer();
 
-    	try {
-			FileInputStream fis = new FileInputStream(file); 
-			XSSFWorkbook myWorkBook = new XSSFWorkbook (fis); 
+    	try (XSSFWorkbook myWorkBook = new XSSFWorkbook(sourceInputStream)) { 
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0); 
 			Iterator<Row> rowIterator = mySheet.iterator(); 
 			String celula;
 			Integer linha = 0;
-			List<String> nomes = new ArrayList();
-			List<DpFuncaoConfianca> lista = new ArrayList(); 
+			List<String> nomes = new ArrayList<>();
+			List<DpFuncaoConfianca> lista = new ArrayList<>(); 
 			Date data = new Date(System.currentTimeMillis());
 			
 			while (rowIterator.hasNext()) {
@@ -274,24 +373,21 @@ public class Excel {
 				DpFuncaoConfianca func = new DpFuncaoConfianca();
 				Row row = rowIterator.next(); //linha
 				
-				Iterator<Cell> cellIterator = row.cellIterator();
-				Cell cell;
-				
 				//NOME DA FUNCAO				
 				celula = retornaConteudo(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
 				problemas.append(validarNomeFuncao(nomes, celula.trim(), orgaoUsuario, linha, funcao, 100));
 				
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					func.setNomeFuncao(celula.trim());
 				}
 
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					func.setDataInicio(data);
 					func.setOrgaoUsuario(orgaoUsuario);
 					lista.add(func);
 				}
 			}
-			if(problemas == null || "".equals(problemas.toString())) {
+			if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 				try {
 	            	for (DpFuncaoConfianca dpFuncaoConfianca : lista) {
 		            	CpDao.getInstance().iniciarTransacao();
@@ -300,7 +396,7 @@ public class Excel {
 	    				if(dpFuncaoConfianca.getIdFuncaoIni() == null && dpFuncaoConfianca.getId() != null) {
 	    					dpFuncaoConfianca.setIdFuncaoIni(dpFuncaoConfianca.getId());
 	    					dpFuncaoConfianca.setIdeFuncao(dpFuncaoConfianca.getId().toString());
-	        				CpDao.getInstance().gravar(dpFuncaoConfianca);
+	    					CpDao.getInstance().gravar(dpFuncaoConfianca);
 	        			}
 					}
 	    			CpDao.getInstance().commitTransacao();			
@@ -309,19 +405,20 @@ public class Excel {
 	    			throw new AplicacaoException("Erro na gravação", 0, e);
 	    		}
 			}
+			if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
+	    		return null;
+	    	}
+	    	inputStream = new ByteArrayInputStream(problemas.toString().getBytes("ISO-8859-1"));
 		} catch (Exception ioe) {
             ioe.printStackTrace();
         }
-    	if(problemas == null || "".equals(problemas.toString())) {
-    		return null;
-    	}
-    	inputStream = new ByteArrayInputStream(problemas.toString().getBytes());
+    	
     	return inputStream;
     }
     
     public String validarNomeFuncao(List<String> nomes, String nomeFuncao, CpOrgaoUsuario orgaoUsuario, Integer linha, DpFuncaoConfianca funcao, Integer tamanho) {
     	
-		if("".equals(nomeFuncao)) {
+		if(StringUtils.EMPTY.equals(nomeFuncao)) {
 			return "Linha " + linha +": NOME em branco" + System.getProperty("line.separator");
 		} 
 		
@@ -329,42 +426,40 @@ public class Excel {
 			return "Linha " + linha +": NOME com mais de 100 caracteres" + System.getProperty("line.separator");
 		}
 		funcao.setOrgaoUsuario(orgaoUsuario);
-		funcao.setNomeFuncao(Texto.removeAcento(Texto.removerEspacosExtra(nomeFuncao).trim()));
+		funcao.setNomeFuncao(nomeFuncao);
 		funcao = CpDao.getInstance().consultarPorNomeOrgao(funcao);
 		if(funcao != null) {
 			return "Linha " + linha +": NOME já cadastrado" + System.getProperty("line.separator");
 		}
 		if(!validarCaracterEspecial(nomeFuncao)) {
-			return "Linha " + linha +": NOME com caracteres especiais" + System.getProperty("line.separator");
+			return "Linha " + linha +": NOME com caracteres não permitidos" + System.getProperty("line.separator");
 		}
-		if(nomes.contains(nomeFuncao)) {
+		if(nomes.contains(Texto.removeAcento(Texto.removerEspacosExtra(nomeFuncao).trim().toUpperCase()))) {
 			return "Linha " + linha +": NOME repetido em outra linha do arquivo" + System.getProperty("line.separator");
 		} else {
-			nomes.add(nomeFuncao);	
+			nomes.add(Texto.removeAcento(Texto.removerEspacosExtra(nomeFuncao).trim().toUpperCase()));	
 		}
 		return "";
 	}
     
-    public InputStream uploadCargo(File file, CpOrgaoUsuario orgaoUsuario, String extensao) {
+    public InputStream uploadCargo(InputStream sourceInputStream, CpOrgaoUsuario orgaoUsuario, String extensao) {
 		InputStream retorno = null;
-		retorno = uploadExcelCargo(file, orgaoUsuario);
+		retorno = uploadExcelCargo(sourceInputStream, orgaoUsuario);
 
 		return retorno;
 	}
     
-    public InputStream uploadExcelCargo(File file, CpOrgaoUsuario orgaoUsuario) {
+    public InputStream uploadExcelCargo(InputStream sourceInputStream, CpOrgaoUsuario orgaoUsuario) {
     	InputStream inputStream = null;
     	StringBuffer problemas = new StringBuffer();
 
-    	try {
-			FileInputStream fis = new FileInputStream(file); 
-			XSSFWorkbook myWorkBook = new XSSFWorkbook (fis); 
+    	try (XSSFWorkbook myWorkBook = new XSSFWorkbook (sourceInputStream)) { 
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0); 
 			Iterator<Row> rowIterator = mySheet.iterator(); 
 			String celula;
 			Integer linha = 0;
-			List<String> nomes = new ArrayList();
-			List<DpCargo> lista = new ArrayList(); 
+			List<String> nomes = new ArrayList<>();
+			List<DpCargo> lista = new ArrayList<>(); 
 			Date data = new Date(System.currentTimeMillis());
 			
 			while (rowIterator.hasNext()) {
@@ -373,24 +468,21 @@ public class Excel {
 				DpCargo ca = new DpCargo();
 				Row row = rowIterator.next(); //linha
 				
-				Iterator<Cell> cellIterator = row.cellIterator();
-				Cell cell;
-				
 				//NOME DA CARGO				
 				celula = retornaConteudo(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
 				problemas.append(validarNomeCargo(nomes, celula.trim(), orgaoUsuario, linha, cargo, 100));
 				
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					ca.setNomeCargo(celula.trim());
 				}
 
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					ca.setDataInicio(data);
 					ca.setOrgaoUsuario(orgaoUsuario);
 					lista.add(ca);
 				}
 			}
-			if(problemas == null || "".equals(problemas.toString())) {
+			if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 				try {
 	            	for (DpCargo dpCargo : lista) {
 		            	CpDao.getInstance().iniciarTransacao();
@@ -408,19 +500,20 @@ public class Excel {
 	    			throw new AplicacaoException("Erro na gravação", 0, e);
 	    		}
 			}
+			if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
+	    		return null;
+	    	}
+	    	inputStream = new ByteArrayInputStream(problemas.toString().getBytes("ISO-8859-1"));
 		} catch (Exception ioe) {
             ioe.printStackTrace();
         }
-    	if(problemas == null || "".equals(problemas.toString())) {
-    		return null;
-    	}
-    	inputStream = new ByteArrayInputStream(problemas.toString().getBytes());
+    	
     	return inputStream;
     }
     
     public String validarNomeCargo(List<String> nomes, String nomeCargo, CpOrgaoUsuario orgaoUsuario, Integer linha, DpCargo cargo, Integer tamanho) {
     	
-		if("".equals(nomeCargo)) {
+		if(StringUtils.EMPTY.equals(nomeCargo)) {
 			return "Linha " + linha +": NOME em branco" + System.getProperty("line.separator");
 		} 
 		
@@ -428,30 +521,30 @@ public class Excel {
 			return "Linha " + linha +": NOME com mais de 100 caracteres" + System.getProperty("line.separator");
 		}
 		cargo.setOrgaoUsuario(orgaoUsuario);
-		cargo.setNomeCargo(Texto.removeAcento(Texto.removerEspacosExtra(nomeCargo).trim()));
+		cargo.setNomeCargo(nomeCargo);
 		cargo = CpDao.getInstance().consultarPorNomeOrgao(cargo);
 		if(cargo != null) {
 			return "Linha " + linha +": NOME já cadastrado" + System.getProperty("line.separator");
 		}
 		if(!validarCaracterEspecial(nomeCargo)) {
-			return "Linha " + linha +": NOME com caracteres especiais" + System.getProperty("line.separator");
+			return "Linha " + linha +": NOME com caracteres não permitidos" + System.getProperty("line.separator");
 		}
-		if(nomes.contains(nomeCargo)) {
+		if(nomes.contains(Texto.removeAcento(Texto.removerEspacosExtra(nomeCargo).trim()).toUpperCase())) {
 			return "Linha " + linha +": NOME repetido em outra linha do arquivo" + System.getProperty("line.separator");
 		} else {
-			nomes.add(nomeCargo);	
+			nomes.add(Texto.removeAcento(Texto.removerEspacosExtra(nomeCargo).trim().toUpperCase()));	
 		}
 		return "";
 	}
     
-    public InputStream uploadPessoa(File file, CpOrgaoUsuario orgaoUsuario, String extensao) {
+    public InputStream uploadPessoa(File file, CpOrgaoUsuario orgaoUsuario, String extensao, CpIdentidade identidade) {
 		InputStream retorno = null;
-		retorno = uploadExcelPessoa(file, orgaoUsuario);
+		retorno = uploadExcelPessoa(file, orgaoUsuario, identidade);
 
 		return retorno;
 	}
     
-    public InputStream uploadExcelPessoa(File file, CpOrgaoUsuario orgaoUsuario) {
+    public InputStream uploadExcelPessoa(File file, CpOrgaoUsuario orgaoUsuario, CpIdentidade identidade) {
     	InputStream inputStream = null;
     	StringBuffer problemas = new StringBuffer();
 
@@ -463,8 +556,8 @@ public class Excel {
 			Iterator<Row> rowIterator = mySheet.iterator(); 
 			String celula;
 			Integer linha = 0;
-//			List<String> nomes = new ArrayList();
-			List<DpPessoa> lista = new ArrayList(); 
+//			List<String> nomes = new ArrayList<>();
+			List<DpPessoa> lista = new ArrayList<>(); 
 			Date data = new Date(System.currentTimeMillis());
 			DpCargo cargo = new DpCargo();
 			List<DpCargo> listaCargo = new ArrayList<DpCargo>();
@@ -476,9 +569,10 @@ public class Excel {
 			String dataString;
 			SimpleDateFormat formato = new SimpleDateFormat("ddMMyyyy");
 			Date date = null;
-			List<String> listaEmail = new ArrayList<String>();
-			List<String> listaCPF = new ArrayList<String>();
 			
+			DpPessoaDaoFiltro dpPessoaFiltro = new DpPessoaDaoFiltro();
+			Integer tamanho = 0;
+						
 			while (rowIterator.hasNext()) {
 				linha++;
 				DpPessoa pessoa = new DpPessoa();
@@ -494,7 +588,7 @@ public class Excel {
 				
 				//SIGLA DO ORGAO				
 				celula = retornaConteudo(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
-				if("".equals(celula.trim())) {
+				if(StringUtils.EMPTY.equals(celula.trim())) {
 					problemas.append("Linha " + linha +": ÓRGÃO em branco" + System.getProperty("line.separator"));
 				} else {
 					if(!celula.equalsIgnoreCase(orgaoUsuario.getSiglaOrgaoUsu())) {
@@ -504,7 +598,7 @@ public class Excel {
 
 				//NOME DO CARGO
 				celula = retornaConteudo(row.getCell(1, Row.CREATE_NULL_AS_BLANK));
-				if(!"".equals(celula.trim())) {
+				if(!StringUtils.EMPTY.equals(celula.trim())) {
 					cargo.setOrgaoUsuario(orgaoUsuario);
 					cargo.setNomeCargo(Texto.removeAcento(Texto.removerEspacosExtra(celula).trim()));
 					
@@ -514,6 +608,7 @@ public class Excel {
 						}
 					}
 					if(cargo.getDataInicio() == null) {
+						cargo.setNomeCargo(celula.trim());
 						cargo = CpDao.getInstance().consultarPorNomeOrgao(cargo);	
 					}
 										
@@ -531,7 +626,7 @@ public class Excel {
 				
 				//NOME FUNCAO DE CONFIANCA
 				celula = retornaConteudo(row.getCell(2, Row.CREATE_NULL_AS_BLANK));
-				if(!"".equals(celula.trim())) {
+				if(!StringUtils.EMPTY.equals(celula.trim())) {
 					funcao.setOrgaoUsuario(orgaoUsuario);
 					funcao.setNomeFuncao(Texto.removeAcento(Texto.removerEspacosExtra(celula).trim()));
 					
@@ -542,6 +637,7 @@ public class Excel {
 					}
 					
 					if(funcao.getDataInicio() == null) {
+						funcao.setNomeFuncao(celula.trim());
 						funcao = CpDao.getInstance().consultarPorNomeOrgao(funcao);	
 					}
 					
@@ -555,23 +651,24 @@ public class Excel {
 						problemas.append("Linha " + linha +": FUNÇÃO DE CONFIANÇA inativa" + System.getProperty("line.separator"));
 					}
 				} else {
-					problemas.append("Linha " + linha +": FUNÇÃO DE CONFIANÇA em branco" + System.getProperty("line.separator"));
+					funcao = null;
 				}
 				
 				//NOME DA LOTACAO
 				celula = retornaConteudo(row.getCell(3, Row.CREATE_NULL_AS_BLANK));
-				if(!"".equals(celula.trim())) {
+				if(!StringUtils.EMPTY.equals(celula.trim())) {
 					lotacao.setOrgaoUsuario(orgaoUsuario);
-					lotacao.setNomeLotacao(Texto.removeAcento(Texto.removerEspacosExtra(celula).trim()));
+					lotacao.setSiglaLotacao(Texto.removeAcento(Texto.removerEspacosExtra(celula).trim()));
 										
 					for(DpLotacao l : listaLotacao) {
-						if(l.getNomeLotacaoAI().equalsIgnoreCase(lotacao.getNomeLotacao())) {
+						if(l.getSiglaLotacao().equalsIgnoreCase(lotacao.getSiglaLotacao())) {
 							lotacao = l;
 						}
 					}
 					
 					if(lotacao.getDataInicio() == null) {
-						lotacao = CpDao.getInstance().consultarPorNomeOrgao(lotacao);	
+						lotacao.setSiglaLotacao(celula.trim());
+						lotacao = CpDao.getInstance().consultarPorSigla(lotacao);	
 					}					
 					
 					if(lotacao == null) {
@@ -591,12 +688,12 @@ public class Excel {
 				celula = retornaConteudo(row.getCell(4, Row.CREATE_NULL_AS_BLANK));
 				problemas.append(validarNomePessoa(celula.trim(), linha, 60));
 				
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					pe.setNomePessoa(celula.trim());
 				}
 				
 				//DATA DE NASCIMENTO
-				if(retornaConteudo(row.getCell(5, Row.CREATE_NULL_AS_BLANK)) != "") {
+				if(isNotBlank(retornaConteudo(row.getCell(5, Row.CREATE_NULL_AS_BLANK)))) {
 					if(row.getCell(5).getCellType() == HSSFCell.CELL_TYPE_NUMERIC && HSSFDateUtil.isCellDateFormatted(row.getCell(5, Row.CREATE_NULL_AS_BLANK))){
 						date = row.getCell(5).getDateCellValue();
 						
@@ -618,7 +715,7 @@ public class Excel {
 						problemas.append(validarData(row.getCell(5, Row.CREATE_NULL_AS_BLANK).getStringCellValue(), linha));
 						if(problemas != null && problemas.toString().equals("")) {
 							dataString = row.getCell(5, Row.CREATE_NULL_AS_BLANK).getStringCellValue();
-							date = formato.parse(dataString);	
+							date = formato.parse(dataString.replace("-", "").replace("/", "").trim());	
 							
 							if(date.compareTo(new Date()) > 0) {
 				    			problemas.append( "Linha " + linha + ": DATA DE NASCIMENTO inválida" + System.getProperty("line.separator"));
@@ -632,22 +729,11 @@ public class Excel {
 				//CPF
 				celula = retornaConteudo(row.getCell(6, Row.CREATE_NULL_AS_BLANK));
 				cpf = celula.replaceAll("[^0-9]", "");
-				if(!"".equals(cpf.trim())) {
-					
-					pessoa = CpDao.getInstance().consultarPorCpf(Long.valueOf(cpf));
-					
-					if(pessoa != null) {
-						problemas.append("Linha " + linha +": CPF já cadastrado" + System.getProperty("line.separator"));
-					}
-					
+				cpf = StringUtils.leftPad(cpf, 11, "0");
+				if(!StringUtils.EMPTY.equals(cpf.trim())) {
 					if(!validarCPF(cpf)) {
 						problemas.append("Linha " + linha +": CPF inválido" + System.getProperty("line.separator"));
 					}
-					
-					if(listaCPF.contains(cpf)) {
-						problemas.append("Linha " + linha +": CPF repetido em outra linha do arquivo" + System.getProperty("line.separator"));
-					}
-					listaCPF.add(cpf);
 				} else {
 					problemas.append("Linha " + linha +": CPF em branco" + System.getProperty("line.separator"));
 				}
@@ -655,13 +741,7 @@ public class Excel {
 				//EMAIL
 				celula = retornaConteudo(row.getCell(7, Row.CREATE_NULL_AS_BLANK)).trim();
 				
-				if(!"".equals(celula.trim())) {
-					
-					pessoa = CpDao.getInstance().consultarPorEmail(celula);
-					
-					if(pessoa != null) {
-						problemas.append("Linha " + linha +": E-MAIL já cadastrado" + System.getProperty("line.separator"));
-					}
+				if(!StringUtils.EMPTY.equals(celula.trim())) {
 					
 					if(celula.length() > 60) {
 						problemas.append("Linha " + linha +": E-MAIL com mais de 60 caracteres" + System.getProperty("line.separator"));
@@ -672,16 +752,36 @@ public class Excel {
 					} else if(!celula.matches("[a-zA-Z0-9._-][a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}")) {
 						problemas.append("Linha " + linha +": E-MAIL inválidos ou com caracteres inválidos" + System.getProperty("line.separator"));
 					}
-					
-					if(listaEmail.contains(celula)) {
-						problemas.append("Linha " + linha +": E-MAIL repetido em outra linha do arquivo" + System.getProperty("line.separator"));
-					}
-					listaEmail.add(celula);
 				} else {
 					problemas.append("Linha " + linha +": E-MAIL em branco" + System.getProperty("line.separator"));
 				}
 				
-				if(problemas == null || "".equals(problemas.toString())) {
+				if(cargo != null && lotacao != null && cpf != null && !StringUtils.EMPTY.equals(cpf) && !Long.valueOf(0).equals(Long.valueOf(cpf))) {
+					dpPessoaFiltro = new DpPessoaDaoFiltro();
+					dpPessoaFiltro.setIdOrgaoUsu(orgaoUsuario.getId());
+					dpPessoaFiltro.setCargo(cargo);
+					dpPessoaFiltro.setFuncaoConfianca(funcao);
+					dpPessoaFiltro.setLotacao(lotacao);
+					dpPessoaFiltro.setCpf(Long.valueOf(cpf));
+					dpPessoaFiltro.setNome("");
+					
+					dpPessoaFiltro.setBuscarFechadas(Boolean.FALSE);
+					tamanho = CpDao.getInstance().consultarQuantidade(dpPessoaFiltro);
+					
+					if(tamanho > 0) {
+						problemas.append("Linha " + linha +": Usuário já cadastrado com estes dados: Órgão, Cargo, Função, Unidade e CPF" + System.getProperty("line.separator"));
+					}
+				}
+				if(!lista.isEmpty()) {
+					for (DpPessoa p : lista) { //repetido em outra linha do arquivo
+						if(p.getCpfPessoa().equals(Long.valueOf(cpf)) && p.getCargo().equals(cargo) && p.getLotacao().equals(lotacao) &&
+								((p.getFuncaoConfianca() == null && funcao == null) || (p.getFuncaoConfianca() != null && p.getFuncaoConfianca().equals(funcao)))) {
+							problemas.append("Linha " + linha +": Usuário repetido em outra linha do arquivo com estes dados: Órgão, Cargo, Função, Unidade e CPF" + System.getProperty("line.separator"));
+						}
+					}
+				}
+				
+				if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 					pe.setEmailPessoa(celula);
 					pe.setDataNascimento(date);
 					pe.setCpfPessoa(Long.valueOf(cpf));
@@ -693,12 +793,16 @@ public class Excel {
 					pe.setDataInicio(data);
 					pe.setSesbPessoa(orgaoUsuario.getSigla());
 					pe.setMatricula(Long.valueOf(0));
+					pe.setSituacaoFuncionalPessoa(SituacaoFuncionalEnum.APENAS_ATIVOS.getValor()[0]);
 					lista.add(pe);
 				}
 			}
-			if(problemas == null || "".equals(problemas.toString())) {
+			if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
 				try {
 					CpDao.getInstance().iniciarTransacao();
+					CpIdentidade usu = null;
+					CpIdentidade usuarioExiste = null;
+					List<CpIdentidade> lista1 = new ArrayList<CpIdentidade>();
 	            	for (DpPessoa dpPessoa : lista) {
 		    			CpDao.getInstance().gravar(dpPessoa);
 
@@ -707,6 +811,28 @@ public class Excel {
 	    					dpPessoa.setIdePessoa(dpPessoa.getId().toString());
 	    					dpPessoa.setMatricula(10000 + dpPessoa.getId());	
 	        				CpDao.getInstance().gravar(dpPessoa);
+	        				
+	        				lista1.clear();
+	        				lista1 = CpDao.getInstance().consultaIdentidadesPorCpf(dpPessoa.getCpfPessoa().toString());
+	        				
+	        				if(lista1.size() > 0) {
+	        					usuarioExiste = lista1.get(0);
+	        					usu = new CpIdentidade();
+	        					usu.setCpTipoIdentidade(CpDao.getInstance().consultar(1,
+	        										CpTipoIdentidade.class, false));
+	        					usu.setDscSenhaIdentidade(usuarioExiste.getDscSenhaIdentidade());
+	        					usu.setDtCriacaoIdentidade(CpDao.getInstance()
+	        							.consultarDataEHoraDoServidor());
+	        					usu.setCpOrgaoUsuario(dpPessoa.getOrgaoUsuario());
+	        					usu.setHisDtIni(usu.getDtCriacaoIdentidade());
+	        					usu.setHisAtivo(true);
+	        					
+		        				if(usu != null) {
+		        					usu.setNmLoginIdentidade(dpPessoa.getSesbPessoa() + dpPessoa.getMatricula());
+		        					usu.setDpPessoa(dpPessoa);
+		        					CpDao.getInstance().gravarComHistorico(usu, identidade);
+		        				}
+	        				}
 	        			}
 					}
 	    			CpDao.getInstance().commitTransacao();			
@@ -718,7 +844,7 @@ public class Excel {
 		} catch (Exception ioe) {
             ioe.printStackTrace();
         }
-    	if(problemas == null || "".equals(problemas.toString())) {
+    	if(problemas == null || StringUtils.EMPTY.equals(problemas.toString())) {
     		return null;
     	}
     	inputStream = new ByteArrayInputStream(problemas.toString().getBytes());
@@ -752,7 +878,7 @@ public class Excel {
     
     public String validarNomePessoa(String nomePessoa, Integer linha, Integer tamanho) {
     	
-		if("".equals(nomePessoa)) {
+		if(StringUtils.EMPTY.equals(nomePessoa)) {
 			return "Linha " + linha +": NOME em branco" + System.getProperty("line.separator");
 		} 
 		
@@ -760,8 +886,8 @@ public class Excel {
 			return "Linha " + linha +": NOME com mais de 60 caracteres" + System.getProperty("line.separator");
 		}
 
-		if(!validarCaracter(nomePessoa)) {
-			return "Linha " + linha +": NOME com número ou caracteres especiais" + System.getProperty("line.separator");
+		if(nomePessoa != null && !nomePessoa.matches("[a-zA-ZáâãéêíóôõúçÁÂÃÉÊÍÓÔÕÚÇ'' ]+")) {
+			return "Linha " + linha +": NOME caracteres não permitidos" + System.getProperty("line.separator");
 		}
 		return "";
 	}    

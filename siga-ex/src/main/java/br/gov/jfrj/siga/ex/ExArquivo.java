@@ -18,21 +18,52 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.ex;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 
 import br.gov.jfrj.itextpdf.Documento;
+import br.gov.jfrj.siga.armazenamento.zip.ZipItem;
+import br.gov.jfrj.siga.armazenamento.zip.ZipServico;
+import br.gov.jfrj.siga.dp.CpOrgaoUsuario;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.model.Objeto;
+
 @MappedSuperclass
 public abstract class ExArquivo extends Objeto {
+
+	private static final long serialVersionUID = -7483037836759972415L;
+
+	public static final String YEAR_PATTERN = "yyyy";
+	public static final String ZIP_MIME_TYPE = "application/zip";
+	public static final String EXTENSAO_ZIP = ".zip";
+
+	protected static final String ERRO_CAMINHO_ARQUIVO = "Erro ao montar caminho para o arquivo \"%s\" de ID=%d: campo \"%s\" não pôde ser convertido em caminho";
+
 	@Column(name = "NUM_PAGINAS")
 	private Integer numPaginas;
+
+	@Transient
+	protected Map<ZipItem, byte[]> cacheConteudo;
+
+	public abstract void setMimeType(String mimeType);
 
 	public abstract String getAssinantesCompleto();
 
@@ -106,24 +137,17 @@ public abstract class ExArquivo extends Objeto {
 	
 	public abstract Date getData();
 
+	public abstract void setData(Date data);
+
 	public abstract String getHtml();
 
 	public abstract String getHtmlComReferencias() throws Exception;
 
-	public Long getIdDoc() {
-		if (this instanceof ExDocumento) {
-			ExDocumento doc = (ExDocumento) this;
-			return doc.getIdDoc();
-		}
-		;
+	public abstract Long getId();
 
-		if (this instanceof ExMovimentacao) {
-			ExMovimentacao mov = (ExMovimentacao) this;
-			return mov.getIdMov();
-		}
+	public abstract String getMimeType();
 
-		return null;
-	}
+	public abstract DpLotacao getLotaTitular();
 
 	public abstract DpLotacao getLotacao();
 
@@ -138,8 +162,8 @@ public abstract class ExArquivo extends Objeto {
 		if (isAssinadoDigitalmente()) {
 			sMensagem += getAssinantesCompleto();
 			sMensagem += "Documento Nº: " + getSiglaAssinatura()
-					+ " - consulta à autenticidade em "
-					+ SigaExProperties.getEnderecoAutenticidadeDocs();
+					+ " - consulta à autenticidade em \n"
+					+ SigaExProperties.getEnderecoAutenticidadeDocs() + "?n="+getSiglaAssinatura();
 		}
 		return sMensagem;
 	}
@@ -272,7 +296,7 @@ public abstract class ExArquivo extends Objeto {
 	 * 
 	 */
 	public String getReferenciaZIP() {
-		return getReferencia() + ".zip";
+		return getReferencia() + EXTENSAO_ZIP;
 	};
 
 	public Map<String, String> getResumo() {
@@ -310,5 +334,132 @@ public abstract class ExArquivo extends Objeto {
 	public abstract boolean isCodigoParaAssinaturaExterna(String num);
 	
 	public abstract String getTipoDescr();
+
+	@PostPersist
+	private void postPersist() {
+		this.efetuarDespejoArquivosZip();
+	}
+
+	@PostUpdate
+	private void postUpdate() {
+		this.efetuarDespejoArquivosZip();
+	}
+
+	@PostRemove
+	private void postRemove() {
+		this.removerArquivosZip();
+	}
+
+	public abstract Path getPathConteudo(Path base);
+
+	protected Path getPathConteudo(AbstractExDocumento documento, String tipoNome, Path base) {
+
+		String acronimoOrgao = ofNullable(this.getLotaTitular())
+				.map(DpLotacao::getOrgaoUsuario)
+				.map(CpOrgaoUsuario::getAcronimoOrgaoUsu)
+				.map(StringUtils::stripToNull)
+				.orElseThrow(() -> new IllegalArgumentException(String.format(ERRO_CAMINHO_ARQUIVO, tipoNome, this.getId(), "ÓRGAO")));
+
+		String siglaForma = ofNullable(documento)
+				.map(AbstractExDocumento::getExFormaDocumento)
+				.map(ExFormaDocumento::getSiglaFormaDoc)
+				.orElseThrow(() -> new IllegalArgumentException(String.format(ERRO_CAMINHO_ARQUIVO, tipoNome, this.getId(), "FORMA DOCUMENTO")));
+
+		String ano = ofNullable(this.getData())
+				.map(dataHora -> DateFormatUtils.format(dataHora, YEAR_PATTERN))
+				.orElseThrow(() -> new IllegalArgumentException(String.format(ERRO_CAMINHO_ARQUIVO, tipoNome, this.getId(), "DATA/HORA")));
+
+		Long id = ofNullable(this.getId())
+				.orElseThrow(() -> new IllegalArgumentException(String.format(ERRO_CAMINHO_ARQUIVO, tipoNome, this.getId(), "ID")));
+
+		return base.resolve(tipoNome)
+				.resolve(acronimoOrgao)
+				.resolve(siglaForma)
+				.resolve(ano)
+				.resolve(id + EXTENSAO_ZIP);
+	}
+
+	protected void efetuarDespejoArquivosZip() {
+		if (this.cacheConteudo != null && !this.cacheConteudo.isEmpty()) {
+			for (Entry<ZipItem, byte[]> entry : this.cacheConteudo.entrySet()) {
+				ZipServico.gravarItem(this, entry.getValue(), entry.getKey());
+			}
+		}
+	}
+
+	protected void removerArquivosZip() {
+		ZipServico.apagar(this);
+	}
+
+	private Map<ZipItem, byte[]> atualizarCache(byte[] zip) {
+		Map<ZipItem, byte[]> cache = new LinkedHashMap<>();
+		List<ZipItem> itens = ZipServico.listarItens(zip);
+		for (ZipItem item : itens) {
+			byte[] itemBytes = ZipServico.lerItem(zip, item);
+			if (itemBytes != null) {
+				cache.put(item, itemBytes);
+			}
+		}
+
+		// Liberando cache antiga
+		if (this.cacheConteudo != null) {
+			this.cacheConteudo.clear();
+		}
+		this.cacheConteudo = cache;
+		return this.cacheConteudo;
+	}
+
+	private void inicializarCacheSeNecessario() {
+		if (this.cacheConteudo == null) {
+			this.cacheConteudo = new LinkedHashMap<>();
+		}
+	}
+
+	public byte[] getConteudoBlobInicializarOuAtualizarCache() {
+		this.inicializarCacheSeNecessario();
+		if (this.getId() == null) {
+			return null;
+		}
+
+		byte[] zip = ZipServico.ler(this);
+		if (zip == null) {
+			return null;
+		}
+
+		this.atualizarCache(zip);
+		return zip;
+	}
+
+	public byte[] getConteudoBlob(final ZipItem zipItem) {
+		if (this.cacheConteudo == null) {
+			this.getConteudoBlobInicializarOuAtualizarCache();
+		}
+		// Retornando item a partir da cache
+		return this.cacheConteudo.get(zipItem);
+	}
+
+	public void setConteudoBlob(final ZipItem zipItem, final byte[] conteudo) {
+		if (zipItem != null && conteudo != null) {
+			this.setMimeType(ZIP_MIME_TYPE);
+			if (this.cacheConteudo == null) {
+				this.getConteudoBlobInicializarOuAtualizarCache();
+			}
+			this.cacheConteudo.put(zipItem, conteudo);
+		}
+	}
+
+	public void clonarConteudo(ExArquivo origem) {
+		origem.getConteudoBlobInicializarOuAtualizarCache();
+		this.inicializarCacheSeNecessario();
+		this.cacheConteudo.putAll(origem.getCacheConteudo());
+	}
+
+	protected Map<ZipItem, byte[]> getCacheConteudo() {
+		return cacheConteudo;
+	}
+
+	protected void setCacheConteudo(Map<ZipItem, byte[]> cacheConteudo) {
+		this.cacheConteudo = cacheConteudo;
+	}
 
 }

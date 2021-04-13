@@ -18,20 +18,20 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.vraptor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Result;
 import br.gov.jfrj.siga.base.AplicacaoException;
+import br.gov.jfrj.siga.base.SigaMessages;
 import br.gov.jfrj.siga.dp.CpMarcador;
 import br.gov.jfrj.siga.dp.dao.CpDao;
 import br.gov.jfrj.siga.ex.ExTipoDocumento;
-import br.gov.jfrj.siga.ex.SigaExProperties;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.Selecionavel;
 import br.gov.jfrj.siga.model.dao.DaoFiltroSelecionavel;
@@ -39,8 +39,8 @@ import br.gov.jfrj.siga.model.dao.DaoFiltroSelecionavel;
 public abstract class ExSelecionavelController<T extends Selecionavel, DaoFiltroT extends DaoFiltroSelecionavel> extends
 		SigaSelecionavelControllerSupport<T, DaoFiltroT> {
 
-	public ExSelecionavelController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em) {
-		super(request, result, dao, so, em);
+	public ExSelecionavelController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+		super(request, response, result, dao, so, em);
 	}
 
 	protected ExDao dao() {
@@ -95,7 +95,7 @@ public abstract class ExSelecionavelController<T extends Selecionavel, DaoFiltro
 
 	protected Map<Integer, String> getListaTipoResp() {
 		final Map<Integer, String> map = new TreeMap<Integer, String>();
-		map.put(1, "Matrícula");
+		map.put(1, SigaMessages.getBundle().getString("usuario.matricula"));
 		map.put(2, "Órgão Integrado");
 		return map;
 	}
@@ -107,4 +107,5 @@ public abstract class ExSelecionavelController<T extends Selecionavel, DaoFiltro
 	protected void assertAcesso(final String pathServico) {
 		super.assertAcesso("DOC:Módulo de Documentos;" + pathServico);
 	}
+
 }

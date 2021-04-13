@@ -28,12 +28,6 @@ import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import br.gov.jfrj.siga.cp.util.Blob;
-import br.gov.jfrj.siga.dp.dao.CpDao;
-import br.gov.jfrj.siga.dp.dao.CpDaoUtil;
 import br.gov.jfrj.siga.model.Assemelhavel;
 import br.gov.jfrj.siga.sinc.lib.SincronizavelSuporte;
 
@@ -85,19 +79,19 @@ public class CpModelo extends AbstractCpModelo {
 	// **
 	public void setConteudoBlobString(String conteudo)
 			throws UnsupportedEncodingException {
-		if (conteudo != null && conteudo.trim().length() == 0)
+		if (conteudo != null && conteudo.trim().length() == 0) {
 			conteudo = null;
-		setConteudoBlobMod(conteudo != null ? CpDaoUtil.createBlob(conteudo)
-				: null);
+		}
+		setConteudoBlobMod(conteudo != null ? conteudo.getBytes() : null);
 		cacheConteudo = conteudo;
 	}
 
 	@PostLoad
 	private void updateCache() throws UnsupportedEncodingException {
-		if (getConteudoBlobMod() == null)
+		if (getConteudoBlobMod() == null) {
 			return;
-		cacheConteudo = new String(Blob.toByteArray(getConteudoBlobMod()),
-				"ISO-8859-1");
+		}
+		cacheConteudo = new String(getConteudoBlobMod(), "ISO-8859-1");
 	}
 
 	//
@@ -105,16 +99,16 @@ public class CpModelo extends AbstractCpModelo {
 	// de HistoricoSuporte.
 	//
 	@Column(name = "HIS_ATIVO")
-	private Integer hisAtivo;
+	private boolean hisAtivo;
 
 	@Override
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.hisAtivo = super.getHisAtivo();
 		return this.hisAtivo;
 	}
 
 	@Override
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		super.setHisAtivo(hisAtivo);
 		this.hisAtivo = getHisAtivo();
 	}

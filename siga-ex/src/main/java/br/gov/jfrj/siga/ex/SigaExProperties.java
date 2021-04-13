@@ -32,11 +32,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.jboss.logging.Logger;
+
 import br.gov.jfrj.siga.base.AplicacaoException;
-import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.prop.ext.ModeloPropriedade;
 
 public class SigaExProperties extends ModeloPropriedade {
+
+	private static final Logger log = Logger.getLogger(SigaExProperties.class);
+
 	/*
 	 * 
 	 *  Antes a classe se chamava Mensagens (foi renomeada - refactor)
@@ -62,10 +66,21 @@ public class SigaExProperties extends ModeloPropriedade {
 	}
 	
 	private static SigaExProperties instance = new SigaExProperties();
-	
+
+	private static String getStringAmbientePadrao(final String key) throws Exception {
+		String ambienteIncompleto = instance.obterPropriedade("ambiente");
+		String keyPadrao = key.replace(ambienteIncompleto + ".", ModeloPropriedade.AMBIENTE_PADRAO + ".");
+		return instance.obterPropriedade(keyPadrao);
+	}
+
 	public static String getString(final String key) {
 		try {
-			return instance.obterPropriedade(key);
+			String value = instance.obterPropriedade(key);
+			if (value == null) {
+				value = getStringAmbientePadrao(key);
+			}
+			log.debugf("Propriedade %s = %s", key, value);
+			return value;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "";
@@ -73,11 +88,11 @@ public class SigaExProperties extends ModeloPropriedade {
 	}
 	
 	public static String getAmbiente() {
-		return System.getProperty("ambiente");
+		return getString("ambiente");
 	}
 	
 	public static String getStringComAmbiente(String key){
-		String ambiente = System.getProperty("ambiente");
+		String ambiente = getAmbiente();
 		if (ambiente != null && ambiente.length() > 0)
 			return getString(ambiente+"."+key).trim();
 		return "";

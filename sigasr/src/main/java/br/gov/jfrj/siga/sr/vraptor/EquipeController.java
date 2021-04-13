@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -33,8 +34,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("app/equipe")
 public class EquipeController extends SrController {
 
-	public EquipeController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, SrDao.getInstance(), so, em, srValidator);
+	public EquipeController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, SrDao.getInstance(), so, em, srValidator);
 
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();

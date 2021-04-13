@@ -1,4 +1,6 @@
 package br.gov.jfrj.siga.pp.vraptor;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,6 +13,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -29,8 +32,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("/app/agendamento")
 public class AgendamentoController extends PpController {
 
-    public AgendamentoController (HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em) {
-        super(request, result, PpDao.getInstance(), so, em);
+    public AgendamentoController (HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+        super(request, response, result, PpDao.getInstance(), so, em);
     }
 
     @Path("/hoje")
@@ -50,7 +53,7 @@ public class AgendamentoController extends PpController {
 					criterioSalas = criterioSalas + ",";
 				}
 			}
-			System.out.println(selFiltraSala);
+			// System.out.println(selFiltraSala);
 			if(selFiltraSala!=null && (!selFiltraSala.equals("")) ){
 				criterioSalas = "'"+selFiltraSala+"'";
 			}
@@ -128,7 +131,7 @@ public class AgendamentoController extends PpController {
     }
     
     @Path("/amanha")
-    public void amanha(){
+    public void amanha(String selFiltraSala){
     	String matriculaSessao = getCadastrante().getMatricula().toString();
 		String sesb_pessoaSessao = getCadastrante().getSesbPessoa().toString();
 		UsuarioForum objUsuario = UsuarioForum.findByMatricula(matriculaSessao, sesb_pessoaSessao);
@@ -148,6 +151,9 @@ public class AgendamentoController extends PpController {
             if (criterioSalas.equals("")) {
                 criterioSalas = "''";
             }
+            if(selFiltraSala!=null && (!selFiltraSala.equals("")) ){
+				criterioSalas = "'"+selFiltraSala+"'";
+			}
 			SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 			// pega a data de hoje
 			Date hoje = new Date();
@@ -198,6 +204,7 @@ public class AgendamentoController extends PpController {
             }
 			result.include("dataAmanha", dtt);
 			result.include("diaSemana", dia_sem);
+			result.include("listLocais", listaDeSalas);
 			} else {
 			redirecionaPaginaErro("Usu&aacute;rio sem permiss&atilde;o." , null);
 		}
@@ -239,36 +246,33 @@ public class AgendamentoController extends PpController {
     
     @Path("/print")
     public void print(String frm_data_ag, String frm_sala_ag, String frm_processo_ag, String frm_periciado ){
-		if(frm_periciado == "" || frm_periciado == null){
+		if(isBlank(frm_periciado)){
 		    redirecionaPaginaErro("Relat&oacute;rio depende de nome de periciado preenchido para ser impresso." , null);
 		    return;
-		}else if(frm_processo_ag  == "" || frm_processo_ag == null){
+		}
+		if(isBlank(frm_processo_ag)){
 		    redirecionaPaginaErro("Relat&oacute;rio depende de n&uacute;mero de processo preenchido para ser impresso." , null);
 		    return;
-		}else{
-		    List listAgendamentos = (List) Agendamentos.AR.find(
-		            "data_ag=to_date('"+frm_data_ag.substring(0,10)+"','yy-mm-dd') and localFk.cod_local='"+frm_sala_ag+"' and processo='"+frm_processo_ag+"' and periciado='"+frm_periciado+"'" ).fetch();
-			List<Peritos> listPeritos = new ArrayList<Peritos>();
-			listPeritos = Peritos.AR.findAll();
-			result.include("frm_processo_ag", frm_processo_ag);
-            result.include("listAgendamentos", listAgendamentos);
-            result.include("listPeritos", listPeritos);
 		}
+	    List<Agendamentos> listAgendamentos = Agendamentos.AR.find("data_ag=to_date('"+frm_data_ag.substring(0,10)+"','yy-mm-dd') and localFk.cod_local='"+frm_sala_ag+"' and processo='"+frm_processo_ag+"' and periciado='"+frm_periciado+"'" ).fetch();
+		List<Peritos> listPeritos = Peritos.AR.findAll();
+		result.include("frm_processo_ag", frm_processo_ag);
+        result.include("listAgendamentos", listAgendamentos);
+        result.include("listPeritos", listPeritos);
     }
 
     @Path("/salaLista")
     public void salaLista(String frm_cod_local, String frm_data_ag){
 		String local = "";
 		String lotacaoSessao = getCadastrante().getLotacao().getSiglaCompleta();
-		List<Locais> listSalas = new ArrayList();
 		// pega usuario do sistema
 		String matriculaSessao = getCadastrante().getMatricula().toString();
 		String sesb_pessoaSessao = getCadastrante().getSesbPessoa().toString();
 		UsuarioForum objUsuario = UsuarioForum.findByMatricula(matriculaSessao, sesb_pessoaSessao);
 		if (objUsuario != null) {
 			// Pega o usuario do sistema, e, filtra os locais(salas) daquele forum onde ele esta.
-			listSalas = ((List) Locais.AR.find("forumFk='" + objUsuario.getForumFk().getCod_forum() + "' order by ordem_apresentacao ").fetch()); // isso nÃ£o dÃ¡ erro no caso de retorno vazio.
-			List<Agendamentos> listAgendamentosMeusSala = new ArrayList();
+			List<Locais> listSalas = ((List) Locais.AR.find("forumFk='" + objUsuario.getForumFk().getCod_forum() + "' order by ordem_apresentacao ").fetch()); // isso nÃ£o dÃ¡ erro no caso de retorno vazio.
+			List<Agendamentos> listAgendamentosMeusSala = new ArrayList<>();
 			if(!(frm_cod_local==null||frm_data_ag.isEmpty())){
 				//lista os agendamentos do dia, e, da lotacao do cadastrante
 				listAgendamentosMeusSala = ((List) Agendamentos.AR.find("localFk.cod_local='" + frm_cod_local + "' and data_ag = to_date('" + frm_data_ag + "','yy-mm-dd') order by hora_ag").fetch());
@@ -686,8 +690,8 @@ public class AgendamentoController extends PpController {
 
     @Path("/calendarioVetor")
     public void calendarioVetor(String frm_cod_local) {
-        List listDatasLotadas = new ArrayList();
-        List listDatasDoMes = new ArrayList();
+        List<String> listDatasLotadas = new ArrayList<>();
+        List<String> listDatasDoMes = new ArrayList<>();
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         Date parametro = new Date();
         Date dt = new Date();

@@ -22,7 +22,6 @@ package br.gov.jfrj.siga.ex;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.sql.Blob;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -56,8 +55,8 @@ public abstract class AbstractExModelo extends HistoricoAuditavelSuporte
 
 	/** The value of the simple conteudoBlobMod property. */
 	@Column(name = "CONTEUDO_BLOB_MOD")
-	@Basic(fetch = FetchType.LAZY)
-	private Blob conteudoBlobMod;
+	@Basic(fetch = FetchType.EAGER)
+	private byte[] conteudoBlobMod;
 
 	/** The value of the simple conteudoTpBlob property. */
 	@Column(name = "CONTEUDO_TP_BLOB", length = 128)
@@ -142,7 +141,7 @@ public abstract class AbstractExModelo extends HistoricoAuditavelSuporte
 	 * 
 	 * @return java.lang.String
 	 */
-	public Blob getConteudoBlobMod() {
+	public byte[] getConteudoBlobMod() {
 		return this.conteudoBlobMod;
 	}
 
@@ -235,7 +234,7 @@ public abstract class AbstractExModelo extends HistoricoAuditavelSuporte
 	 * 
 	 * @param conteudoBlobMod
 	 */
-	public void setConteudoBlobMod(Blob conteudoBlobMod) {
+	public void setConteudoBlobMod(byte[] conteudoBlobMod) {
 		this.conteudoBlobMod = conteudoBlobMod;
 	}
 
@@ -327,10 +326,8 @@ public abstract class AbstractExModelo extends HistoricoAuditavelSuporte
 		} else {
 			if (other.getConteudoBlobMod() == null)
 				return false;
-			byte[] abthis = br.gov.jfrj.siga.cp.util.Blob
-					.toByteArray(getConteudoBlobMod());
-			byte[] abother = br.gov.jfrj.siga.cp.util.Blob.toByteArray(other
-					.getConteudoBlobMod());
+			byte[] abthis = getConteudoBlobMod();
+			byte[] abother = other.getConteudoBlobMod();
 			try {
 				String sthis = new String(abthis, "UTF-8");
 				String sother = new String(abother, "UTF-8");

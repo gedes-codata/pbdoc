@@ -27,10 +27,10 @@ package br.gov.jfrj.siga.vraptor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TreeMap;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -41,12 +41,7 @@ import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.view.Results;
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.base.Texto;
-import br.gov.jfrj.siga.cp.model.CpOrgaoSelecao;
-import br.gov.jfrj.siga.cp.model.DpLotacaoSelecao;
-import br.gov.jfrj.siga.cp.model.DpPessoaSelecao;
 import br.gov.jfrj.siga.ex.ExClassificacao;
-import br.gov.jfrj.siga.ex.ExDocumento;
-import br.gov.jfrj.siga.ex.ExNivelAcesso;
 import br.gov.jfrj.siga.ex.ExTemporalidade;
 import br.gov.jfrj.siga.ex.ExTipoDestinacao;
 import br.gov.jfrj.siga.ex.ExVia;
@@ -56,20 +51,17 @@ import br.gov.jfrj.siga.ex.util.MascaraUtil;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.Selecionavel;
 import br.gov.jfrj.siga.persistencia.ExClassificacaoDaoFiltro;
-import br.gov.jfrj.siga.persistencia.ExMobilDaoFiltro;
-import br.gov.jfrj.siga.vraptor.builder.ExMobilBuilder;
 
 @Resource
-public class ExClassificacaoController
-		extends
-		SigaSelecionavelControllerSupport<ExClassificacao, ExClassificacaoDaoFiltro> {
+public class ExClassificacaoController extends SigaSelecionavelControllerSupport<ExClassificacao, ExClassificacaoDaoFiltro> {
+
 	private static final String ACESSO_SIGA_DOC_FE_PC = "DOC:Módulo de Documentos;FE:Ferramentas;PC:Plano de Classificação";
+
 	private String[] nivelSelecionado;
 	private Integer nivelAlterado;
 
-	public ExClassificacaoController(HttpServletRequest request, Result result,
-			SigaObjects so, EntityManager em) {
-		super(request, result, ExDao.getInstance(), so, em);
+	public ExClassificacaoController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, ExDao.getInstance(), so, em);
 		int totalItens = getTotalDeNiveis();
 		nivelSelecionado = new String[totalItens];
 	}
@@ -121,12 +113,23 @@ public class ExClassificacaoController
 		aBuscar(sigla, postback);
 		final String[] listaNiveis = new String[getTotalDeNiveis()];
 		final String[] nomeNivel = new String[getTotalDeNiveis()];
-		final List<String> listaNomes = SigaExProperties
-				.getExClassificacaoNomesNiveis();
+		final List<String> listaNomes = SigaExProperties.getExClassificacaoNomesNiveis();
 		final List<ExClassificacao>[] classificacoesDoNivel = new List[getTotalDeNiveis()];
 		for (int i = 0; i < listaNiveis.length; i++) {
 			listaNiveis[i] = String.valueOf(i);
-			nomeNivel[i] = listaNomes.get(i + 1);
+			String res = null;
+			if (listaNomes.get(i + 1).equals("Assunto")) {
+				res = "Função";
+			} else 	if (listaNomes.get(i + 1).equals("Classe")) {
+				res = "Subfunção";
+			} else 	if (listaNomes.get(i + 1).equals("Subclasse")) {
+				res = "Atividade";
+			} else 	if (listaNomes.get(i + 1).equals("Atividade")) {
+				res = "Documento";
+			} else {
+				res = listaNomes.get(i + 1);
+			}
+			nomeNivel[i] = res;
 			classificacoesDoNivel[i] = getClassificacoesDoNivel(i);
 		}
 
@@ -143,7 +146,7 @@ public class ExClassificacaoController
 	@Get("app/classificacao/selecionar")
 	public void selecionar(String sigla) throws Exception {
 		String resultado = super.aSelecionar(sigla);
-		if (resultado == "ajax_retorno") {
+		if ("ajax_retorno".equals(resultado)) {
 			result.include("sel", getSel());
 			result.use(Results.page()).forwardTo(
 					"/WEB-INF/jsp/ajax_retorno.jsp");

@@ -37,77 +37,116 @@
 </c:catch>
 <c:catch var="catchException">
 	<siga:pagina titulo="Erro Geral" desabilitarbusca="sim" desabilitarmenu="sim" desabilitarComplementoHEAD="sim">
-		<!--
-Unless this text is here, if your page is less than 513 bytes, Internet Explorer will display it's "Friendly HTTP Error Message",
-and your custom error will never be displayed.  This text is just used as filler.
-This is a useless buffer to fill the page to 513 bytes to avoid display of Friendly Error Pages in Internet Explorer
-This is a useless buffer to fill the page to 513 bytes to avoid display of Friendly Error Pages in Internet Explorer
-This is a useless buffer to fill the page to 513 bytes to avoid display of Friendly Error Pages in Internet Explorer
--->
 
-		<div class="gt-bd clearfix">
-			<div class="gt-content clearfix">
-
-				<div id="caption" class="gt-error-page-hd">
-					<h2>Não Foi Possível Completar a Operação (${pageContext.getRequest().serverName})</h2>
-				</div>
-
-				<div class="gt-content-box">
-					<table width="100%">
-						<tr>
-							<td align="center" valign="middle">
-								<table class="form" width="50%">
-									<c:catch>
-										<c:if test="${not empty exceptionGeral}">
-											<c:if test="${not empty exceptionGeral.message}">
-												<tr>
-													<td style="text-align: center; padding-top: 10px;"><h3>${exceptionGeral.message}</h3>
-													</td>
-												</tr>
-											</c:if>
-											<c:if test="${not empty exceptionGeral.cause}">
-
-												<tr>
-													<td
-														style="text-align: center;"><h4>${exceptionGeral.cause.message}</h4></td>
-												</tr>
-											</c:if>
-										</c:if>
-									</c:catch>
-								</table>
-							</td>
-						</tr>
-						<tr>
-							<td style="text-align: center; padding:0;">
-								<div style="display: none; padding: 8pt;" align="left" id="stack">
-									<pre style="font-size: 8pt;">${exceptionStackGeral}</pre>
+		<div class="container my-5" style="min-height: 480px;">
+			<div class="row">
+				<div class="col-md-12">
+					<div class="error-template">
+						<h1 class="text-danger">
+							<i class="fa fa-times-circle"></i>
+							<strong> N&atilde;o foi poss&iacute;vel completar a opera&ccedil;&atilde;o!</strong>
+						</h1>
+						<div class="error-details my-5">
+							<p class="h4"><strong>${exceptionMessage}</strong></p>
+						</div>
+						<div class="error-actions mb-5">
+							<button type="button" class="btn btn-primary" onclick="javascript:history.back();">
+								<i class="fa fa-undo"></i> Voltar
+							</button>
+	
+							<div class="btn-group">
+								<a href="https://portal.pbdoc.pb.gov.br/atendimentos" class="btn btn-danger" target="_blank">
+									<i class="fa fa-envelope"></i> Solicitar Atendimento
+								</a>
+								<button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<span class="sr-only">Mais op��es...</span>
+								</button>
+								<div class="dropdown-menu">
+									<a data-toggle="collapse" href="#stackCollapse" role="button" aria-expanded="false" aria-controls="stackCollapse" class="dropdown-item">
+										Visualizar detalhes t&eacute;cnicos
+									</a>
 								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
-				<div style="padding-top:10px;float: right;">
-					<table>
-						<tr>
-							<td><input type="button" value="Voltar" class="gt-btn-medium gt-btn-left"  onclick="javascript:history.back();" /></td>
-							<td><input type="button" id="show_stack" value="Mais detalhes" class="gt-btn-large gt-btn-right" onclick="javascript: document.getElementById('caption').setAttribute('class',''); document.getElementById('stack').style.display=''; document.getElementById('show_stack').style.display='none';" /></td>
-						</tr>
-					</table>
+							</div>
+						</div>
+						<div class="error-stacktrace collapse" id="stackCollapse">
+							<div class="card bg-light">
+								<div class="card-header">
+									<strong>Informa&ccedil;&otilde;es T&eacute;cnicas: envie estas informa&ccedil;&otilde;es para o suporte</strong>
+								</div>
+								<div class="card-body">
+									<pre style="font-size: 0.6em;">${exceptionStackGeral}</pre>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 
+		<!--
+		<div class="container-fluid">
+			<div class="card bg-light mb-3" >
+				<div class="card-header">
+					<h5>
+						N&atilde;o Foi Poss&iacute;vel Completar a Opera&ccedil;&atilde;o (${pageContext.getRequest().serverName})
+					</h5>
+				</div>
+
+				<div class="card-body">
+					<div class="row">
+						<div class="col">
+							<div class="form-group">
+								<c:catch>
+									<c:if test="${not empty exceptionGeral}">
+										<c:if test="${not empty exceptionGeral.message}">
+											<h3>${exceptionGeral.message}</h3>
+										</c:if>
+										<c:if test="${not empty exceptionGeral.cause}">
+											<h4>${exceptionGeral.cause.message}</h4>
+										</c:if>
+									</c:if>
+								</c:catch>
+							</div>
+						</div>
+					</div>
+					<c:if test="${siga_cliente != 'GOVSP'}">
+						<div class="row">
+							<div class="col">
+								<div class="form-group">
+									<div style="display: none; padding: 8pt;" align="left" id="stack">
+										<pre style="font-size: 8pt;">${exceptionStackGeral}</pre>
+									</div>
+								</div>
+							</div>
+						</div>
+					</c:if>
+					<div class="row">
+						<div class="col">
+							<div class="form-group">		
+								<input type="button" value="Voltar" class="btn btn-primary"  onclick="javascript:history.back();" />
+								<c:if test="${siga_cliente != 'GOVSP'}">
+									<input type="button" id="show_stack" value="Mais detalhes" class="btn btn-primary" onclick="javascript: document.getElementById('stack').style.display=''; document.getElementById('show_stack').style.display='none';" />
+								</c:if>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		-->
 	</siga:pagina>
 </c:catch>
 
 <c:if test="${catchException!=null}">
-Erro: ${catchException.message}<br>
+	Erro: ${catchException.message}
+	<br>
 	<br>
 	<br>
 
 	<pre>
-Erro original:
-${exceptionStack}</pre>
+		Erro original:
+		${exceptionStack}
+	</pre>
 </c:if>
 
 

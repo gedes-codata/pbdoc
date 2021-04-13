@@ -4,6 +4,7 @@ import static br.com.caelum.vraptor.view.Results.http;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpStatus;
 
@@ -23,8 +24,8 @@ public class SrController extends SigaController {
 
 	protected SrValidator srValidator;
 
-	public SrController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, dao, so, em);
+	public SrController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, dao, so, em);
 		this.srValidator = srValidator;
 	}
 

@@ -6,6 +6,7 @@ import java.util.Date;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Resource;
@@ -20,8 +21,8 @@ import br.gov.jfrj.siga.dp.dao.CpDao;
 @Resource
 public class IdentidadeController extends GiControllerSupport {
 
-	public IdentidadeController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em) {
-		super(request, result, CpDao.getInstance(), so, em);
+	public IdentidadeController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, CpDao.getInstance(), so, em);
 
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();
@@ -81,6 +82,7 @@ public class IdentidadeController extends GiControllerSupport {
 		if (id != null) {
 			CpIdentidade ident = daoId(id);
 			Cp.getInstance().getBL().bloquearIdentidade(ident, getIdentidadeCadastrante(), true);
+			result.include("mensagemUsuario", "Pessoa desbloqueada com sucesso");
 			result.forwardTo(this).lista(pessoaSel);
 		} else
 			throw new AplicacaoException("Não foi informada id");
@@ -92,6 +94,7 @@ public class IdentidadeController extends GiControllerSupport {
 		if (id != null) {
 			CpIdentidade ident = daoId(id);
 			Cp.getInstance().getBL().bloquearIdentidade(ident,getIdentidadeCadastrante(), false);
+			result.include("mensagemUsuario", "Pessoa bloqueada com sucesso");
 			result.forwardTo(this).lista(pessoaSel);
 		} else
 			throw new AplicacaoException("Não foi informada id");
@@ -104,6 +107,7 @@ public class IdentidadeController extends GiControllerSupport {
 
 		if (pes != null) {
 			Cp.getInstance().getBL().bloquearPessoa(pes,getIdentidadeCadastrante(), true);
+			result.include("mensagemUsuario", "Pessoa bloqueada com sucesso");
 			result.forwardTo(this).lista(pessoaSel);
 		} else
 			throw new AplicacaoException("Não foi informada a pessoa");
@@ -116,6 +120,7 @@ public class IdentidadeController extends GiControllerSupport {
 
 		if (pes != null) {
 			Cp.getInstance().getBL().bloquearPessoa(pes,getIdentidadeCadastrante(), false);
+			result.include("mensagemUsuario", "Pessoa desbloqueada com sucesso");
 			result.forwardTo(this).lista(pessoaSel);
 		} else
 			throw new AplicacaoException("Não foi informada a pessoa");

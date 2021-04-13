@@ -24,6 +24,9 @@
  */
 package br.gov.jfrj.siga.vraptor;
 
+import org.apache.commons.lang.StringUtils;
+
+import br.gov.jfrj.siga.base.util.CPFUtils;
 
 public class UsuarioAction {
 
@@ -68,7 +71,9 @@ public class UsuarioAction {
 	}
 
 	public void setCpf(String cpf) {
-		this.cpf = cpf;
+		if (StringUtils.isNotEmpty(cpf)) {
+			this.cpf = CPFUtils.limpaCpf(cpf);
+		}
 	}
 
 	public String getMatricula() {
@@ -148,7 +153,9 @@ public class UsuarioAction {
 	}
 
 	public void setCpf1(String cpf1) {
-		this.cpf1 = cpf1;
+		if (StringUtils.isNotEmpty(cpf1)) {
+			this.cpf1 = CPFUtils.limpaCpf(cpf1);
+		}
 	}
 
 	public String getSenha1() {
@@ -172,7 +179,9 @@ public class UsuarioAction {
 	}
 
 	public void setCpf2(String cpf2) {
-		this.cpf2 = cpf2;
+		if (StringUtils.isNotEmpty(cpf2)) {
+			this.cpf2 = CPFUtils.limpaCpf(cpf2);
+		}
 	}
 
 	public String getSenha2() {

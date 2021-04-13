@@ -1,0 +1,180 @@
+div.amb-bar {
+	position: static;
+	top: 0;
+	text-align: center;
+}
+
+div.amb-bar div.amb {
+	font-size: 1em;
+	line-height: 3em;
+	font-weight: bold;
+}
+
+div.amb-hostname {
+	position: relative;
+	top: -1.8em;
+	font-size: 0.6em;
+	font-weight: bold;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+div.amb-hostname.simulacao {
+	color: #00000099;
+}
+
+div.amb-hostname.homologacao {
+	color: #ffffff99;
+}
+
+div.amb-bar.simulacao {
+	background: #fec93d;
+	color: #000;
+}
+
+div.amb-bar.homologacao {
+	background: #dc3545;
+	color: #fff;
+}
+
+.linha_divisoria {
+	content: "";
+	height: 40px;
+	background: #3f7fad;
+	background-size: contain;
+	top: -18px;
+	left: 0;
+	right: 0;
+}
+
+a {
+	color: #3f7fad;
+}
+
+.btn-primary {
+	color: #fff;
+	background-color: #3f7fad;
+	border-color: #3f7fad;
+}
+
+body>div:nth-child(2)>div.row.pt-2.pb-2.mb-3.submenusp>div.col.col-12.col-sm-4.text-right
+	{
+	height: 24px;
+	/* 	margin-top: -8px; */
+}
+
+#navbarSupportedContent>form>button {
+	color: #212529;
+	background-color: #fff;
+	border-color: #212529;
+}
+
+#navbarSupportedContent>ul>li>a {
+	color: #212529 !important;
+}
+
+.text-success {
+	color: #fec93d !important;
+	font-weight: bold;
+}
+
+.menusp {
+	/* 	background-color: #809eab; */
+	background-color: #fff;
+}
+
+.submenusp {
+	color: #fff !important;
+	background-color: #3f7fad;
+	/* 	color: #212529 !important; */
+	/* 	background-color: #fff; */
+}
+
+.login_body_color {
+	background-color: #fff;
+}
+
+.body_color {
+	background-color: #fff;
+}
+
+.box_login {
+	background-color: rgb(190, 213, 206);
+	border-radius: 8px;
+	border: 1px solid #dadce0;
+}
+
+p.gt-table-action-list a.link-tag {
+	margin-top: 0.4em;
+}
+
+/*Identidade Visual do SIGA.doc para todos locais */
+
+/* Elementos para collapse de cards */
+.card-header .card-toggle:after {
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+	float: right;
+	color: grey;
+	content: "\f0d7";
+}
+
+.card-header .card-toggle.collapsed:after {
+	content: "\f0da";
+}
+
+.btn-circle {
+	width: 30px;
+	height: 30px;
+	padding: 6px 0px;
+	border-radius: 15px;
+	text-align: center;
+	font-size: 12px;
+	line-height: 1.42857;
+}
+
+#radioBtn .notActive {
+	color: #3276b1;
+	background-color: #fff;
+}
+
+/* Sidebar */
+.wrapper {
+	display: flex;
+	align-items: stretch;
+}
+
+#sidebar {
+	transition: all 0.3s;
+}
+
+#sidebar.active {
+	margin-left: -800px;
+}
+
+.opacity-80 {
+	opacity: 0.8;
+}
+
+.xxborderBox {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+html body, .table-group-separator {
+	background-color: #dae9ec;
+}
+
+.table-group-separator, .table-group-title {
+	background-color: #dae9ec !important;
+	border: 1px solid #dae9ec !important;
+	background-color: #dae9ec !important;
+}
+
+table.table {
+	background-color: white;
+}
+
+p.gt-table-action-list a.link-tag {
+	margin-top: 0.4em;
+}

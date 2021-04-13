@@ -407,7 +407,7 @@ public class ExDocumentoDTO {
 		} catch (final ParseException e) {
 			return "Ocorreu um erro na conversão da Data";
 		}
-		df1.applyPattern("'" + "Rio de Janeiro" + ",' dd 'de' MMMM 'de' yyyy.");
+		df1.applyPattern("'" + "Paraíba" + ",' dd 'de' MMMM 'de' yyyy.");
 		return df1.format(minhaData);
 	}
 
@@ -454,9 +454,9 @@ public class ExDocumentoDTO {
 
 	public Map<Integer, String> getListaTipoDest() {
 		final Map<Integer, String> map = new TreeMap<Integer, String>();
-		map.put(1, "Matrícula");
+		map.put(1, "Usuário");
 		map.put(2, "Órgão Integrado");
-		map.put(3, "Externo");
+		//map.put(3, "Externo");
 		map.put(4, "Campo Livre");
 		return map;
 	}
@@ -817,7 +817,7 @@ public class ExDocumentoDTO {
 	}
 
 	public ArrayList getListaNumViasAlternativo() {
-		ArrayList al = new ArrayList();
+		ArrayList al = new ArrayList<>();
 		for (int k = 1; k <= getDoc().getNumUltimaVia(); k++)
 			al.add(k);
 		al.add(0);

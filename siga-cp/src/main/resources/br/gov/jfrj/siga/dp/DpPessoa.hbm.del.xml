@@ -193,7 +193,7 @@
 	<sql-query name="consultarDataEHoraDoServidor" cacheable="false"
 		read-only="true">
 		<return-scalar column="dt" type="timestamp" />
-		<![CDATA[SELECT sysdate dt FROM dual]]>
+		<![CDATA[SELECT CURRENT_TIMESTAMP]]>
 	</sql-query>
 	
 	<query name="consultarAtivasNaDataOrgao">
@@ -223,7 +223,7 @@
        u, 
 	       pes, 
 	       (select max(cpcfg.hisDtIni), max(cpcfg.hisDtFim)	from CpConfiguracao cpcfg),
-	       sysdate, 
+	       CURRENT_TIMESTAMP AS "sysdate", 
 	       (select per from CpPersonalizacao per, DpPessoa pes2 where per.pessoa.idPessoa = pes2.idPessoa and pes2.idPessoaIni = pes.idPessoaIni)
 	 	  from CpIdentidade u , DpPessoa pes   
 	      where u.nmLoginIdentidade = :nmUsuario

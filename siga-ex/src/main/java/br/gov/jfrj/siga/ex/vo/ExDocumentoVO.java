@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import br.gov.jfrj.siga.base.SigaMessages;
 import br.gov.jfrj.siga.base.Texto;
 import br.gov.jfrj.siga.dp.CpMarcador;
 import br.gov.jfrj.siga.dp.DpLotacao;
@@ -36,6 +37,7 @@ import br.gov.jfrj.siga.ex.ExMobil;
 import br.gov.jfrj.siga.ex.ExMovimentacao;
 import br.gov.jfrj.siga.ex.ExTipoMovimentacao;
 import br.gov.jfrj.siga.ex.bl.Ex;
+import br.gov.jfrj.siga.ex.bl.ExBL;
 import br.gov.jfrj.siga.ex.util.ExGraphColaboracao;
 import br.gov.jfrj.siga.ex.util.ExGraphRelacaoDocs;
 import br.gov.jfrj.siga.ex.util.ExGraphTramitacao;
@@ -99,11 +101,12 @@ public class ExDocumentoVO extends ExVO {
 
 		this.nomeCompleto = doc.getNomeCompleto();
 		this.dtDocDDMMYY = doc.getDtDocDDMMYY();
-		this.subscritorString = doc.getSubscritorString();
+		this.subscritorString = doc.getSubscritorString() + " (" + doc.getSubscritor().getLotacao().getSiglaLotacao() + "/" + doc.getSubscritor().getOrgaoUsuario().getSiglaOrgaoUsuCompleta() +")";
 		this.cadastranteString = doc.getCadastranteString();
+
 		if (doc.getLotaCadastrante() != null)
 			this.lotaCadastranteString = "("
-					+ doc.getLotaCadastrante().getSigla() + ")";
+					+ doc.getLotaCadastrante().getSigla() + " / " + doc.getOrgaoUsuario().getSiglaCompleta() + ")";
 		else
 			this.lotaCadastranteString = "";
 
@@ -293,6 +296,8 @@ public class ExDocumentoVO extends ExVO {
 				.add(ExTipoMovimentacao.TIPO_MOVIMENTACAO_ENCERRAMENTO_DE_VOLUME);
 		movimentacoesPermitidas
 				.add(ExTipoMovimentacao.TIPO_MOVIMENTACAO_COPIA);
+		movimentacoesPermitidas
+				.add(ExTipoMovimentacao.TIPO_MOVIMENTACAO_CIENCIA);		
 
 		List<Long> marcasGeralPermitidas = new ArrayList<Long>();
 		marcasGeralPermitidas.add(CpMarcador.MARCADOR_A_ELIMINAR);
@@ -329,7 +334,7 @@ public class ExDocumentoVO extends ExVO {
 								.getExMovimentacaoRef());
 						// Edson: se não gerou peça, nem mostra o
 						// desentranhamento
-						if (exMovVO.getMov().getConteudoBlobMov() == null)
+						if (exMovVO.getMov().getConteudoBlobInicializarOuAtualizarCache() == null)
 							continue;
 					}
 					if (!juntadasRevertidas.contains(exMovVO.getMov()))
@@ -352,7 +357,7 @@ public class ExDocumentoVO extends ExVO {
 		}
 
 		for (ExMobil cadaMobil : doc.getExMobilSet()) {
-			if (!cadaMobil.isGeral())
+			// if (!cadaMobil.isGeral())
 				marcasPorMobil.put(cadaMobil, cadaMobil.getExMarcaSet());
 		}
 
@@ -365,18 +370,18 @@ public class ExDocumentoVO extends ExVO {
 				if (marcasGeralPermitidas.contains(m.getCpMarcador()
 						.getIdMarcador()))
 					mobilEspecifico.getMarcasAtivas().add(m);
-			for (ExMarca m : mobilGeral.getMob().getExMarcaSet())
-				if (marcasGeralPermitidas.contains(m.getCpMarcador()
-						.getIdMarcador()))
-					for (ExMobil cadaMobil : marcasPorMobil.keySet())
-						marcasPorMobil.get(cadaMobil).add(m);
+//			for (ExMarca m : mobilGeral.getMob().getExMarcaSet())
+//				if (marcasGeralPermitidas.contains(m.getCpMarcador()
+//						.getIdMarcador()))
+//					for (ExMobil cadaMobil : marcasPorMobil.keySet())
+//						marcasPorMobil.get(cadaMobil).add(m);
 			mobs.remove(mobilGeral);
 		}
 
 		// Edson: mostra lista de vias/volumes só se número de
 		// vias/volumes além do geral for > que 1 ou se o móbil
 		// tiver informações que não aparecem no topo da tela
-		if (doc.getExMobilSet().size() > 2 || mob.temMarcaNaoAtiva())
+		//if (doc.getExMobilSet().size() > 2 || mob.temMarcaNaoAtiva())
 			outrosMobsLabel = doc.isProcesso() ? "Volumes" : "Vias";
 
 		this.dotTramitacao = new ExGraphTramitacao(mob);
@@ -384,7 +389,7 @@ public class ExDocumentoVO extends ExVO {
 		this.dotColaboracao = new ExGraphColaboracao(doc);
 
 	}
-
+	
 	/**
 	 * @param doc
 	 * @param titular
@@ -393,6 +398,7 @@ public class ExDocumentoVO extends ExVO {
 	 */
 	private void addAcoes(ExDocumento doc, DpPessoa titular,
 			DpLotacao lotaTitular, boolean exibirAntigo) {
+		
 		ExVO vo = this;
 		for (ExMobilVO mobvo : mobs) {
 			if (mobvo.getMob().isGeral())
@@ -400,25 +406,25 @@ public class ExDocumentoVO extends ExVO {
 		}
 
 		ExMobil mob = doc.getMobilGeral();
-
+		
 		vo.addAcao(
 				"folder_magnify",
-				"_Ver Dossiê",
+				SigaMessages.getMessage("documento.ver.dossie"),
 				"/app/expediente/doc",
 				"exibirProcesso",
 				Ex.getInstance().getComp()
 						.podeVisualizarImpressao(titular, lotaTitular, mob));
 
-		vo.addAcao(
-				"printer",
-				"Ver _Impressão",
-				"/app/arquivo",
-				"exibir",
-				Ex.getInstance().getComp()
-						.podeVisualizarImpressao(titular, lotaTitular, mob),
-				null, "&popup=true&arquivo=" + doc.getReferenciaPDF(), null,
-				null, null);
-
+//		vo.addAcao(
+//				SigaMessages.getMessage("icon.ver.impressao"),
+//				SigaMessages.getMessage("documento.ver.impressao"),
+//				"/app/arquivo",
+//				"exibir",
+//				Ex.getInstance().getComp()
+//						.podeVisualizarImpressao(titular, lotaTitular, mob),
+//				null, "&popup=true&arquivo=" + doc.getReferenciaPDF(), null,
+//				null, null);
+			
 		vo.addAcao(
 				"lock",
 				"Fina_lizar",
@@ -467,7 +473,7 @@ public class ExDocumentoVO extends ExVO {
 				Ex.getInstance().getComp()
 						.podeFazerAnotacao(titular, lotaTitular, mob));
 
-		vo.addAcao("folder_user", "Definir Perfil", "/app/expediente/mov",
+		vo.addAcao("folder_user", SigaMessages.getMessage("documento.definir.perfil"), "/app/expediente/mov",
 				"vincularPapel", Ex.getInstance().getComp()
 						.podeFazerVinculacaoPapel(titular, lotaTitular, mob));
 
@@ -506,7 +512,7 @@ public class ExDocumentoVO extends ExVO {
 				Ex.getInstance().getComp()
 						.podeCriarSubprocesso(titular, lotaTitular, mob), null,
 				"mobilPaiSel.sigla=" + getSigla() + "&idForma="
-						+ mob.doc().getExFormaDocumento().getIdFormaDoc() + "&criandoSubprocesso=true",
+						+ mob.getDoc().getExFormaDocumento().getIdFormaDoc() + "&criandoSubprocesso=true",
 				null, null, null);
 
 		vo.addAcao(
@@ -525,15 +531,15 @@ public class ExDocumentoVO extends ExVO {
 				Ex.getInstance().getComp()
 						.podeAssinar(titular, lotaTitular, mob));
 
-		vo.addAcao(
-				"script_key",
-				"A_utenticar",
-				"/app/expediente/mov",
-				"autenticar_documento",
-				Ex.getInstance()
-						.getComp()
-						.podeAutenticarDocumento(titular, lotaTitular,
-								mob.doc()));
+//		vo.addAcao(
+//				"script_key",
+//				"A_utenticar",
+//				"/app/expediente/mov",
+//				"autenticar_documento",
+//				Ex.getInstance()
+//						.getComp()
+//						.podeAutenticarDocumento(titular, lotaTitular,
+//								mob.getExDocumento()));
 
 		vo.addAcao(
 				"page_go	",
@@ -543,7 +549,7 @@ public class ExDocumentoVO extends ExVO {
 				Ex.getInstance()
 						.getComp()
 						.podeSolicitarAssinatura(titular, lotaTitular,
-								mob.doc()), "Ao clicar em prosseguir, você estará sinalizando que revisou este documento e que ele deve ser incluído na lista para ser assinado em lote. Prosseguir?", 
+								mob.getDoc()), "Ao clicar em prosseguir, você estará sinalizando que revisou este documento e que ele deve ser incluído na lista para ser assinado em lote. Prosseguir?", 
 								null, null, null, "once");
 
 		if (doc.isFinalizado() && doc.getNumExpediente() != null) {
@@ -600,16 +606,16 @@ public class ExDocumentoVO extends ExVO {
 				"duplicar",
 				Ex.getInstance().getComp()
 						.podeDuplicar(titular, lotaTitular, mob),
-				"Esta operação criará um expediente com os mesmos dados do atual. Prosseguir?",
+				SigaMessages.getMessage("documento.confirma.duplica"),
 				null, null, null, "once");
 
 		// test="${exibirCompleto != true}" />
 		int numUltMobil = doc.getNumUltimoMobil();
 		vo.addAcao(
-				"eye",
-				"Ver _Mais",
+				SigaMessages.getMessage("icon.ver.mais"),
+				SigaMessages.getMessage("documento.ver.mais"),
 				"/app/expediente/doc",
-				"exibirAntigo",
+				SigaMessages.getMessage("documento.acao.exibirAntigo"),
 				Ex.getInstance()
 						.getComp()
 						.podeExibirInformacoesCompletas(titular, lotaTitular,
@@ -669,6 +675,15 @@ public class ExDocumentoVO extends ExVO {
 						.podeTornarDocumentoSemEfeito(titular, lotaTitular, mob),
 				"Esta operação tornará esse documento sem efeito. Prosseguir?",
 				null, null, null, "once");
+
+		boolean documentoAssinado = ExBL.TESTE_DOCUMENTO_ASSINADO.apply(doc);
+		vo.addAcao(
+				"arrow_refresh",
+				"Reprocessar PDF",
+				"/app/expediente/doc",
+				"corrigirPDF",
+				!documentoAssinado, null, null, null, null, null,
+				"Reprocessa os dados e regera o PDF do banco de dados");
 	}
 
 	public void addDadosComplementares() {

@@ -26,10 +26,6 @@
 			type="java.lang.String" />
 		<property name="dscSenhaIdentidade" column="SENHA_IDENTIDADE"
 			type="java.lang.String" />
-		<property name="dscSenhaIdentidadeCripto" column="SENHA_IDENTIDADE_CRIPTO"
-			type="java.lang.String" />
-		<property name="dscSenhaIdentidadeCriptoSinc" column="SENHA_IDENTIDADE_CRIPTO_SINC"
-			type="java.lang.String" />
 
 		<!-- Campos padronizados para armazenar dados histórios -->
 		<property name="hisIdIni" column="HIS_ID_INI" type="java.lang.Long" />
@@ -37,7 +33,7 @@
 		<many-to-one name="hisIdcIni" column="HIS_IDC_INI" class="CpIdentidade" />
 		<property name="hisDtFim" column="HIS_DT_FIM" type="java.util.Date" />
 		<many-to-one name="hisIdcFim" column="HIS_IDC_FIM" class="CpIdentidade" />
-		<property name="hisAtivo" column="HIS_ATIVO" type="java.lang.Integer" />
+		<property name="hisAtivo" column="HIS_ATIVO" type="boolean" />
 
 	</class>
 

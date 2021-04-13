@@ -1,12 +1,16 @@
 package br.gov.jfrj.siga.sr.vraptor;
 
 import static br.gov.jfrj.siga.sr.util.SrSigaPermissaoPerfil.ADM_ADMINISTRAR;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -22,8 +26,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("app/tipoAcao")
 public class TipoAcaoController extends SrController {
 
-	public TipoAcaoController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, SrDao.getInstance(), so, em, srValidator);
+	public TipoAcaoController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, SrDao.getInstance(), so, em, srValidator);
 	}
 
 	@AssertAcesso(ADM_ADMINISTRAR)
@@ -106,14 +110,14 @@ public class TipoAcaoController extends SrController {
 	}
 
 	private boolean temSigla(String sigla) {
-		return null != sigla && !"".equals(sigla.trim());
+		return null != sigla && !StringUtils.EMPTY.equals(sigla.trim());
 	}
 
 	private void validarFormEditar(SrTipoAcao acao) {
-		if ("".equals(acao.getSiglaTipoAcao())) {
+		if (isBlank(acao.getSiglaTipoAcao())) {
 			srValidator.addError("tipoAcao.siglaTipoAcao", "C&oacute;digo n&atilde;o informado");
 		}
-		if ("".equals(acao.getTituloTipoAcao())) {
+		if (isBlank(acao.getTituloTipoAcao())) {
 			srValidator.addError("tipoAcao.tituloTipoAcao", "Titulo n&atilde;o informado");
 		}
 		if (srValidator.hasErrors()) {

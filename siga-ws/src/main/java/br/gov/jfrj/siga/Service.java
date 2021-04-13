@@ -183,8 +183,6 @@ public abstract class Service {
 		} catch (UnsupportedEncodingException e) {
 			return false;
 		}
-		if (s == null)
-			return false;
 		return s.startsWith(ERRO);
 	}
 
@@ -195,8 +193,6 @@ public abstract class Service {
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
-		if (s == null)
-			return null;
 		return s;
 	}
 

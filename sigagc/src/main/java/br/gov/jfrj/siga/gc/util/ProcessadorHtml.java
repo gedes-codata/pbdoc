@@ -18,15 +18,20 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.gc.util;
 
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.kxml2.io.KXmlParser;
 import org.kxml2.io.KXmlSerializer;
 import org.w3c.tidy.Tidy;
@@ -39,9 +44,9 @@ public class ProcessadorHtml {
 
 	XmlSerializer serializer;
 
-	HashSet<String> setTrimElements;
+	Set<String> setTrimElements;
 
-	HashMap<String, Tag> mapKnownElements;
+	Map<String, Tag> mapKnownElements;
 
 	Boolean fTrimLeft;
 
@@ -56,20 +61,20 @@ public class ProcessadorHtml {
 	private class Tag {
 		String name;
 
-		HashMap<String, HashSet<String>> attrs = null;
+		Map<String, Set<String>> attrs = null;
 
-		HashMap<String, HashSet<String>> styles = null;
+		Map<String, Set<String>> styles = null;
 
 		public Tag(String name, String attrs, String styles, boolean hasContent) {
 			String s;
 			this.name = name;
 			if (attrs != null) {
-				this.attrs = new HashMap<String, HashSet<String>>();
+				this.attrs = new HashMap<>();
 				for (String attrStr : attrs.split(";")) {
 					String attrSplit[] = attrStr.split("=");
-					HashSet<String> vals = null;
+					Set<String> vals = null;
 					if (attrSplit.length > 1) {
-						vals = new HashSet<String>();
+						vals = new HashSet<>();
 						s = "";
 						for (String attrVal : attrSplit[1].split(",")) {
 							if (attrVal.endsWith("\\")) {
@@ -84,12 +89,12 @@ public class ProcessadorHtml {
 				}
 			}
 			if (styles != null) {
-				this.styles = new HashMap<String, HashSet<String>>();
+				this.styles = new HashMap<>();
 				for (String styleStr : styles.split(";")) {
 					String styleSplit[] = styleStr.split("=");
-					HashSet<String> vals = null;
+					Set<String> vals = null;
 					if (styleSplit.length > 1) {
-						vals = new HashSet<String>();
+						vals = new HashSet<>();
 						s = "";
 						for (String styleVal : styleSplit[1].split(",")) {
 							if (styleVal.endsWith("\\")) {
@@ -108,9 +113,9 @@ public class ProcessadorHtml {
 
 	}
 
-	static HashMap<String, Tag> tags = null;
+	static Map<String, Tag> tags = null;
 
-	private void add(HashMap<String, Tag> tags, String name, String attrs,
+	private void add(Map<String, Tag> tags, String name, String attrs,
 			String styles, boolean hasContent) {
 		tags.put(name, new Tag(name, attrs, styles, hasContent));
 	}
@@ -119,13 +124,13 @@ public class ProcessadorHtml {
 		parser = new KXmlParser();
 		serializer = new KXmlSerializer();
 
-		setTrimElements = new HashSet<String>();
+		setTrimElements = new HashSet<>();
 		for (final String s : ProcessadorHtml.asTrimElements)
 			setTrimElements.add(s.intern());
 
 		tags = null;
 		if (tags == null) {
-			HashMap<String, Tag> myTags = new HashMap<String, Tag>();
+			Map<String, Tag> myTags = new HashMap<>();
 			add(myTags, "html", "lang=en;xml:lang=en;xmlns", null, true);
 			add(myTags, "head", null, null, true);
 			add(myTags, "meta", null, null, false);
@@ -425,10 +430,10 @@ public class ProcessadorHtml {
 				s = s.replace("*newline*", " ");
 				while (-1 != s.indexOf("  "))
 					s = s.replace("  ", " ");
-				if (fTrimLeft) {
+				if (isTrue(fTrimLeft)) {
 					while (s.startsWith(" "))
 						s = s.substring(1);
-					if ("".equals(s))
+					if (StringUtils.EMPTY.equals(s))
 						break;
 					else
 						fTrimLeft = false;
@@ -517,13 +522,11 @@ public class ProcessadorHtml {
 			for (int i = 0; i < parser.getAttributeCount(); i++) {
 				String attrName = parser.getAttributeName(i).intern();
 				String val = parser.getAttributeValue(i).intern();
-				if (attrName != "style") {
-					if (t.attrs == null
-							|| !t.attrs.containsKey(attrName.intern()))
+				if (!"style".equals(attrName)) {
+					if (t.attrs == null || !t.attrs.containsKey(attrName.intern()))
 						continue;
-					HashSet<String> vals = t.attrs.get(attrName);
-					if (vals == null || vals.contains(val)
-							|| (val == "style" && t.styles != null)) {
+					Set<String> vals = t.attrs.get(attrName);
+					if (vals == null || vals.contains(val) || ("style".equals(val) && t.styles != null)) {
 						serializer.attribute(parser.getAttributeNamespace(i),
 								parser.getAttributeName(i),
 								parser.getAttributeValue(i));
@@ -542,7 +545,7 @@ public class ProcessadorHtml {
 							continue;
 						String styleVal = items[1].trim().toLowerCase()
 								.intern();
-						HashSet<String> vals = t.styles.get(styleName);
+						Set<String> vals = t.styles.get(styleName);
 						if (vals == null || vals.contains(styleVal)) {
 							if (sb == null)
 								sb = new StringBuilder();

@@ -18,22 +18,20 @@ import javax.persistence.Transient;
 import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.annotations.Type;
 
-import br.gov.jfrj.siga.cp.CpComplexo;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import br.gov.jfrj.siga.cp.CpConfiguracao;
 import br.gov.jfrj.siga.cp.CpTipoConfiguracao;
 import br.gov.jfrj.siga.dp.DpLotacao;
-import br.gov.jfrj.siga.dp.DpPessoa;
 import br.gov.jfrj.siga.model.ActiveRecord;
 import br.gov.jfrj.siga.model.Selecionavel;
 import br.gov.jfrj.siga.sr.model.SrAcao.SrAcaoVO;
 import br.gov.jfrj.siga.sr.model.vo.SrConfiguracaoAssociacaoVO;
 import br.gov.jfrj.siga.sr.model.vo.SrConfiguracaoVO;
 import br.gov.jfrj.siga.sr.model.vo.SrItemConfiguracaoVO;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 @Entity
 @Table(name = "SR_CONFIGURACAO", schema = "SIGASR")

@@ -97,12 +97,12 @@ public class PlantaoController extends TpController {
 
         StringBuilder sbAfastamento = new StringBuilder();
         for (Afastamento item : afastamentos) {
-            sbAfastamento.append("".equals(sbAfastamento.toString())? "" : ",");
+            sbAfastamento.append(StringUtils.EMPTY.equals(sbAfastamento.toString())? "" : ",");
             sbAfastamento.append(FormatarDataHora.formatarData(item.getDataHoraInicio()) + " a " + FormatarDataHora.formatarData(item.getDataHoraFim()));
         }
 
         String listaAfastamento = sbAfastamento.toString();
-        if (!"".equals(listaAfastamento))
+        if (!StringUtils.EMPTY.equals(listaAfastamento))
             validator.add(new ValidationMessage("Condutor afastado " + getMensagemPeriodo(listaAfastamento) + " de: " + listaAfastamento + ".", PLANTAO));
 
         if (validator.hasErrors()) {
@@ -113,12 +113,12 @@ public class PlantaoController extends TpController {
             		FormatarDataHora.formatarData(plantao.getDataHoraFim()), plantao.getId());
             StringBuilder sbPlantao = new StringBuilder();
             for (Plantao item : plantoes) {
-                sbPlantao.append("".equals(sbPlantao.toString()) ? "" : ",");
+                sbPlantao.append(StringUtils.EMPTY.equals(sbPlantao.toString()) ? "" : ",");
                 sbPlantao.append(FormatarDataHora.formatarData(item.getDataHoraInicio()) + " a " + FormatarDataHora.formatarData(item.getDataHoraFim()));
             }
 
             String listaPlantao = sbPlantao.toString();
-            if (!"".equals(listaPlantao))
+            if (!StringUtils.EMPTY.equals(listaPlantao))
                 validator.add(new ValidationMessage("Condutor em plant&atilde;o " + getMensagemPeriodo(listaPlantao) + " de: " + listaPlantao + ".", PLANTAO));
         }
 
@@ -130,7 +130,7 @@ public class PlantaoController extends TpController {
                 List<Missao> missoes = retornarMissoesCondutorPlantao(plantao, dataHoraInicioNova, dataHoraFimNova);
                 StringBuilder sbMissoes = new StringBuilder();
                 for (Missao item : missoes) {
-                    sbMissoes.append("".equals(sbMissoes.toString()) ? "" : ",");
+                    sbMissoes.append(StringUtils.EMPTY.equals(sbMissoes.toString()) ? "" : ",");
                     sbMissoes.append(item.getSequence());
                 }
                 String listaMissoes = sbMissoes.toString();

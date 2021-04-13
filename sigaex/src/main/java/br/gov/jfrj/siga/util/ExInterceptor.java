@@ -9,6 +9,7 @@ import br.com.caelum.vraptor.InterceptionException;
 import br.com.caelum.vraptor.Intercepts;
 import br.com.caelum.vraptor.Validator;
 import br.com.caelum.vraptor.core.InterceptorStack;
+import br.com.caelum.vraptor.interceptor.ApplicationLogicException;
 import br.com.caelum.vraptor.interceptor.Interceptor;
 import br.com.caelum.vraptor.ioc.Component;
 import br.com.caelum.vraptor.resource.ResourceMethod;
@@ -19,6 +20,7 @@ import br.gov.jfrj.siga.ex.bl.RequestInfo;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.ContextoPersistencia;
 import br.gov.jfrj.siga.model.dao.ModeloDao;
+import br.gov.jfrj.siga.uteis.ExceptionUtils;
 
 @Component
 @Intercepts(before = JPATransactionInterceptor.class)
@@ -40,58 +42,27 @@ public class ExInterceptor implements Interceptor {
 		this.context = context;
 	}
 
-	// private final EntityManager manager;
-	// private final Validator validator;
-	//
-	// public JPATransactionInterceptor(EntityManager manager, Validator
-	// validator) {
-	// this.manager = manager;
-	// this.validator = validator;
-	// }
-	//
-	// public void intercept(InterceptorStack stack, ResourceMethod method,
-	// Object instance) {
-	// EntityTransaction transaction = null;
-	// try {
-	// transaction = manager.getTransaction();
-	// transaction.begin();
-	//
-	// stack.next(method, instance);
-	//
-	// if (!validator.hasErrors() && transaction.isActive()) {
-	// transaction.commit();
-	// }
-	// } finally {
-	// if (transaction != null && transaction.isActive()) {
-	// transaction.rollback();
-	// }
-	// }
-	// }
-
-	public void intercept(InterceptorStack stack, ResourceMethod method,
-			Object instance) {
-
-		// EntityManager em = ExStarter.emf.createEntityManager();
+	public void intercept(InterceptorStack stack, ResourceMethod method, Object instance) throws InterceptionException {
 
 		ContextoPersistencia.setEntityManager(this.manager);
 
 		// Inicialização padronizada
-		CurrentRequest.set(new RequestInfo(this.context, this.request,
-				this.response));
+		CurrentRequest.set(new RequestInfo(this.context, this.request, this.response));
 
 		ModeloDao.freeInstance();
 		ExDao.getInstance();
 		try {
 			Ex.getInstance().getConf().limparCacheSeNecessario();
 		} catch (Exception e1) {
-			throw new RuntimeException(
-					"Não foi possível atualizar o cache de configurações", e1);
+			throw new RuntimeException("Não foi possível atualizar o cache de configurações", e1);
 		}
 
 		try {
 			stack.next(method, instance);
+		} catch (ApplicationLogicException e) {
+			ExceptionUtils.tratarExcecao(request, response, e.getCause());
 		} catch (Exception e) {
-			throw new InterceptionException(e);
+			ExceptionUtils.tratarExcecao(request, response, e);
 		} finally {
 			ContextoPersistencia.setEntityManager(null);
 		}

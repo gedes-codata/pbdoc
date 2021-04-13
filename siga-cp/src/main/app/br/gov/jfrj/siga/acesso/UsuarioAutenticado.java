@@ -18,6 +18,10 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.acesso;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import java.security.cert.CertificateParsingException;
 import java.sql.SQLException;
 import java.util.Date;
@@ -29,6 +33,7 @@ import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.cp.CpIdentidade;
 import br.gov.jfrj.siga.cp.CpTipoIdentidade;
 import br.gov.jfrj.siga.dp.CpPersonalizacao;
+import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
 import br.gov.jfrj.siga.dp.DpSubstituicao;
 import br.gov.jfrj.siga.dp.dao.CpDao;
@@ -54,7 +59,7 @@ public class UsuarioAutenticado {
 				DpPessoa pessoa = CpDao.getInstance().getPessoaPorPrincipal(
 						principal);
 				if (pessoa == null)
-					throw new AplicacaoException("Pessoa não identificada para a matrícula '"+ principal + "'.");
+					throw new AplicacaoException("Pessoa não identificada para o usuário '"+ principal + "'.");
 				CpTipoIdentidade tpId = CpDao.getInstance().consultar(
 						CpTipoIdentidade.CERTIFICADO, CpTipoIdentidade.class, false);
 				if (tpId == null)
@@ -69,8 +74,6 @@ public class UsuarioAutenticado {
 				Date dt = dao().consultarDataEHoraDoServidor();
 				idCertNova.setDtCriacaoIdentidade(dt);
 				idCertNova.setDscSenhaIdentidade(null);
-				idCertNova.setDscSenhaIdentidadeCripto(null);
-				idCertNova.setDscSenhaIdentidadeCriptoSinc(null);
 				// TODO: verificar o porquï¿½ da nï¿½o gravaï¿½ï¿½o da identidade
 				dao().iniciarTransacao();
 				// dao().gravar(idCertNova);
@@ -85,11 +88,9 @@ public class UsuarioAutenticado {
 			carregarUsuario(idCertEncontrada, ioc);
 		}
 	}
-	
 
-	@SuppressWarnings("static-access")
-	public static void carregarUsuario(CpIdentidade id, ConheceUsuario ioc)
-			throws AplicacaoException, SQLException {
+	public static void carregarUsuario(CpIdentidade id, ConheceUsuario ioc) throws AplicacaoException, SQLException {
+
 		Date dt = dao().consultarDataEHoraDoServidor();
 		if (!id.ativaNaData(dt)) {
 			CpIdentidade idAtual = dao().obterIdentidadeAtual(id);
@@ -97,8 +98,9 @@ public class UsuarioAutenticado {
 				dao().invalidarCache(id);
 				id = idAtual;
 			}
-			if (!id.ativaNaData(dt)) 
+			if (!id.ativaNaData(dt))  {
 				throw new AplicacaoException("O acesso não será permitido porque identidade está inativa desde '"+ id.getDtExpiracaoDDMMYYYY() + "'.");
+			}
 		}
 		if (id.isBloqueada()) {
 			throw new AplicacaoException("O acesso não será permitido porque esta identidade está bloqueada.");
@@ -109,9 +111,7 @@ public class UsuarioAutenticado {
 
 		CpPersonalizacao per = dao().consultarPersonalizacao(ioc.getCadastrante());
 
-		if ((per != null)
-				&& ((per.getPesSubstituindo() != null) || (per
-						.getLotaSubstituindo() != null))) {
+		if (nonNull(per) && (nonNull(per.getPesSubstituindo()) || nonNull(per.getLotaSubstituindo()))) {
 
 			DpSubstituicao dpSubstituicao = new DpSubstituicao();
 			dpSubstituicao.setSubstituto(ioc.getCadastrante());
@@ -119,15 +119,15 @@ public class UsuarioAutenticado {
 
 			ioc.setTitular(per.getPesSubstituindo());
 			ioc.setLotaTitular(per.getLotaSubstituindo());
-
 		}
 
-		if (ioc.getLotaTitular() == null && ioc.getTitular() != null)
-			ioc.setLotaTitular(ioc.getTitular().getLotacao());
-		if (ioc.getTitular() == null)
+		if (ioc.getTitular() == null) {
 			ioc.setTitular(ioc.getCadastrante());
-		if (ioc.getLotaTitular() == null)
+		}
+		if (ioc.getLotaTitular() == null) {
 			ioc.setLotaTitular(ioc.getTitular().getLotacao());
+		}
+		ioc.setOutrasLotacoes(carregarOutrasLotacoesMesmoCpf(id));
 	}
 
 	/**
@@ -135,59 +135,15 @@ public class UsuarioAutenticado {
 	 * @throws SQLException
 	 */
 	public static void carregarUsuarioAutenticado(String principal,	ConheceUsuario ioc) throws Exception {
-
 		CpIdentidade id = dao().consultaIdentidadeCadastrante(principal, true);
 		carregarUsuario(id, ioc);
-		/*
-		 * if (id.isBloqueada()) { throw new AplicacaoException(
-		 * "O acesso nï¿½o serï¿½ permitido porque esta identidade estï¿½ bloqueada."
-		 * ); }
-		 * 
-		 * ioc.setIdentidadeCadastrante(id);
-		 * ioc.setCadastrante(id.getPessoaAtual());
-		 * 
-		 * CpPersonalizacao per = dao().consultarPersonalizacao(
-		 * ioc.getCadastrante());
-		 * 
-		 * // // Verifica se o usuï¿½rio estï¿½ simulando alguï¿½m. // if (per != null
-		 * && per.getUsuarioSimulando() != null) { // principal =
-		 * per.getUsuarioSimulando().getNmUsuario(); // usu =
-		 * dao().consultaUsuarioCadastranteAtivo(principal); //
-		 * ioc.setCadastrante(usu.getPessoa()); // // per =
-		 * dao().consultarPersonalizacao(ioc.getCadastrante()); // }
-		 * 
-		 * if ((per != null) && ((per.getPesSubstituindo() != null) || (per
-		 * .getLotaSubstituindo() != null))) {
-		 * 
-		 * DpSubstituicao dpSubstituicao = new DpSubstituicao();
-		 * dpSubstituicao.setSubstituto(ioc.getCadastrante());
-		 * dpSubstituicao.setLotaSubstituto(ioc.getCadastrante().getLotacao());
-		 * 
-		 * List<DpSubstituicao> substituicoesPermitidas = dao()
-		 * .consultarSubstituicoesPermitidas(dpSubstituicao);
-		 * 
-		 * for (final DpSubstituicao substituicao : substituicoesPermitidas) {
-		 * if (per.getPesSubstituindo() != null) if
-		 * (per.getPesSubstituindo().equivale( substituicao.getTitular())) {
-		 * ioc.setTitular(per.getPesSubstituindo()); break; }
-		 * 
-		 * if (per.getLotaSubstituindo() != null) if
-		 * (per.getLotaSubstituindo().equivale( substituicao.getLotaTitular()))
-		 * { ioc.setLotaTitular(per.getLotaSubstituindo()); break; }
-		 * 
-		 * }
-		 * 
-		 * if (ioc.getTitular() == null && ioc.getLotaTitular() == null) {
-		 * per.setPesSubstituindo(null); per.setLotaSubstituindo(null);
-		 * dao().iniciarTransacao(); dao().gravar(per); dao().commitTransacao();
-		 * } }
-		 * 
-		 * if (ioc.getLotaTitular() == null && ioc.getTitular() != null)
-		 * ioc.setLotaTitular(ioc.getTitular().getLotacao()); if
-		 * (ioc.getTitular() == null) ioc.setTitular(ioc.getCadastrante()); if
-		 * (ioc.getLotaTitular() == null)
-		 * ioc.setLotaTitular(ioc.getTitular().getLotacao());
-		 */
+	}
+
+	public static List<DpLotacao> carregarOutrasLotacoesMesmoCpf(CpIdentidade identidade) {
+		if (isNull(identidade) || isNull(identidade.getDpPessoa()) || isNull(identidade.getDpPessoa().getCpfPessoa())) {
+			return emptyList();
+		}
+		return dao().carregarOutrasLotacoesMesmoCpf(identidade);
 	}
 
 	/**

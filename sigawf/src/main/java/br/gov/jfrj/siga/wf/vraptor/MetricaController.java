@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jbpm.graph.def.ProcessDefinition;
 import org.jbpm.taskmgmt.def.Task;
@@ -25,13 +27,13 @@ import br.gov.jfrj.siga.wf.relatorio.RelTempoDocDetalhado;
 
 @Resource
 public class MetricaController extends WfController {
+
 	private static final Long REL_ESTATISTICAS_GERAIS = 1L;
 	private static final Long REL_TEMPO_DE_DOCUMENTOS = 2L;
 	private static final Long REL_TEMPO_DE_DOCUMENTOS_DETALHADO = 3L;
 
-	public MetricaController(HttpServletRequest request, Result result,
-			WfDao dao, SigaObjects so, WfUtil util) {
-		super(request, result, dao, so, util);
+	public MetricaController(HttpServletRequest request, HttpServletResponse response, Result result, WfDao dao, SigaObjects so, WfUtil util, EntityManager em) {
+		super(request, response, result, dao, so, util, em);
 	}
 
 	/**

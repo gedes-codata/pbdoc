@@ -1,5 +1,7 @@
 package br.gov.jfrj.siga.vraptor;
 
+import org.apache.commons.lang.StringUtils;
+
 import br.com.caelum.vraptor.http.route.PathAnnotationRoutesParser;
 import br.com.caelum.vraptor.http.route.Router;
 import br.com.caelum.vraptor.ioc.ApplicationScoped;
@@ -15,14 +17,12 @@ public class SigaRoutesParser extends PathAnnotationRoutesParser {
 
 	protected String extractControllerNameFrom(Class<?> type) {
 		String prefix = extractPrefix(type);
-		if ("".equals(prefix)) {
+		if (StringUtils.EMPTY.equals(prefix)) {
 			String baseName = lowerFirstCharacter(type.getSimpleName());
 			if ("appController".equals(baseName))
 				return "/app";
 			if (baseName.endsWith("Controller")) {
-				return "/app/"
-						+ baseName.substring(0,
-								baseName.lastIndexOf("Controller"));
+				return "/app/" + baseName.substring(0, baseName.lastIndexOf("Controller"));
 			}
 			return "/app/" + baseName;
 		} else {

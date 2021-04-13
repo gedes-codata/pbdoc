@@ -7,6 +7,7 @@ import java.util.Date;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
 import br.com.caelum.vraptor.Path;
@@ -44,8 +45,8 @@ public class SolicitacaoEmailController extends SrController {
 		}
 	}
 	
-	public SolicitacaoEmailController(HttpServletRequest request, Result result,  SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, CpDao.getInstance(), so, em, srValidator);
+	public SolicitacaoEmailController(HttpServletRequest request, HttpServletResponse response, Result result,  SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, CpDao.getInstance(), so, em, srValidator);
 	}
 	
 	private UploadedFile getArquivoMsg(final byte[] mensagem, final String assunto) {

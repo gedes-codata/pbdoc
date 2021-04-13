@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -19,8 +20,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Resource
 public class PrincipalController extends PpController {
     
-    public PrincipalController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em) {
-        super(request, result, PpDao.getInstance(), so, em);
+    public PrincipalController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+        super(request, response, result, PpDao.getInstance(), so, em);
     }
 
     @Path("/app/principal")

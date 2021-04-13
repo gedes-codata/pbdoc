@@ -18,6 +18,8 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.acesso;
 
+import java.util.List;
+
 import br.gov.jfrj.siga.cp.CpIdentidade;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
@@ -34,10 +36,14 @@ public interface ConheceUsuario {
 
 	void setTitular(DpPessoa pesSubstituindo);
 
-	void setLotaTitular(DpLotacao lotaSubstituindo);
-
 	DpPessoa getTitular();
 
+	void setLotaTitular(DpLotacao lotaSubstituindo);
+
 	DpLotacao getLotaTitular();
+
+	void setOutrasLotacoes(List<DpLotacao> outrasLotacoes);
+
+	List<DpLotacao> getOutrasLotacoes();
 
 }

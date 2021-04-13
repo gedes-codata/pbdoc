@@ -7,7 +7,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
 import org.jfree.util.Log;
 
@@ -29,8 +31,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("app/acao")
 public class AcaoController extends SrController {
 
-	public AcaoController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, dao, so, em, srValidator);
+	public AcaoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, dao, so, em, srValidator);
 	}
 
 	private static final String ACAO = "acao";
@@ -137,10 +139,10 @@ public class AcaoController extends SrController {
 	}
 
 	private void validarFormEditarAcao(SrAcao acao) {
-		if ("".equals(acao.getSiglaAcao()))
+		if (StringUtils.EMPTY.equals(acao.getSiglaAcao()))
 			srValidator.addError("siglaAcao", "Código não informado");
 
-		if ("".equals(acao.getTituloAcao()))
+		if (StringUtils.EMPTY.equals(acao.getTituloAcao()))
 			srValidator.addError("tituloAcao", "Titulo não informado");
 
 		if (srValidator.hasErrors())

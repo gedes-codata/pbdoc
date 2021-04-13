@@ -23,7 +23,7 @@ import br.gov.jfrj.ldap.LdapDaoImpl;
 import br.gov.jfrj.siga.base.AplicacaoException;
 import br.gov.jfrj.siga.cp.CpIdentidade;
 import br.gov.jfrj.siga.dp.CpOrgaoUsuario;
-import br.gov.jfrj.siga.dp.dao.CpDao;
+import br.gov.jfrj.siga.gi.integracao.IntegracaoLdapProperties;
 
 public class IntegracaoLdap {
 
@@ -56,7 +56,6 @@ public class IntegracaoLdap {
 
 		String cnPessoa = id.getDpPessoa().getSesbPessoa() + id.getDpPessoa().getMatricula();
 		ldap.definirSenha("CN=" + cnPessoa +  "," + prop.getDnUsuarios() , senha);
-		limparSenhaSincDB(id);		
 	}
 
 	public ILdapDao conectarLDAP(IntegracaoLdapProperties prop) {
@@ -65,13 +64,6 @@ public class IntegracaoLdap {
 		return ldap;
 	}
 
-	private void limparSenhaSincDB(CpIdentidade id) throws AplicacaoException {
-		CpDao dao = CpDao.getInstance();
-//		dao.iniciarTransacao();
-		id.setDscSenhaIdentidadeCriptoSinc(null);
-//		dao.commitTransacao();
-	}
-	
 	public boolean integrarComLdap(CpOrgaoUsuario orgaoUsuario){
 		String localidade = orgaoUsuario.getAcronimoOrgaoUsu().toLowerCase();
 		IntegracaoLdapProperties prop = configurarProperties(localidade);

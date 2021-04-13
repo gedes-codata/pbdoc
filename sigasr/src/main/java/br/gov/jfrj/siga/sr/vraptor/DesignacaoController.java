@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -28,9 +29,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("app/designacao")
 public class DesignacaoController extends SrController {
 
-	public DesignacaoController(HttpServletRequest request, Result result,
-			SigaObjects so, EntityManager em, SrValidator srValidator) {
-		super(request, result, CpDao.getInstance(), so, em, srValidator);
+	public DesignacaoController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, CpDao.getInstance(), so, em, srValidator);
 	}
 
 	@AssertAcesso(ADM_ADMINISTRAR)

@@ -62,9 +62,24 @@
   <function-signature>java.lang.String maiusculasEMinusculas(java.lang.String)</function-signature>
  </function>
  <function>
+  <name>maiusculasEMinusculasPrimeiraPalavra</name>
+  <function-class>br.gov.jfrj.siga.jee.SigaLibsEL</function-class>
+  <function-signature>java.lang.String maiusculasEMinusculasPrimeiraPalavra(java.lang.String)</function-signature>
+ </function>
+ <function>
+  <name>maiusculasEMinusculasPrimeiraEUltimaPalavra</name>
+  <function-class>br.gov.jfrj.siga.jee.SigaLibsEL</function-class>
+  <function-signature>java.lang.String maiusculasEMinusculasPrimeiraEUltimaPalavra(java.lang.String)</function-signature>
+ </function>
+ <function>
   <name>resource</name>
   <function-class>br.gov.jfrj.siga.jee.SigaLibsEL</function-class>
   <function-signature>java.lang.Object resource(java.lang.String)</function-signature>
+ </function>
+ <function>
+  <name>env</name>
+  <function-class>br.gov.jfrj.siga.jee.SigaLibsEL</function-class>
+  <function-signature>java.lang.String env(java.lang.String)</function-signature>
  </function>
  <function>
   <name>espera</name>

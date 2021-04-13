@@ -49,6 +49,8 @@ import br.gov.jfrj.siga.sinc.lib.SincronizavelSuporte;
 public class CpOrgao extends AbstractCpOrgao implements Serializable,
 		Selecionavel, Historico, Sincronizavel {
 
+	public static final String ORGAO_PADRAO = "ZZZ";
+
 	/**
 	 * 
 	 */
@@ -194,16 +196,16 @@ public class CpOrgao extends AbstractCpOrgao implements Serializable,
 	// Solução para não precisar criar HIS_ATIVO em todas as tabelas que herdam de HistoricoSuporte.
 	//
 	@Column(name = "HIS_ATIVO")
-	private Integer hisAtivo;
+	private boolean hisAtivo;
 
 	@Override
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.hisAtivo = super.getHisAtivo();
 		return this.hisAtivo;
 	}
 	
 	@Override
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		super.setHisAtivo(hisAtivo);
 		this.hisAtivo = getHisAtivo();
 	}

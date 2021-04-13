@@ -237,7 +237,7 @@ public class Missao extends TpModel implements ConvertableEntity, Comparable<Mis
 	}
 
 	public static List<Missao> buscarEmAndamento() {
-		return Missao.AR.find("trunc(dataHoraSaida) = trunc(sysdate)").fetch();
+		return Missao.AR.find("DATE(dataHoraSaida) = DATE(CURRENT_TIMESTAMP)").fetch();
 	}
 
 	public static Missao buscar(String sequence) throws Exception {
@@ -325,8 +325,8 @@ public class Missao extends TpModel implements ConvertableEntity, Comparable<Mis
 		String qrl = "SELECT m FROM Missao m WHERE " + filtroEntidade
 				+
 				// "  estadoMissao NOT IN ('" + EstadoMissao.CANCELADA + "','" + EstadoMissao.FINALIZADA + "')" +
-				"  estadoMissao NOT IN ('" + EstadoMissao.CANCELADA + "')" + " AND trunc(dataHoraSaida) <= trunc(" + dataFormatadaOracle + ")"
-				+ " AND (dataHoraRetorno IS NULL OR trunc(dataHoraRetorno) >= trunc(" + dataFormatadaOracle + "))";
+				"  estadoMissao NOT IN ('" + EstadoMissao.CANCELADA + "')" + " AND DATE(dataHoraSaida) <= DATE(" + dataFormatadaOracle + ")"
+				+ " AND (dataHoraRetorno IS NULL OR DATE(dataHoraRetorno) >= DATE(" + dataFormatadaOracle + "))";
 
 		Query qry = AR.em().createQuery(qrl);
 		try {
@@ -357,7 +357,7 @@ public class Missao extends TpModel implements ConvertableEntity, Comparable<Mis
 		if (!dataFimFormatadaOracle.isEmpty()) {
 			qrl += " AND dataHoraSaida BETWEEN " + dataInicioFormatadaOracle + " AND " + dataFimFormatadaOracle;
 		} else {
-			qrl += " AND trunc(dataHoraSaida) <= trunc(" + dataInicioFormatadaOracle + ")";
+			qrl += " AND DATE(dataHoraSaida) <= DATE(" + dataInicioFormatadaOracle + ")";
 		}
 
 

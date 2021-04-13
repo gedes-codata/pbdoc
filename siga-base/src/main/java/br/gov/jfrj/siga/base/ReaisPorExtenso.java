@@ -54,7 +54,7 @@ public class ReaisPorExtenso {
 	 * Construtor
 	 */
 	public ReaisPorExtenso() {
-		nro = new ArrayList();
+		nro = new ArrayList<>();
 	}
 
 	/**

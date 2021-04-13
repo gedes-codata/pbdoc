@@ -19,8 +19,6 @@
 package br.gov.jfrj.siga.wf;
 
 import br.gov.jfrj.siga.cp.CpConfiguracao;
-import br.gov.jfrj.siga.dp.DpCargo;
-import br.gov.jfrj.siga.dp.DpFuncaoConfianca;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
 

@@ -1,6 +1,5 @@
 package br.gov.jfrj.siga.vraptor;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,8 +7,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.io.FileUtils;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -36,20 +34,20 @@ public class DpCargoController extends
 	
 	private Long orgaoUsu;
 
-	public DpCargoController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em) {
-		super(request, result, dao, so, em);
+	public DpCargoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+		super(request, response, result, dao, so, em);
 	}
 	
 	@Get
 	@Post
 	@Path({"/app/cargo/buscar","/cargo/buscar.action"})
-	public void busca(String nome, Long idOrgaoUsu, Integer offset, String postback) throws Exception{
+	public void busca(String nome, Long idOrgaoUsu, Integer paramoffset, String postback) throws Exception{
 		if (postback == null)
 			orgaoUsu = getLotaTitular().getOrgaoUsuario().getIdOrgaoUsu();
 		else
 			orgaoUsu = idOrgaoUsu;
 		
-		this.getP().setOffset(offset);
+		this.getP().setOffset(paramoffset);
 		
 		if (nome == null)
 			nome = "";
@@ -64,7 +62,7 @@ public class DpCargoController extends
 		result.include("idOrgaoUsu",orgaoUsu);
 		result.include("nome",nome);
 		result.include("postbak",postback);
-		result.include("offset",offset);
+		result.include("offset",paramoffset);
 	}
 
 	@Override
@@ -102,7 +100,7 @@ public class DpCargoController extends
 		this.setNome(sigla);
 		String resultado =  super.aSelecionar(sigla);
 		
-		if (resultado == "ajax_retorno"){
+		if ("ajax_retorno".equals(resultado)){
 			result.include("sel", getSel());
 			result.use(Results.page()).forwardTo("/WEB-INF/jsp/ajax_retorno.jsp");
 		}else{
@@ -111,9 +109,9 @@ public class DpCargoController extends
 	}
 	
 	@Get("app/cargo/listar")
-	public void lista(Integer offset, Long idOrgaoUsu, String nome) throws Exception {
+	public void lista(Integer paramoffset, Long idOrgaoUsu, String nome) throws Exception {
 		
-		if("ZZ".equals(getTitular().getOrgaoUsuario().getSigla())) {
+		if("ZZZ".equals(getTitular().getOrgaoUsuario().getSigla())) {
 			result.include("orgaosUsu", dao().listarOrgaosUsuarios());
 		} else {
 			CpOrgaoUsuario ou = CpDao.getInstance().consultarPorSigla(getTitular().getOrgaoUsuario());
@@ -123,12 +121,12 @@ public class DpCargoController extends
 		}
 		if(idOrgaoUsu != null) {
 			DpCargoDaoFiltro dpCargo = new DpCargoDaoFiltro();
-			if(offset == null) {
-				offset = 0;
+			if(paramoffset == null) {
+				paramoffset = 0;
 			}
 			dpCargo.setIdOrgaoUsu(idOrgaoUsu);
 			dpCargo.setNome(Texto.removeAcento(nome));
-			setItens(CpDao.getInstance().consultarPorFiltro(dpCargo, offset, 15));
+			setItens(CpDao.getInstance().consultarPorFiltro(dpCargo, paramoffset, 15));
 			result.include("itens", getItens());
 			result.include("tamanho", dao().consultarQuantidade(dpCargo));
 			
@@ -136,7 +134,7 @@ public class DpCargoController extends
 			result.include("nome", nome);
 		}
 		setItemPagina(15);
-		result.include("currentPageNumber", calculaPaginaAtual(offset));
+		result.include("currentPageNumber", calculaPaginaAtual(paramoffset));
 	}
 	
 	@Get("/app/cargo/editar")
@@ -153,7 +151,7 @@ public class DpCargoController extends
 			}
 		}
 		
-		if("ZZ".equals(getTitular().getOrgaoUsuario().getSigla())) {
+		if("ZZZ".equals(getTitular().getOrgaoUsuario().getSigla())) {
 			result.include("orgaosUsu", dao().listarOrgaosUsuarios());
 		} else {
 			CpOrgaoUsuario ou = CpDao.getInstance().consultarPorSigla(getTitular().getOrgaoUsuario());
@@ -169,7 +167,7 @@ public class DpCargoController extends
 	public void editarGravar(final Long id, 
 							 final String nmCargo, 
 							 final Long idOrgaoUsu) throws Exception{
-		assertAcesso("FE:Ferramentas;CAD_CARGO: Cadastrar Cargo");
+		assertAcesso("GI:Módulo de Gestão de Identidade;CAD_CARGO: Cadastrar Cargo");
 		
 		if(nmCargo == null)
 			throw new AplicacaoException("Nome do cargo não informado");
@@ -177,6 +175,9 @@ public class DpCargoController extends
 		if(idOrgaoUsu == null)
 			throw new AplicacaoException("Órgão não informada");
 		
+		if(nmCargo != null && !nmCargo.matches("[a-zA-ZàáâãéêíóôõúçÀÁÂÃÉÊÍÓÔÕÚÇ 0-9.]+")) 
+			throw new AplicacaoException("Nome com caracteres não permitidos");
+				
 		List<DpPessoa> listPessoa = null;
 		
 		DpCargo cargo = new DpCargo();
@@ -223,11 +224,19 @@ public class DpCargoController extends
 			dao().rollbackTransacao();
 			throw new AplicacaoException("Erro na gravação", 0, e);
 		}
-		this.result.redirectTo(this).lista(0, null, "");
+
+		if (id  == null) {
+			result.include("mensagemUsuario", "Cargo cadastrado com sucesso!!");
+		} else {
+			result.include("mensagemUsuario", "Cargo alterado com sucesso!!");
+		}
+		
+		this.result.forwardTo(this).lista(0, null, "");
 	}
+
 	@Get("/app/cargo/carregarExcel")
 	public void carregarExcel() {
-		if("ZZ".equals(getTitular().getOrgaoUsuario().getSigla())) {
+		if("ZZZ".equals(getTitular().getOrgaoUsuario().getSigla())) {
 			result.include("orgaosUsu", dao().listarOrgaosUsuarios());
 		} else {
 			result.include("nmOrgaousu", getTitular().getOrgaoUsuario().getNmOrgaoUsu());	
@@ -242,25 +251,20 @@ public class DpCargoController extends
 		try {
 			String nomeArquivo = arquivo.getFileName();
 			String extensao = nomeArquivo.substring(nomeArquivo.lastIndexOf("."), nomeArquivo.length());
-			
-			File file = new File("arq" + extensao);
 
-			file.createNewFile();
-			FileUtils.copyInputStreamToFile(arquivo.getFile(), file);
-			
 			CpOrgaoUsuario orgaoUsuario = new CpOrgaoUsuario();
-			if(idOrgaoUsu != null && !"".equals(idOrgaoUsu)) {
+			if (idOrgaoUsu != null) {
 				orgaoUsuario.setIdOrgaoUsu(idOrgaoUsu);
 			} else {
 				orgaoUsuario = getTitular().getOrgaoUsuario();
 			}
 			
 			CpBL cpbl = new CpBL();
-			inputStream = cpbl.uploadCargo(file, orgaoUsuario, extensao);
+			inputStream = cpbl.uploadCargo(arquivo.getFile(), orgaoUsuario, extensao);
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
-			
+
 		if(inputStream == null) {
 			result.include("msg", "Arquivo processado com sucesso!");
 			carregarExcel();

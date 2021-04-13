@@ -41,13 +41,13 @@ import java.util.logging.Logger;
 
 import javax.naming.NamingException;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.cfg.Configuration;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import br.gov.jfrj.siga.base.AplicacaoException;
-import br.gov.jfrj.siga.base.Texto;
 import br.gov.jfrj.siga.cp.bl.CpAmbienteEnumBL;
 import br.gov.jfrj.siga.ex.ExClassificacao;
 import br.gov.jfrj.siga.ex.ExFormaDocumento;
@@ -281,7 +281,7 @@ public class SigaExSinc {
 			s = s.substring(1);
 		if (s.endsWith("/"))
 			s = s.substring(0, s.length() - 1);
-		if ("".equals(s))
+		if (StringUtils.EMPTY.equals(s))
 			return null;
 		return s;
 	}

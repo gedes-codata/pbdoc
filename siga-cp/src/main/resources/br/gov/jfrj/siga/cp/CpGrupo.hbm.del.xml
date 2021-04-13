@@ -32,7 +32,7 @@
 		<many-to-one name="hisIdcIni" column="HIS_IDC_INI" class="CpIdentidade" />
 		<property name="hisDtFim" column="HIS_DT_FIM" type="java.util.Date" />
 		<many-to-one name="hisIdcFim" column="HIS_IDC_FIM" class="CpIdentidade" />
-		<property name="hisAtivo" column="HIS_ATIVO" type="java.lang.Integer" />
+		<property name="hisAtivo" column="HIS_ATIVO" type="boolean" />
 
 
 		<subclass name="br.gov.jfrj.siga.cp.CpPerfil"
@@ -49,13 +49,13 @@
  	<![CDATA[from br.gov.jfrj.siga.cp.CpGrupo where dataFimGrupo is null order by siglaGrupo ]]>
 	</query>
 	<query name="consultarQuantidadeCpGrupo">
-	<![CDATA[select count(*) from br.gov.jfrj.siga.cp.CpGrupo where hisAtivo = 1]]>
+	<![CDATA[select count(*) from br.gov.jfrj.siga.cp.CpGrupo where hisAtivo = true]]>
 	</query>
 	<query name="consultarCpGrupoPorCpTipoGrupoId">
 		<![CDATA[
 			from br.gov.jfrj.siga.cp.CpGrupo cpgrp
 			where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo)
-			and cpgrp.hisAtivo = 1
+			and cpgrp.hisAtivo = true
 			order by cpgrp.siglaGrupo
 		]]>
 	</query>
@@ -63,7 +63,7 @@
 		<![CDATA[
 			select count(*) from br.gov.jfrj.siga.cp.CpGrupo cpgrp
 			where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo)
-			and cpgrp.hisAtivo = 1
+			and cpgrp.hisAtivo = true
 		]]>
 	</query>
 	
@@ -72,7 +72,7 @@
 			select count(*) from br.gov.jfrj.siga.cp.CpGrupo cpgrp
 			where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo)
 			and (upper(cpgrp.siglaGrupo) like upper('%'||:siglaGrupo||'%') or upper(cpgrp.dscGrupo) like upper('%'||:siglaGrupo||'%'))
-			and cpgrp.hisAtivo = 1
+			and cpgrp.hisAtivo = true
 		]]>
 	</query>
 	
@@ -81,7 +81,7 @@
 			from br.gov.jfrj.siga.cp.CpGrupo cpgrp
 			where ( cpgrp.cpTipoGrupo.idTpGrupo = :idTpGrupo)
 			and (upper(cpgrp.siglaGrupo) like upper('%'||:siglaGrupo||'%') or upper(cpgrp.dscGrupo) like upper('%'||:siglaGrupo||'%'))
-			and cpgrp.hisAtivo = 1
+			and cpgrp.hisAtivo = true
 			order by cpgrp.siglaGrupo
 		]]>
 	</query>
@@ -90,7 +90,7 @@
 		<![CDATA[select g from br.gov.jfrj.siga.cp.CpGrupo g where
 			upper(g.siglaGrupo) = upper(:siglaGrupo)
 			and (:idOrgaoUsu = null or :idOrgaoUsu = 0 or g.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu)
-	       	and g.hisAtivo = 1]]>
+	       	and g.hisAtivo = true]]>
 	</query>
 
 </hibernate-mapping>

@@ -18,6 +18,8 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.ex.relatorio.dinamico.relatorios;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -29,9 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.view.JasperViewer;
 
 import org.hibernate.Query;
 
@@ -48,6 +47,8 @@ import br.gov.jfrj.siga.ex.ExMobil;
 import br.gov.jfrj.siga.ex.bl.Ex;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.dao.HibernateUtil;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.view.JasperViewer;
 
 public class RelConsultaDocEntreDatas extends RelatorioTemplate {
 
@@ -60,19 +61,19 @@ public class RelConsultaDocEntreDatas extends RelatorioTemplate {
 	public RelConsultaDocEntreDatas(Map<String, String> parametros) throws Exception {
 		super(parametros);
 		
-		if (!isPreenchido(parametros.get("secaoUsuario"))) {
+		if (isBlank(parametros.get("secaoUsuario"))) {
 			throw new AplicacaoException("Parâmetro secaoUsuario não informado!");
 		}
-		if (!isPreenchido(parametros.get("lotacao"))) {
+		if (isBlank(parametros.get("lotacao"))) {
 			throw new AplicacaoException("Parâmetro lotação não informado!");
 		}
-		if (!isPreenchido(parametros.get("dataInicial"))) {
+		if (isBlank(parametros.get("dataInicial"))) {
 			throw new AplicacaoException("Parâmetro data inicial não informado!");
 		}
-		if (!isPreenchido(parametros.get("dataFinal"))) {
+		if (isBlank(parametros.get("dataFinal"))) {
 			throw new AplicacaoException("Parâmetro data final não informado!");
 		}
-		if (!isPreenchido(parametros.get("link_siga"))) {
+		if (isBlank(parametros.get("link_siga"))) {
 			throw new AplicacaoException("Parâmetro link_siga não informado!");
 		}
 		
@@ -89,11 +90,7 @@ public class RelConsultaDocEntreDatas extends RelatorioTemplate {
 		this.dataFinal = stringToDate(parametros.get("dataFinal") + " 23:59:59");	
 		this.link = parametros.get("link_siga"); 
 	}
-	
-	private boolean isPreenchido(String texto) {
-		return texto != null && !"".equals(texto);
-	}
-	
+
 	private DpLotacao buscarLotacaoPor(Long id) {
 		CpDao dao = CpDao.getInstance();
 		DpLotacao lotacao = dao.consultar(id, DpLotacao.class, false);

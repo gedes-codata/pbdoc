@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
@@ -38,8 +39,8 @@ import br.gov.jfrj.siga.dp.dao.CpDao;
 @Resource
 public class PerfilJEEController extends GrupoController {
 
-	public PerfilJEEController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em) {
-		super(request, result, CpDao.getInstance(), so, em);
+	public PerfilJEEController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, CpDao.getInstance(), so, em);
 		
 		result.on(AplicacaoException.class).forwardTo(this).appexception();
 		result.on(Exception.class).forwardTo(this).exception();
@@ -135,7 +136,7 @@ public class PerfilJEEController extends GrupoController {
 	@Get("/app/gi/perfilJEE/selecionar")
 	public void selecionar(String sigla) {
 		String resultado =  super.aSelecionar(sigla);
-		if (resultado == "ajax_retorno"){
+		if ("ajax_retorno".equals(resultado)){
 			result.include("sel", getSel());
 			result.use(Results.page()).forwardTo("/WEB-INF/jsp/ajax_retorno.jsp");
 		}else{

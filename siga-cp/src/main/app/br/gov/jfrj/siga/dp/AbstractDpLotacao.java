@@ -58,7 +58,7 @@ import br.gov.jfrj.siga.sinc.lib.Desconsiderar;
 		@NamedQuery(name = "consultarPorSiglaDpLotacao", query = "select lot from DpLotacao lot where"
 				+ "      upper(lot.siglaLotacao) = upper(:siglaLotacao)"
 				+ "      and (:idOrgaoUsu = null or :idOrgaoUsu = 0 or lot.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu)"
-				+ "	     and lot.dataFimLotacao = null"),
+				+ "	     and lot.dataFimLotacao is null"),
 		@NamedQuery(name = "consultarPorSiglaDpLotacaoComLike", query = "select lot from DpLotacao lot where"
 				+ "        upper(lot.siglaLotacao) like upper('%' || :siglaLotacao || '%') "
 				+ "        and (:idOrgaoUsu = null or :idOrgaoUsu = 0 or lot.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu)"
@@ -75,25 +75,24 @@ import br.gov.jfrj.siga.sinc.lib.Desconsiderar;
 		@NamedQuery(name = "consultarQuantidadeDpLotacao", query = "select count(lot) from DpLotacao lot "
 				+ "  where ((upper(lot.nomeLotacaoAI) like upper('%' || :nome || '%')) or (upper(lot.siglaLotacao) like upper('%' || :nome || '%')))"
 				+ "	and (:idOrgaoUsu = null or :idOrgaoUsu = 0 or lot.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu)"
-				+ "	and lot.dataFimLotacao = null"
-				+ "	order by lot.nomeLotacao"),
+				+ "	and lot.dataFimLotacao = null"),
 		@NamedQuery(name = "consultarPorFiltroDpLotacaoInclusiveFechadas", query = "from DpLotacao where idLotacao in ("
 				+ "  select max(lot.idLotacao)"
 				+ "  from DpLotacao lot"
 				+ "  where ((upper(lot.nomeLotacaoAI) like upper('%' || :nome || '%')) or (upper(lot.siglaLotacao) like upper('%' "
 				+ "  || :nome || '%')))"
 				+ "	and (:idOrgaoUsu = null or :idOrgaoUsu = 0 or lot.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu)"
-				+ "  group by lot.idLotacaoIni)"),
+				+ "  group by lot.idLotacaoIni) order by upper(nomeLotacaoAI)"),
 		@NamedQuery(name = "consultarQuantidadeDpLotacaoInclusiveFechadas", query = "select count(distinct lot.idLotacaoIni)"
 				+ "	from DpLotacao lot"
 				+ "	where ((upper(lot.nomeLotacaoAI) like upper('%' || :nome || '%')) or (upper(lot.siglaLotacao) like upper('%' || :nome || '%')))"
 				+ "	and (:idOrgaoUsu = null or :idOrgaoUsu = 0 or lot.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu)"),
-		@NamedQuery(name = "consultarPorNomeOrgaoDpLotacao", query = "select lot from DpLotacao lot where upper(lot.nomeLotacaoAI) = upper(:nome) and lot.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu")})
+		@NamedQuery(name = "consultarPorNomeOrgaoDpLotacao", query = "select lot from DpLotacao lot where upper(REMOVE_ACENTO(lot.nomeLotacao)) = upper(REMOVE_ACENTO(:nome)) and lot.orgaoUsuario.idOrgaoUsu = :idOrgaoUsu")})
 @NamedNativeQueries({
 		@NamedNativeQuery(name = "consultarQuantidadeDocumentosPorDpLotacao", query = "SELECT count(1) FROM corporativo.dp_lotacao lotacao"
 			+ " left join corporativo.cp_marca marca on lotacao.ID_LOTACAO = marca.ID_LOTACAO_INI"
-			+ " WHERE(dt_ini_marca IS NULL OR dt_ini_marca < sysdate)"
-			+ " AND(dt_fim_marca IS NULL OR dt_fim_marca > sysdate)"
+			+ " WHERE(dt_ini_marca IS NULL OR dt_ini_marca < CURRENT_DATE)"
+			+ " AND(dt_fim_marca IS NULL OR dt_fim_marca > CURRENT_DATE)"
 			+ " AND id_marcador not in (1,10,32)"
 			+ " AND lotacao.id_lotacao_ini = :idLotacao"
 			+ " AND id_tp_marca = :idTipoMarca ")	})
@@ -101,10 +100,10 @@ import br.gov.jfrj.siga.sinc.lib.Desconsiderar;
 public abstract class AbstractDpLotacao extends DpResponsavel implements
 		Serializable {
 
-	@SequenceGenerator(name = "generator", sequenceName = "CORPORATIVO.DP_LOTACAO_SEQ")
 	@Id
 	@GeneratedValue(generator = "generator")
-	@Column(name = "ID_LOTACAO", unique = true, nullable = false)
+	@SequenceGenerator(name = "generator", sequenceName = "CORPORATIVO.DP_LOTACAO_SEQ")
+	@Column(name = "ID_LOTACAO")
 	@Desconsiderar
 	private Long idLotacao;
 
@@ -162,7 +161,7 @@ public abstract class AbstractDpLotacao extends DpResponsavel implements
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_TP_LOTACAO")
 	private CpTipoLotacao cpTipoLotacao;
-
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_LOCALIDADE")
 	private CpLocalidade localidade;

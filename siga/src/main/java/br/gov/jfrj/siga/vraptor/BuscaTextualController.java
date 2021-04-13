@@ -4,6 +4,7 @@ import java.net.URI;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.Cookie;
@@ -26,9 +27,9 @@ public class BuscaTextualController extends SigaController {
 	private static final String IDP_JSESSIONID = "IDP-JSESSIONID";
 	private static final String GSA_SESSION_ID = "GSA_SESSION_ID";
 
-	public BuscaTextualController(HttpServletRequest request, Result result,
+	public BuscaTextualController(HttpServletRequest request, HttpServletResponse response, Result result,
 			CpDao dao, SigaObjects so, EntityManager em) {
-		super(request, result, dao, so, em);
+		super(request, response, result, dao, so, em);
 	}
 
 	@Get("app/busca")

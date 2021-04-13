@@ -1,12 +1,10 @@
 package br.gov.jfrj.siga.pp.vraptor;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
-
-
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -22,9 +20,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("/app/usuarioForm")
 public class UsuarioFormController extends PpController {
 
-    public UsuarioFormController(HttpServletRequest request, Result result,
-            CpDao dao, SigaObjects so, EntityManager em) {
-        super(request, result, PpDao.getInstance(), so, em);
+    public UsuarioFormController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+        super(request, response, result, PpDao.getInstance(), so, em);
     }
     
     @Path("/atualiza")

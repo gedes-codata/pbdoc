@@ -47,7 +47,6 @@ public final class ExMovimentacaoBuilder {
 	private DpPessoaSelecao subscritorSel;
 	private Long idPapel;
 	private Long idMarcador;
-	private String contentType;
 	private String fileName;
 
 	private ExMovimentacaoBuilder() {
@@ -169,7 +168,7 @@ public final class ExMovimentacaoBuilder {
 		final SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 
 		try {
-			mov.setDtMov(df.parse(dtMovString));
+			mov.setData(df.parse(dtMovString));
 		} catch (final Exception e) {
 		}
 
@@ -180,11 +179,11 @@ public final class ExMovimentacaoBuilder {
 
 		if (getDtPubl() != null) {
 			try {
-				mov.setDtMov(df.parse(dtPubl));
+				mov.setData(df.parse(dtPubl));
 			} catch (final ParseException e) {
-				mov.setDtMov(new Date());
+				mov.setData(new Date());
 			} catch (final NullPointerException e) {
-				mov.setDtMov(new Date());
+				mov.setData(new Date());
 			}
 		}
 
@@ -193,7 +192,6 @@ public final class ExMovimentacaoBuilder {
 		} catch (final Exception e) {
 		}
 
-		mov.setConteudoTpMov(contentType);
 		mov.setNmArqMov(fileName);
 
 		if ((mov.getTitular() != null && mov.getSubscritor() == null) || (mov.getLotaTitular() != null && mov.getLotaSubscritor() == null)) {
@@ -299,10 +297,6 @@ public final class ExMovimentacaoBuilder {
 
 	public Long getIdMarcador() {
 		return idMarcador;
-	}
-
-	public String getContentType() {
-		return contentType;
 	}
 
 	public String getFileName() {
@@ -426,11 +420,6 @@ public final class ExMovimentacaoBuilder {
 
 	public ExMovimentacaoBuilder setIdMarcador(Long idMarcador) {
 		this.idMarcador = idMarcador;
-		return this;
-	}
-
-	public ExMovimentacaoBuilder setContentType(String contentType) {
-		this.contentType = contentType;
 		return this;
 	}
 

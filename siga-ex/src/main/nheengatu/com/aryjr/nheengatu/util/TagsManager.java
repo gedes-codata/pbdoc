@@ -41,7 +41,7 @@ import com.lowagie.text.Font;
 public class TagsManager {
 	private static ThreadLocal<TagsManager> instance = new ThreadLocal<TagsManager>();
 
-	public ArrayList states = new ArrayList();
+	public ArrayList states = new ArrayList<>();
 
 	public TagsManager() {
 		states.add(new GraphicsState());

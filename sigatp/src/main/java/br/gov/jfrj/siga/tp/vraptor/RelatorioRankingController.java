@@ -115,7 +115,7 @@ public class RelatorioRankingController extends TpController {
             msgErro.append("Data in&iacute;cio n&atilde;o deve ser maior que a data fim.");
         }
 
-        if (!"".equals(msgErro.toString())) {
+        if (!StringUtils.EMPTY.equals(msgErro.toString())) {
             result.include(OPT_VALORES, gerarVetorNumeros());
             validator.add(new ValidationMessage(msgErro.toString(), "relatorio"));
             validator.onErrorUse(Results.page()).of(RelatorioRankingController.class).consultar();

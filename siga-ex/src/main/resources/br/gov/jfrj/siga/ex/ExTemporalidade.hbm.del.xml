@@ -19,11 +19,11 @@
 		<many-to-one name="hisIdcIni" column="HIS_IDC_INI" class="br.gov.jfrj.siga.cp.CpIdentidade" />
 		<property name="hisDtFim" column="HIS_DT_FIM" type="java.util.Date" />
 		<many-to-one name="hisIdcFim" column="HIS_IDC_FIM" class="br.gov.jfrj.siga.cp.CpIdentidade" />
-	 	<property name="hisAtivo" column="HIS_ATIVO" type="java.lang.Integer" /> 
+	 	<property name="hisAtivo" column="HIS_ATIVO" type="boolean" />
 		
 		
 		<set name="exViaArqCorrenteSet" inverse="true"
-			where="HIS_ATIVO = 1"
+			where="HIS_ATIVO = TRUE"
 			order-by="COD_VIA asc">
 
 			<key column="ID_TEMPORAL_ARQ_COR" />
@@ -31,7 +31,7 @@
 		</set>
 		
 			<set name="exViaArqIntermediarioSet" inverse="true"
-			where="HIS_ATIVO = 1"
+			where="HIS_ATIVO = TRUE"
 			order-by="COD_VIA asc">
 
 			<key column="ID_TEMPORAL_ARQ_INT" />

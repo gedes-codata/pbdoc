@@ -41,7 +41,7 @@
 		<property name="hisIdIni" column="HIS_ID_INI" type="java.lang.Long" />
 		<property name="hisDtIni" column="HIS_DT_INI" type="java.util.Date" />
 		<property name="hisDtFim" column="HIS_DT_FIM" type="java.util.Date" />
-		<property name="hisAtivo" column="HIS_ATIVO" type="java.lang.Integer" />
+		<property name="hisAtivo" column="HIS_ATIVO" type="boolean" />
 		<!-- Id externo -->
 		<property name="idePapel" column="HIS_IDE"	type="string" />
 				

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <module xmlns="urn:jboss:module:1.1" name="sigarh.jsf" slot="1.1.12">
+        <resources>
+            <resource-root path="jsf-impl.jar"/>
+			<resource-root path="jsf-api.jar"/>
+			<resource-root path="jstl-impl-1.2.jar"/>
+			<resource-root path="jstl-api-1.2.jar"/>
+        </resources>
+		
+		<dependencies>
+			<module name="javax.api" export="true"/>
+            <module name="javax.el.api" export="true"/>
+            <module name="javax.servlet.api" export="true"/>
+            <module name="javax.servlet.jsp.api" export="true"/>
+            <module name="javax.servlet.jstl.api" export="true"/>
+            <module name="javax.validation.api" export="true"/>
+        </dependencies>
+    </module>

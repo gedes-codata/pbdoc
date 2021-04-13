@@ -18,8 +18,9 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.ex.relatorio.dinamico.relatorios;
 
-import java.util.ArrayList;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,10 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.jasperreports.engine.JRException;
-
 import org.hibernate.Query;
-
 
 import ar.com.fdvs.dj.domain.builders.DJBuilderException;
 import br.gov.jfrj.relatorio.dinamico.AbstractRelatorioBaseBuilder;
@@ -47,6 +45,7 @@ import br.gov.jfrj.siga.ex.ExTipoFormaDoc;
 import br.gov.jfrj.siga.ex.bl.Ex;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.model.dao.HibernateUtil;
+import net.sf.jasperreports.engine.JRException;
 
 public class RelMovimentacaoDocSubordinados extends RelatorioTemplate {
 
@@ -116,8 +115,9 @@ public class RelMovimentacaoDocSubordinados extends RelatorioTemplate {
 		else
 			todasLotas = lotacaoSet;
 		for (DpLotacao lot : todasLotas) {
-			if (listaLotacoes != "")
+			if (isNotBlank(listaLotacoes)) {
 				listaLotacoes += ",";
+			}
 			listaLotacoes += lot.getIdInicial().toString();
 		}
 
@@ -312,8 +312,9 @@ public class RelMovimentacaoDocSubordinados extends RelatorioTemplate {
 		else
 			todasLotas = lotacaoSet;
 		for (DpLotacao lot : todasLotas) {
-			if (listaLotacoes != "")
+			if (isNotBlank(listaLotacoes)) {
 				listaLotacoes += ",";
+			}
 			listaLotacoes += lot.getIdInicial().toString();
 		}
 
@@ -428,7 +429,7 @@ public class RelMovimentacaoDocSubordinados extends RelatorioTemplate {
 			Set<DpLotacao> todosSubordinados = getSetoresSubordinados(lotacaoSet);
 
 			for (DpLotacao lot : todosSubordinados) {
-				if (lotacoes != "") {
+				if (isNotBlank(lotacoes)) {
 					lotacoes += " or lot.id=" + lot.getIdInicial().toString();
 				} else {
 					lotacoes = "and (lot.id=" + lot.getIdInicial().toString();
@@ -437,7 +438,7 @@ public class RelMovimentacaoDocSubordinados extends RelatorioTemplate {
 			lotacoes += ")";
 		} else {
 			for (DpLotacao lot : lotacaoSet) {
-				if (lotacoes != "") {
+				if (isNotBlank(lotacoes)) {
 					lotacoes += " or lot.id=" + lot.getIdInicial().toString();
 				} else {
 					lotacoes = "and (lot.id=" + lot.getIdInicial().toString();

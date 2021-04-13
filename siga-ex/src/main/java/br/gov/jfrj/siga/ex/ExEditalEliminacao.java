@@ -180,7 +180,7 @@ public class ExEditalEliminacao {
 					getDoc().getCadastrante(), getDoc().getLotaCadastrante(),
 					o.getMob()))
 				indisponiveis.adicionar(o);
-			else if (o.getMob().doc().isEletronico())
+			else if (o.getMob().getDoc().isEletronico())
 				digitais.adicionar(o);
 			else
 				fisicos.adicionar(o);

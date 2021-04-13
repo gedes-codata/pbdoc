@@ -58,6 +58,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 
@@ -195,11 +197,11 @@ public class ExMovimentacaoVO extends ExVO {
 				token = getWebdavJwtToken(mov, cadastrante, titular, lotaTitular, pwd);
 
 				addAcao(null, "Editar no " + sNome, sApp
-						+ ":ofe|u|__scheme__://__serverName__:__serverPort____contextPath__/public/app/webdav/" + token,
+						+ ":ofe|u|__scheme__://__serverName__:__serverPort____contextPath__/webdav/" + token,
 						mov.getNmArqMov(), true, null, null, null, null, null);
 			}
 
-			if (!mov.isCancelada() && !mov.mob().doc().isSemEfeito()) {
+			if (!mov.isCancelada() && !mov.mob().getDoc().isSemEfeito()) {
 				addAcao(null, "Cancelar", "/app/expediente/mov", "cancelar", true);
 			}
 		}
@@ -219,7 +221,7 @@ public class ExMovimentacaoVO extends ExVO {
 			}
 
 			if (idTpMov == TIPO_MOVIMENTACAO_ANEXACAO) {
-				if (!mov.isCancelada() && !mov.mob().doc().isSemEfeito() && !mov.mob().isEmTransito()) {
+				if (!mov.isCancelada() && !mov.mob().getDoc().isSemEfeito() && !mov.mob().isEmTransito()) {
 					addAcao(null, "Excluir", "/app/expediente/mov", "excluir",
 							Ex.getInstance().getComp().podeExcluirAnexo(titular, lotaTitular, mov.mob(), mov));
 					addAcao(null, "Cancelar", "/app/expediente/mov", "cancelar",
@@ -234,7 +236,7 @@ public class ExMovimentacaoVO extends ExVO {
 			}
 
 			if (hasDespacho(idTpMov)) {
-				if (!mov.mob().doc().isSemEfeito())
+				if (!mov.mob().getDoc().isSemEfeito())
 					addAcao(null, "Cancelar", "/app/expediente/mov", "cancelar",
 							Ex.getInstance().getComp().podeCancelarDespacho(titular, lotaTitular, mov.mob(), mov));
 			}
@@ -244,7 +246,7 @@ public class ExMovimentacaoVO extends ExVO {
 					&& idTpMov != TIPO_MOVIMENTACAO_CONFERENCIA_COPIA_DOCUMENTO
 					&& idTpMov != TIPO_MOVIMENTACAO_AGENDAMENTO_DE_PUBLICACAO && idTpMov != TIPO_MOVIMENTACAO_ANEXACAO
 					&& idTpMov != TIPO_MOVIMENTACAO_ANEXACAO_DE_ARQUIVO_AUXILIAR) {
-				if (!mov.isCancelada() && !mov.mob().doc().isSemEfeito())
+				if (!mov.isCancelada() && !mov.mob().getDoc().isSemEfeito())
 
 					if ((idTpMov == ExTipoMovimentacao.TIPO_MOVIMENTACAO_DESPACHO
 							|| idTpMov == ExTipoMovimentacao.TIPO_MOVIMENTACAO_DESPACHO_INTERNO
@@ -442,7 +444,7 @@ public class ExMovimentacaoVO extends ExVO {
 				|| idTpMov == TIPO_MOVIMENTACAO_TRANSFERENCIA || idTpMov == TIPO_MOVIMENTACAO_TRANSFERENCIA_EXTERNA
 				|| idTpMov == TIPO_MOVIMENTACAO_RECEBIMENTO_TRANSITORIO) {
 			String pre = null;
-			if (mov.getDtFimMovDDMMYY() != "") {
+			if (!StringUtils.EMPTY.equals(mov.getDtFimMovDDMMYY())) {
 				pre = "Devolver até " + mov.getDtFimMovDDMMYY() + " | ";
 			}
 			if (!mov.isCancelada())
@@ -658,9 +660,9 @@ public class ExMovimentacaoVO extends ExVO {
 	}
 
 	private String mimeType() {
-		if (mov == null || mov.getConteudoTpMov() == null)
+		if (mov == null || mov.getMimeType() == null)
 			return "";
-		return mov.getConteudoTpMov();
+		return mov.getMimeType();
 	}
 
 	public boolean isImage() {

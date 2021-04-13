@@ -100,16 +100,16 @@ public abstract class CpGrupo extends AbstractCpGrupo implements Selecionavel,
 	// de HistoricoSuporte.
 	//
 	@Column(name = "HIS_ATIVO")
-	private Integer hisAtivo;
+	private boolean hisAtivo;
 
 	@Override
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.hisAtivo = super.getHisAtivo();
 		return this.hisAtivo;
 	}
 
 	@Override
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		super.setHisAtivo(hisAtivo);
 		this.hisAtivo = getHisAtivo();
 	}

@@ -38,14 +38,21 @@ import br.gov.jfrj.siga.model.GenericoSelecao;
 public class PrincipalController extends SigaController {
 	HttpServletResponse response;
 
-	public PrincipalController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao,
-			SigaObjects so, EntityManager em) {
-		super(request, result, dao, so, em);
+	public PrincipalController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+		super(request, response, result, dao, so, em);
 		this.response = response;
 	}
 
 	@Get("app/principal")
-	public void principal(Boolean exibirAcessoAnterior) {
+	public void principal(Boolean exibirAcessoAnterior, Boolean redirecionar) {
+		if (redirecionar == null || redirecionar) {
+			String paginaInicialUrl = System.getProperty("siga.pagina.inicial.url");
+			if (paginaInicialUrl != null) {
+				result.redirectTo(paginaInicialUrl + ((exibirAcessoAnterior != null && exibirAcessoAnterior) ? "?exibirAcessoAnterior=true" : ""));
+				return;
+			}
+		}
+		
 		if (exibirAcessoAnterior != null && exibirAcessoAnterior) {
 			CpAcesso a = dao.consultarAcessoAnterior(so.getCadastrante());
 			if (a != null) {
@@ -81,6 +88,7 @@ public class PrincipalController extends SigaController {
 		result.redirectTo(Contexto.urlBase(request) + "/sigaex/app/expediente/mov/exibir?id=" + parte);
 	}
 
+	// Buscar Genérico Geral
 	@Get("public/app/generico/selecionar")
 	public void selecionar(final String sigla, final String matricula) {
 		try {

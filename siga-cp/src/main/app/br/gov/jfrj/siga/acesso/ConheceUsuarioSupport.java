@@ -18,15 +18,22 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.acesso;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
+
+import java.util.List;
+
 import br.gov.jfrj.siga.cp.CpIdentidade;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
 
 public class ConheceUsuarioSupport implements ConheceUsuario {
+
 	private CpIdentidade identidadeCadastrante;
 	private DpPessoa cadastrante;
 	private DpPessoa titular;
 	private DpLotacao lotaTitular;
+	private List<DpLotacao> outrasLotacoes;
 
 	public DpPessoa getCadastrante() {
 		return cadastrante;
@@ -58,6 +65,16 @@ public class ConheceUsuarioSupport implements ConheceUsuario {
 
 	public void setIdentidadeCadastrante(CpIdentidade identidadeCadastrante) {
 		this.identidadeCadastrante = identidadeCadastrante;
+	}
+
+	@Override
+	public List<DpLotacao> getOutrasLotacoes() {
+		return nonNull(outrasLotacoes) ? outrasLotacoes : emptyList();
+	}
+
+	@Override
+	public void setOutrasLotacoes(List<DpLotacao> outrasLotacoes) {
+		this.outrasLotacoes = outrasLotacoes;
 	}
 
 }

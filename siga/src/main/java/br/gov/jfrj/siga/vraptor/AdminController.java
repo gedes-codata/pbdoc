@@ -30,8 +30,8 @@ import java.util.Map;
 import javax.crypto.Cipher;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import br.com.caelum.vraptor.Consumes;
 import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
@@ -39,15 +39,17 @@ import br.com.caelum.vraptor.Resource;
 import br.com.caelum.vraptor.Result;
 import br.gov.jfrj.ldap.ILdapDao;
 import br.gov.jfrj.siga.dp.dao.CpDao;
+import br.gov.jfrj.siga.gi.integracao.IntegracaoLdapProperties;
 import br.gov.jfrj.siga.integracao.ldap.IntegracaoLdap;
-import br.gov.jfrj.siga.integracao.ldap.IntegracaoLdapProperties;
 
 @Path("/app/admin/ldap")
 @Resource
 public class AdminController extends SigaController {
-	
-	public AdminController(HttpServletRequest request, Result result, SigaObjects so, EntityManager em) {
-		super(request, result, CpDao.getInstance(), so, em);
+
+	public static final String UPLOAD_DIRECTORY = System.getProperty("java.io.tmpdir");
+
+	public AdminController(HttpServletRequest request, HttpServletResponse response, Result result, SigaObjects so, EntityManager em) {
+		super(request, response, result, CpDao.getInstance(), so, em);
 		assertAcesso("FE;LDAP_ADMIN:Administrar Integracao LDAP");
 	}
 	

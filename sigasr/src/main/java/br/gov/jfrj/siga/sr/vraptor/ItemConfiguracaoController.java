@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.logging.Logger;
 import org.jfree.util.Log;
@@ -49,10 +50,8 @@ public class ItemConfiguracaoController extends SrController {
 	private static final String PESQUISA_SATISFACAO = "pesquisaSatisfacao";
 	private final static Logger log = Logger.getLogger(ItemConfiguracaoController.class);
 
-	public ItemConfiguracaoController(HttpServletRequest request,
-			Result result, CpDao dao, SigaObjects so, EntityManager em,
-			SrValidator srValidator) {
-		super(request, result, dao, so, em, srValidator);
+	public ItemConfiguracaoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em, SrValidator srValidator) {
+		super(request, response, result, dao, so, em, srValidator);
 	}
 
 	@AssertAcesso(ADM_ADMINISTRAR)

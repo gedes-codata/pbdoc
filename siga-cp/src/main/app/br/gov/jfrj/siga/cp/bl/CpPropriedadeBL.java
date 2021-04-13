@@ -96,14 +96,11 @@ public class CpPropriedadeBL extends ModeloPropriedade {
 	public void setCacheUseQueryCache(Boolean b) throws Exception {
 		this.setPropriedade("cache.use_query_cache",b.toString());
 	}
-	
-	public Integer getJWTTokenTTL(String modulo) {
-		int defaultTTL = 3600;
-		String ttl = System.getProperty("idp.jwt.token.ttl." + modulo,String.valueOf(defaultTTL));
-		return Integer.valueOf(ttl); 
-		 
-	}
 	public String getJWTModuloPwd(String modulo) throws Exception {
 		return System.getProperty("idp.jwt.modulo.pwd." + modulo);
+	}
+	
+	public String getModoAutenticacao(String orgao) throws Exception {
+		return System.getProperty(getPrefixoModulo() + ".autenticacao." + orgao.toLowerCase() + ".modo");
 	}
 }

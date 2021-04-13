@@ -132,8 +132,8 @@ public class Afastamento extends TpModel implements ConvertableEntity {
             filtroCondutor = "condutor.id = " + idCondutor + " AND ";
         }
 
-        String qrl = "SELECT a FROM Afastamento a " + " WHERE " + filtroCondutor + " trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracle + ")"
-                + " AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracle + "))";
+        String qrl = "SELECT a FROM Afastamento a " + " WHERE " + filtroCondutor + " DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracle + ")"
+                + " AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracle + "))";
 
         return retornarLista(qrl);
     }
@@ -147,9 +147,9 @@ public class Afastamento extends TpModel implements ConvertableEntity {
             filtroCondutor = "condutor.id = " + idCondutor + " AND ";
         }
 
-        String qrl = "SELECT a FROM Afastamento a " + " WHERE " + filtroCondutor + " ((trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracleInicio + ")"
-                + " AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracleInicio + ")))" + " OR (trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracleFim + ")"
-                + " AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracleFim + "))))";
+        String qrl = "SELECT a FROM Afastamento a " + " WHERE " + filtroCondutor + " ((DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracleInicio + ")"
+                + " AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracleInicio + ")))" + " OR (DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracleFim + ")"
+                + " AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracleFim + "))))";
 
         return retornarLista(qrl);
     }

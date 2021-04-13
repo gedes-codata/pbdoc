@@ -33,10 +33,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.Query;
 import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
@@ -373,11 +370,11 @@ public class DpLotacao extends AbstractDpLotacao implements Serializable,
 		setDataFimLotacao(hisDtFim);
 	}
 
-	public Integer getHisAtivo() {
-		return getDataFimLotacao() != null ? 1 : 0;
+	public boolean getHisAtivo() {
+		return getDataFimLotacao() != null;
 	}
 
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		//
 	}
 

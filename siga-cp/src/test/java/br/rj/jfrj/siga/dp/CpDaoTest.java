@@ -22,11 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.Query;
@@ -36,14 +32,10 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.jdbc.Work;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 import br.gov.jfrj.siga.base.AplicacaoException;
-import br.gov.jfrj.siga.base.Criptografia;
 import br.gov.jfrj.siga.cp.CpConfiguracao;
 import br.gov.jfrj.siga.cp.CpGrupo;
 import br.gov.jfrj.siga.cp.CpGrupoDeEmail;
-import br.gov.jfrj.siga.cp.CpIdentidade;
 import br.gov.jfrj.siga.cp.CpServico;
 import br.gov.jfrj.siga.cp.CpTipoGrupo;
 import br.gov.jfrj.siga.cp.CpTipoServico;
@@ -57,6 +49,7 @@ import br.gov.jfrj.siga.dp.dao.DpPessoaDaoFiltro;
 import br.gov.jfrj.siga.model.Objeto;
 import br.gov.jfrj.siga.model.dao.DaoFiltro;
 import br.gov.jfrj.siga.model.dao.HibernateUtil;
+import junit.framework.TestCase;
 
 public class CpDaoTest extends TestCase {
 
@@ -205,153 +198,6 @@ public class CpDaoTest extends TestCase {
 				CpTipoServico.class, false);
 		assertNotNull(tpsrv);
 	}
-
-	/*
-	 * O MÉTODO testBL foi DESATIVADO pois está usando a conta de um usuário
-	 * real e, além disso, disparando e-mais por causa das trocas de senha e
-	 * criação de identidades. Esse teste deve ser REFATORADO para fazer parte
-	 * da integração contínua.
-	 */
-	public void __DESATIVADO__testBL() throws AplicacaoException, Exception,
-			IllegalAccessException {
-		if (true)
-			return;
-
-		// Carrega uma identidade ativa
-		CpIdentidade idAntiga = null;
-		try {
-			idAntiga = dao.consultaIdentidadeCadastrante(LOGIN, true);
-		} catch (Exception e) {
-		}
-
-		// Cancela a identidade
-		if (idAntiga != null) {
-			CpIdentidade idCancelada = null;
-			Cp.getInstance().getBL().cancelarIdentidade(idAntiga, null);
-			try {
-				idCancelada = dao.consultaIdentidadeCadastrante(LOGIN, true);
-			} catch (Exception e) {
-			}
-			assertNull(idCancelada);
-		}
-
-		// Cria uma nova identidade
-		CpIdentidade idNova = Cp.getInstance().getBL()
-				.criarIdentidade(LOGIN, CPF, null, null, null, false);
-		assertTrue(idNova.getDscSenhaIdentidade().length() > 0);
-
-		// Altera a identidade
-		Date dt = dao.consultarDataEHoraDoServidor();
-		Calendar c = Calendar.getInstance();
-		c.setTime(dt);
-		c.add(Calendar.YEAR, 1);
-		CpIdentidade idAlterada = Cp.getInstance().getBL()
-				.alterarIdentidade(idNova, c.getTime(), null);
-		assertEquals(idAlterada.getDtExpiracaoIdentidade(), c.getTime());
-
-		// Se não há alteração, a ID deve ser mantida
-		CpIdentidade idAlterada2 = Cp.getInstance().getBL()
-				.alterarIdentidade(idAlterada, c.getTime(), null);
-		assertEquals(idAlterada.getId(), idAlterada2.getId());
-
-		// Altera novamente e verifica se foi criada uma nova ID
-		CpIdentidade idAlterada3 = Cp.getInstance().getBL()
-				.alterarIdentidade(idAlterada, null, null);
-		assertFalse(idAlterada3.getId().equals(idAlterada2.getId()));
-
-		// Verificar se a busca por identidades retorna somente um item
-		List<CpIdentidade> l = dao
-				.consultaIdentidades(idAlterada.getDpPessoa());
-		assertEquals(l.size(), 1);
-
-		// A identidade está bloqueada?
-		assertFalse(idAlterada.isBloqueada());
-
-		// A pessoa está bloqueada?
-		assertFalse(idAlterada.getDpPessoa().isBloqueada());
-
-		// Bloquear a identidade
-		Cp.getInstance().getBL().bloquearIdentidade(idAlterada, null, true);
-		assertTrue(idAlterada.isBloqueada());
-		assertFalse(idAlterada.getDpPessoa().isBloqueada());
-
-		// Desbloquear a identidade
-		Cp.getInstance().getBL().bloquearIdentidade(idAlterada, null, false);
-		assertFalse(idAlterada.isBloqueada());
-		assertFalse(idAlterada.getDpPessoa().isBloqueada());
-
-		// Bloquear a pessoa
-		Cp.getInstance().getBL()
-				.bloquearPessoa(idAlterada.getDpPessoa(), null, true);
-		assertTrue(idAlterada.isBloqueada());
-		assertTrue(idAlterada.getDpPessoa().isBloqueada());
-
-		// Desnloquear a pessoa
-		Cp.getInstance().getBL()
-				.bloquearPessoa(idAlterada.getDpPessoa(), null, false);
-		assertFalse(idAlterada.getDpPessoa().isBloqueada());
-
-		// Depois de desbloquear a pessoa, a identidade continua bloqueada. Por
-		// isso, temos que desbloquea-la tb.
-		assertTrue(idAlterada.isBloqueada());
-		Cp.getInstance().getBL().bloquearIdentidade(idAlterada, null, false);
-		assertFalse(idAlterada.isBloqueada());
-
-		/*
-		 * O TESTE DE TROCA DE SENHA ABAIXO FOI DESATIVADO, PORQUE SEMPRE ENVIA
-		 * E-MAIL PARA O USUÁRIOCOM O BUILD AUTOMATICO DA FERRAMENTA HUDSON(CI).
-		 */
-		// Troca a senha
-		String senha = decodificarSenha(idAlterada);
-		CpIdentidade idNovaSenha = Cp
-				.getInstance()
-				.getBL()
-				.trocarSenhaDeIdentidade(senha, NOVA_SENHA, NOVA_SENHA, LOGIN,
-						null);
-		assertEquals(decodificarSenha(idNovaSenha), NOVA_SENHA);
-
-	}
-
-	private String decodificarSenha(CpIdentidade id) throws Exception {
-		BASE64Decoder b64dec = new BASE64Decoder();
-		BASE64Encoder b64enc = new BASE64Encoder();
-		String chave = b64enc.encode(id.getDpPessoa().getIdInicial().toString()
-				.getBytes());
-		String senha = new String(Criptografia.desCriptografar(
-				b64dec.decodeBuffer(id.getDscSenhaIdentidadeCripto()), chave));
-
-		return senha;
-	}
-
-	// Esse teste deve ficar sempre desativado. Caso ele seja executado, todas
-	// as senhas serão lidas do esquema "ACESSO_TOMCAT" e depois serão escritas
-	// identidades no esquema "CORPORATIVO"
-	// public void testImportarAcessoTomcar() throws AplicacaoException,
-	// Exception, IllegalAccessException {
-	// dao.iniciarTransacao();
-	// dao.importarAcessoTomcat();
-	// dao.commitTransacao();
-	// }
-
-	// public void testRelAlteracaoDeAcesso() throws AplicacaoException,
-	// Exception, IllegalAccessException {
-	// Map<String, String> listaParametros = new HashMap<String, String>();
-	// listaParametros.put("dataInicio", "06/01/2011");
-	// listaParametros.put("dataFim", "06/01/2011");
-	// listaParametros.put("idOrgaoUsuario", "1");
-	// AlteracaoDireitosRelatorio rel = new AlteracaoDireitosRelatorio(
-	// listaParametros);
-	// rel.gerar();
-	// }
-
-	// public void testRelHistoricoUsuario() throws AplicacaoException,
-	// Exception, IllegalAccessException {
-	// Map<String, String> listaParametros = new HashMap<String, String>();
-	// listaParametros.put("idPessoa", "160632");
-	// HistoricoUsuarioRelatorio rel = new HistoricoUsuarioRelatorio(
-	// listaParametros);
-	// rel.gerar();
-	// }
 
 	/**
 	 * @param args

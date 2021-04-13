@@ -144,8 +144,8 @@ public class Plantao extends TpModel implements ConvertableEntity, Comparable<Pl
         }
 
         String qrl = "SELECT p FROM Plantao p WHERE " + filtroCondutor + 
-        			 "  trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracle + ")" + 
-        		     " AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracle + "))";
+        			 "  DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracle + ")" + 
+        		     " AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracle + "))";
 
         return retornarLista(qrl);
     }
@@ -161,10 +161,10 @@ public class Plantao extends TpModel implements ConvertableEntity, Comparable<Pl
 
      	String qrl = 	"SELECT p FROM Plantao p " +
     	                " WHERE " + filtroCondutor + 
-    					" ((trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracleInicio + ")" +  	
-    					" AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracleInicio + ")))" +
-    					" OR (trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracleFim + ")" +  	
-    					" AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracleFim + "))))";
+    					" ((DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracleInicio + ")" +  	
+    					" AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracleInicio + ")))" +
+    					" OR (DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracleFim + ")" +  	
+    					" AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracleFim + "))))";
     		
     	return retornarLista(qrl); 
     }
@@ -185,10 +185,10 @@ public class Plantao extends TpModel implements ConvertableEntity, Comparable<Pl
 
         String qrl = "SELECT p FROM Plantao p " +
         			 " WHERE " + filtroCondutor + filtroPlantao + 
-        			 " ((trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracleInicio + ")" +
-                     " AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracleInicio + ")))" + 
-        		     " OR (trunc(dataHoraInicio) <= trunc(" + dataFormatadaOracleFim + ")" +
-                     " AND (dataHoraFim IS NULL OR trunc(dataHoraFim) >= trunc(" + dataFormatadaOracleFim + "))))";
+        			 " ((DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracleInicio + ")" +
+                     " AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracleInicio + ")))" + 
+        		     " OR (DATE(dataHoraInicio) <= DATE(" + dataFormatadaOracleFim + ")" +
+                     " AND (dataHoraFim IS NULL OR DATE(dataHoraFim) >= DATE(" + dataFormatadaOracleFim + "))))";
 
         return retornarLista(qrl);
     }

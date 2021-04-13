@@ -3,6 +3,7 @@ package br.gov.jfrj.siga.pp.vraptor;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Resource;
@@ -18,9 +19,8 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 @Path("/app/perito")
 public class PeritoController extends PpController{
 
-    public PeritoController(HttpServletRequest request, Result result,
-            CpDao dao, SigaObjects so, EntityManager em) {
-        super(request, result, PpDao.getInstance(), so, em);
+    public PeritoController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+        super(request, response, result, PpDao.getInstance(), so, em);
     }
     
     @Path("/incluir")

@@ -1,5 +1,7 @@
 package br.gov.jfrj.siga.sr.util;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,12 +10,13 @@ import java.util.List;
 
 import javax.persistence.Query;
 
+import org.apache.commons.lang.StringUtils;
+
 import br.gov.jfrj.siga.dp.CpMarcador;
 import br.gov.jfrj.siga.dp.DpLotacao;
 import br.gov.jfrj.siga.dp.DpPessoa;
 import br.gov.jfrj.siga.model.ContextoPersistencia;
 import br.gov.jfrj.siga.sr.model.SrAcordo;
-import br.gov.jfrj.siga.sr.model.SrAtributo;
 import br.gov.jfrj.siga.sr.model.SrAtributoSolicitacao;
 import br.gov.jfrj.siga.sr.model.SrLista;
 import br.gov.jfrj.siga.sr.model.SrSolicitacao;
@@ -171,18 +174,18 @@ public class SrSolicitacaoFiltro extends SrSolicitacao {
 			query.append(" and situacao.cpMarcador.idMarcador = " + getSituacao().getIdMarcador()); 
 		
 		query.append(" and (situacao.dtIniMarca is null or "
-					+ "situacao.dtIniMarca < sysdate) ");
+					+ "situacao.dtIniMarca < CURRENT_TIMESTAMP) ");
 		query.append(" and (situacao.dtFimMarca is null or "
-					+ "situacao.dtFimMarca > sysdate) ");
+					+ "situacao.dtFimMarca > CURRENT_TIMESTAMP) ");
 		
 		if (situacaoFiltro.equals("situacaoAux")) {
 			if (getSituacao() != null)
 				query.append(" and situacaoAux.cpMarcador.idMarcador = "
 					+ getSituacao().getIdMarcador());
 			query.append(" and (situacaoAux.dtIniMarca is null or "
-					+ "situacaoAux.dtIniMarca < sysdate) ");
+					+ "situacaoAux.dtIniMarca < CURRENT_TIMESTAMP) ");
 			query.append(" and (situacaoAux.dtFimMarca is null or "
-					+ "situacaoAux.dtFimMarca > sysdate) ");
+					+ "situacaoAux.dtFimMarca > CURRENT_TIMESTAMP) ");
 		}
 		
 		if (Filtros.deveAdicionar(getAtendente())){
@@ -241,11 +244,9 @@ public class SrSolicitacaoFiltro extends SrSolicitacao {
 			}
 		}
 
-		if (getDescrSolicitacao() != null
-				&& !"".equals(getDescrSolicitacao().trim())) {
+		if (isNotBlank(getDescrSolicitacao())) {
 			for (String s : getDescrSolicitacao().split(" ")) {
-				query.append(" and lower(sol.descrSolicitacao) like '%"
-						+ s.toLowerCase() + "%' ");
+				query.append(" and lower(sol.descrSolicitacao) like '%" + s.toLowerCase() + "%' ");
 			}
 		}
 
@@ -282,7 +283,7 @@ public class SrSolicitacaoFiltro extends SrSolicitacao {
 					+ "from sol.meuAtributoSolicitacaoSet atributoDaSolicitacao where atributoDaSolicitacao.hisDtFim is null "
 					+ "and atributoDaSolicitacao.atributo.hisIdIni = " + getAtributoSolicitacao().getAtributo().getHisIdIni());
 			
-			if (!"".equals(getAtributoSolicitacao().getValorAtributoSolicitacao().trim())) {
+			if (!StringUtils.EMPTY.equals(getAtributoSolicitacao().getValorAtributoSolicitacao().trim())) {
 				String[] valorPreenchido = getAtributoSolicitacao().getValorAtributoSolicitacao().split(" ");
 				for (String valor : valorPreenchido) 
 					query.append(" and lower(atributoDaSolicitacao.valorAtributoSolicitacao) like '%" + valor.toLowerCase() + "%'");

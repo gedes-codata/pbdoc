@@ -33,7 +33,6 @@ import org.hibernate.annotations.BatchSize;
 
 import br.gov.jfrj.siga.base.Texto;
 import br.gov.jfrj.siga.hibernate.ExDao;
-import br.gov.jfrj.siga.model.dao.HibernateUtil;
 import br.gov.jfrj.siga.sinc.lib.Sincronizavel;
 
 /**
@@ -44,6 +43,7 @@ import br.gov.jfrj.siga.sinc.lib.Sincronizavel;
 @BatchSize(size = 500)
 @Table(name = "EX_MODELO", catalog = "SIGA")
 public class ExModelo extends AbstractExModelo implements Sincronizavel {
+
 	@Transient
 	private byte[] cacheConteudoBlobMod;
 
@@ -64,16 +64,16 @@ public class ExModelo extends AbstractExModelo implements Sincronizavel {
 
 	/* Add customized code below */
 	public void setConteudoBlobMod2(final byte[] blob) {
-		if (blob != null)
-			setConteudoBlobMod(HibernateUtil.getSessao().getLobHelper()
-					.createBlob(blob));
+		if (blob != null) {
+			setConteudoBlobMod(blob);
+		}
 		cacheConteudoBlobMod = blob;
 	}
 
 	public byte[] getConteudoBlobMod2() {
-		if (cacheConteudoBlobMod == null)
-			cacheConteudoBlobMod = br.gov.jfrj.siga.cp.util.Blob
-					.toByteArray(getConteudoBlobMod());
+		if (cacheConteudoBlobMod == null) {
+			cacheConteudoBlobMod = getConteudoBlobMod();
+		}
 		return cacheConteudoBlobMod;
 	}
 
@@ -198,16 +198,16 @@ public class ExModelo extends AbstractExModelo implements Sincronizavel {
 	// Solução para não precisar criar HIS_ATIVO em todas as tabelas que herdam de HistoricoSuporte.
 	//
 	@Column(name = "HIS_ATIVO")
-	private Integer hisAtivo;
+	private boolean hisAtivo;
 
 	@Override
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.hisAtivo = super.getHisAtivo();
 		return this.hisAtivo;
 	}
 	
 	@Override
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		super.setHisAtivo(hisAtivo);
 		this.hisAtivo = getHisAtivo();
 	}

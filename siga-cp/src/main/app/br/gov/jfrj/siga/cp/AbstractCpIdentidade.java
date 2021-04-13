@@ -18,10 +18,9 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.cp;
 
-import static javax.persistence.GenerationType.SEQUENCE;
-
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -53,24 +52,38 @@ import br.gov.jfrj.siga.sinc.lib.Desconsiderar;
 				+ "     where pes.idPessoaIni = :idPessoaIni"
 				+ "      and u.dpPessoa = pes" + "      and u.hisDtFim is null"),
 		@NamedQuery(name = "consultarIdentidadeCadastranteAtiva", query = "select u from CpIdentidade u , DpPessoa pes "
-				+ "where u.nmLoginIdentidade = :nmUsuario "
-				+ "and pes.sesbPessoa = :sesbPessoa "
+				+ "where ((u.nmLoginIdentidade = :nmUsuario and pes.sesbPessoa = :sesbPessoa and pes.sesbPessoa is not null) or "
+				+ " (pes.cpfPessoa is not null and pes.cpfPessoa <> :cpfZero and pes.cpfPessoa = :cpf)) "
 				+ "and u.dpPessoa.idPessoaIni = pes.idPessoaIni "
-				+ "and (u.hisDtFim is null) "
-				+ "and (u.dtCancelamentoIdentidade is null) "
+				+ "and u.hisDtFim is null "
+				+ "and u.dtCancelamentoIdentidade is null "
 				+ "and (u.dtExpiracaoIdentidade is null or u.dtExpiracaoIdentidade > current_date()) "
-				+ "and (pes.dataFimPessoa is null) "
-				+ "and (pes.situacaoFuncionalPessoa = '1' "
-				+ "or pes.situacaoFuncionalPessoa = '2' "
-				+ "or pes.situacaoFuncionalPessoa = '12' "
-				+ "or pes.situacaoFuncionalPessoa = '22' "
-				+ "or pes.situacaoFuncionalPessoa = '31') "),
-		@NamedQuery(name = "consultarIdentidadeAtualPelaInicial", query = "from CpIdentidade u "
+				+ "and pes.dataFimPessoa is null "
+				+ "and (pes.situacaoFuncionalPessoa = :sfp1 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp2 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp12 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp22 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp31) "),
+        @NamedQuery(name = "consultarIdentidadeAtualPelaInicial", query = "from CpIdentidade u "
 				+ "		where u.hisDtIni = "
 				+ "		(select max(p.hisDtIni) from CpIdentidade p where p.hisIdIni = :idIni)"
-				+ "		 and u.hisIdIni = :idIni"),
-		})
+				+ "		 and u.hisIdIni = :idIni"),				
+		@NamedQuery(name = "consultarIdentidadeCpfEmail", query = "select u from CpIdentidade u , DpPessoa pes "
+				+ "where (pes.cpfPessoa is not null and pes.cpfPessoa <> :cpfZero and pes.cpfPessoa = :cpf)"
+				+ "and pes.emailPessoa = :email "
+				+ "and u.dpPessoa.idPessoaIni = pes.idPessoaIni "
+				+ "and u.hisDtFim is null "
+				+ "and u.dtCancelamentoIdentidade is null "
+				+ "and (u.dtExpiracaoIdentidade is null or u.dtExpiracaoIdentidade > current_date()) "
+				+ "and pes.dataFimPessoa is null "
+				+ "and (pes.situacaoFuncionalPessoa = :sfp1 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp2 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp12 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp22 "
+				+ "or pes.situacaoFuncionalPessoa = :sfp31)")})
+
 public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
+
 	@SequenceGenerator(name = "generator", sequenceName = "CORPORATIVO.CP_IDENTIDADE_SEQ")
 	@Id
 	@GeneratedValue(generator = "generator")
@@ -90,16 +103,6 @@ public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
 	@JoinColumn(name = "ID_PESSOA")
 	private DpPessoa dpPessoa;
 
-	@Column(name = "SENHA_IDENTIDADE", length = 40)
-	private String dscSenhaIdentidade;
-
-	@Column(name = "SENHA_IDENTIDADE_CRIPTO")
-	private String dscSenhaIdentidadeCripto;
-
-	@Column(name = "SENHA_IDENTIDADE_CRIPTO_SINC")
-	@Desconsiderar
-	private String dscSenhaIdentidadeCriptoSinc;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "DATA_CANCELAMENTO_IDENTIDADE", length = 19)
 	private Date dtCancelamentoIdentidade;
@@ -114,6 +117,10 @@ public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
 
 	@Column(name = "LOGIN_IDENTIDADE", length = 20)
 	private String nmLoginIdentidade;
+
+	@JoinColumn(name = "aaa_id")
+	@ManyToOne(optional = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private AAA aaa = new AAA();
 
 	/*
 	 * (non-Javadoc)
@@ -132,11 +139,11 @@ public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
 			return false;
 		}
 		AbstractCpIdentidade other = (AbstractCpIdentidade) obj;
-		if (dscSenhaIdentidade == null) {
-			if (other.dscSenhaIdentidade != null) {
+		if (getDscSenhaIdentidade() == null) {
+			if (other.getDscSenhaIdentidade() != null) {
 				return false;
 			}
-		} else if (!dscSenhaIdentidade.equals(other.dscSenhaIdentidade)) {
+		} else if (!getDscSenhaIdentidade().equals(other.getDscSenhaIdentidade())) {
 			return false;
 		}
 		if (dtCancelamentoIdentidade == null) {
@@ -217,15 +224,7 @@ public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
 	 * @return the dscSenhaIdentidade
 	 */
 	public String getDscSenhaIdentidade() {
-		return dscSenhaIdentidade;
-	}
-
-	public String getDscSenhaIdentidadeCripto() {
-		return dscSenhaIdentidadeCripto;
-	}
-
-	public String getDscSenhaIdentidadeCriptoSinc() {
-		return dscSenhaIdentidadeCriptoSinc;
+		return getAaa().getSenha();
 	}
 
 	/**
@@ -274,8 +273,7 @@ public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
 		int result = 1;
 		result = prime
 				* result
-				+ ((dscSenhaIdentidade == null) ? 0 : dscSenhaIdentidade
-						.hashCode());
+				+ ((getDscSenhaIdentidade() == null) ? 0 : getDscSenhaIdentidade().hashCode());
 		result = prime
 				* result
 				+ ((dtCancelamentoIdentidade == null) ? 0
@@ -330,15 +328,7 @@ public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
 	 *            the dscSenhaIdentidade to set
 	 */
 	public void setDscSenhaIdentidade(String dscSenhaIdentidade) {
-		this.dscSenhaIdentidade = dscSenhaIdentidade;
-	}
-
-	public void setDscSenhaIdentidadeCripto(String senha) {
-		this.dscSenhaIdentidadeCripto = senha;
-	}
-
-	public void setDscSenhaIdentidadeCriptoSinc(String senha) {
-		this.dscSenhaIdentidadeCriptoSinc = senha;
+		this.getAaa().setSenha(dscSenhaIdentidade);
 	}
 
 	/**
@@ -379,6 +369,17 @@ public abstract class AbstractCpIdentidade extends HistoricoAuditavelSuporte {
 	 */
 	public void setNmLoginIdentidade(String nmLoginIdentidade) {
 		this.nmLoginIdentidade = nmLoginIdentidade;
+	}
+
+	public AAA getAaa() {
+		if (this.aaa == null) {
+			this.aaa = new AAA();
+		}
+		return this.aaa;
+	}
+
+	public void setAaa(AAA aaa) {
+		this.aaa = aaa;
 	}
 
 }

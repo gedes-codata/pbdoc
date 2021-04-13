@@ -50,11 +50,9 @@ import br.gov.jfrj.siga.ex.ExNivelAcesso;
 import br.gov.jfrj.siga.ex.ExSituacaoConfiguracao;
 import br.gov.jfrj.siga.ex.ExTipoDocumento;
 import br.gov.jfrj.siga.ex.ExTipoMobil;
-import br.gov.jfrj.siga.ex.bl.CurrentRequest;
 import br.gov.jfrj.siga.ex.bl.Ex;
 import br.gov.jfrj.siga.ex.bl.ExCompetenciaBL;
 import br.gov.jfrj.siga.ex.bl.ExConfiguracaoBL;
-import br.gov.jfrj.siga.ex.bl.RequestInfo;
 import br.gov.jfrj.siga.ex.service.ExService;
 import br.gov.jfrj.siga.hibernate.ExDao;
 import br.gov.jfrj.siga.parser.PessoaLotacaoParser;
@@ -87,8 +85,8 @@ public class ExServiceImpl implements ExService {
 			return false;
 		try {
 			ExMobil mob = buscarMobil(codigoDocumentoVia);
-			if (mob.doc().isProcesso())
-				mob = mob.doc().getUltimoVolume();
+			if (mob.getDoc().isProcesso())
+				mob = mob.getDoc().getUltimoVolume();
 			PessoaLotacaoParser cadastranteParser = new PessoaLotacaoParser(
 					siglaCadastrante);
 			PessoaLotacaoParser destinoParser = new PessoaLotacaoParser(
@@ -242,10 +240,10 @@ public class ExServiceImpl implements ExService {
 			PessoaLotacaoParser cadastranteParser = new PessoaLotacaoParser(
 					siglaCadastrante);
 			ExMobil mob = buscarMobil(codigoDocumento);
-			if (mob.doc().isProcesso()){
-				mob = mob.doc().getUltimoVolume();
+			if (mob.getDoc().isProcesso()){
+				mob = mob.getDoc().getUltimoVolume();
 			}else if (contemApenasUmaVia(mob)){
-				mob = mob.doc().getPrimeiraVia();
+				mob = mob.getDoc().getPrimeiraVia();
 			}
 			if (forcarTransferencia)
 				return Ex
@@ -272,7 +270,7 @@ public class ExServiceImpl implements ExService {
 	 * @return
 	 */
 	private boolean contemApenasUmaVia(ExMobil mob) {
-		return mob.doc().getPrimeiraVia() != null && mob.doc().getSetVias().size() == 1;
+		return mob.getDoc().getPrimeiraVia() != null && mob.getDoc().getSetVias().size() == 1;
 	}
 
 	public Boolean isAtendente(String codigoDocumento, String siglaTitular)
@@ -347,8 +345,8 @@ public class ExServiceImpl implements ExService {
 							cadastranteParser.getPessoa(),
 							cadastranteParser
 									.getLotacaoOuLotacaoPrincipalDaPessoa(),
-							mob.doc());
-			return mob.doc().getUltimaVia().getSigla();
+							mob.getDoc());
+			return mob.getDoc().getUltimaVia().getSigla();
 		} catch (Exception e) {
 			if (!isHideStackTrace())
 				e.printStackTrace(System.out);
@@ -362,7 +360,7 @@ public class ExServiceImpl implements ExService {
 			return null;
 		try {
 			ExMobil mob = buscarMobil(codigoDocumento);
-			return mob.doc().getForm().get(variavel);
+			return mob.getDoc().getForm().get(variavel);
 		} catch (Exception e) {
 			if (!isHideStackTrace())
 				e.printStackTrace(System.out);
@@ -423,15 +421,15 @@ public class ExServiceImpl implements ExService {
     		ExDocumento doc = new ExDocumento();
     		
     		if(cadastranteStr == null || cadastranteStr.isEmpty())
-    			throw new AplicacaoException("A matrícula do cadastrante não foi informada.");
+    			throw new AplicacaoException("O usuário do cadastrante não foi informado.");
     		
     		if(subscritorStr == null || subscritorStr.isEmpty())
-    			throw new AplicacaoException("A matrícula do subscritor não foi informada.");
+    			throw new AplicacaoException("O usuário do subscritor não foi informado.");
 
     		cadastrante = dao().getPessoaFromSigla(cadastranteStr);
     		
     		if(cadastrante == null)
-    			throw new AplicacaoException("Não foi possível encontrar um cadastrante com a matrícula informada.");
+    			throw new AplicacaoException("Não foi possível encontrar um cadastrante com o usuário informado.");
     		
     		if(cadastrante.isFechada())
     			throw new AplicacaoException("O cadastrante não está mais ativo.");
@@ -439,7 +437,7 @@ public class ExServiceImpl implements ExService {
     		subscritor = dao().getPessoaFromSigla(subscritorStr);
     		
     		if(subscritor == null)
-    			throw new AplicacaoException("Não foi possível encontrar um subscritor com a matrícula informada.");
+    			throw new AplicacaoException("Não foi possível encontrar um subscritor com o usuário informado.");
  
     		if(subscritor.isFechada())
     			throw new AplicacaoException("O subscritor não está mais ativo.");
@@ -665,8 +663,7 @@ public class ExServiceImpl implements ExService {
 				conteudo = "";
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 				baos.write(conteudo.getBytes());
-			
-				doc.setConteudoTpDoc("application/zip");
+				doc.setMimeType("application/zip");
 				doc.setConteudoBlobForm(baos.toByteArray());
 			}
 			

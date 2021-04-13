@@ -71,7 +71,6 @@ public class DpPessoa extends AbstractDpPessoa implements Serializable,
 	private static final long serialVersionUID = -5743631829922578717L;
 	public static final ActiveRecord<DpPessoa> AR = new ActiveRecord<>(
 			DpPessoa.class);
-
 	@Formula(value = "REMOVE_ACENTO(NOME_PESSOA)")
 	@Desconsiderar
 	private String nomePessoaAI;
@@ -80,7 +79,6 @@ public class DpPessoa extends AbstractDpPessoa implements Serializable,
 	private Long idSitConfiguracaoConfManual;
 
 	public DpPessoa() {
-
 	}
 
 	public Long getIdLotacao() {
@@ -198,12 +196,20 @@ public class DpPessoa extends AbstractDpPessoa implements Serializable,
 		if (sigla == null) {
 			sigla = "";
 		}
-		final Pattern p1 = Pattern.compile("^([A-Za-z][A-Za-z0-9])([0-9]+)");
+		
+		final Pattern p1 = Pattern.compile("^([A-Za-z][A-Za-z0-9]{1,2})([0-9]+)"); /* Aumentada a mascar para aceitar até 5 caractetes no primeiro grupo para o Órgão */
 		final Matcher m = p1.matcher(sigla);
 		if (m.find()) {
 			setSesbPessoa(m.group(1).toUpperCase());
 			setMatricula(Long.parseLong(m.group(2)));
 		}
+		
+		/** Retirado por dar erro na pesquisa por nome nas caixas de seleção de pessoas - Atenção GOVSP
+		
+		if(sigla != null && !StringUtils.EMPTY.equals(sigla)) {
+			setSesbPessoa(MatriculaUtils.getSiglaDoOrgaoDaMatricula(sigla.toUpperCase()).toUpperCase());
+			setMatricula(MatriculaUtils.getParteNumericaDaMatricula(sigla.toUpperCase()));
+		}  **/
 	}
 
 	public String getNomePessoaAI() {
@@ -511,11 +517,11 @@ public class DpPessoa extends AbstractDpPessoa implements Serializable,
 		setDataFimPessoa(hisDtFim);
 	}
 
-	public Integer getHisAtivo() {
-		return getHisDtFim() != null ? 1 : 0;
+	public boolean getHisAtivo() {
+		return getHisDtFim() != null;
 	}
 
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		//
 	}
 

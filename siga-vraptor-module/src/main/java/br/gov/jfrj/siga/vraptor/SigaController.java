@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,9 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.common.collect.Lists;
 
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.interceptor.multipart.UploadedFile;
@@ -31,16 +35,15 @@ import br.gov.jfrj.siga.dp.DpPessoa;
 import br.gov.jfrj.siga.dp.DpSubstituicao;
 import br.gov.jfrj.siga.dp.dao.CpDao;
 
-import com.google.common.collect.Lists;
-
 public class SigaController {
 	public SigaObjects so;
 
 	public Result result;
 
 	protected HttpServletRequest request;
+	protected HttpServletResponse response;
 
-	private EntityManager em;
+	protected EntityManager em;
 	protected CpDao dao;
 
 	private Paginador p = new Paginador();
@@ -92,10 +95,10 @@ public class SigaController {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SigaController(HttpServletRequest request, Result result, CpDao dao,
-			SigaObjects so, EntityManager em) {
+	public SigaController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
 		super();
-		this.setRequest(request);
+		this.request = request;
+		this.response = response;
 		this.dao = dao;
 		this.setPar(new HashMap<>( getRequest().getParameterMap()));
 		this.result = result;
@@ -109,6 +112,7 @@ public class SigaController {
 		result.include("lotaCadastrante", getLotaCadastrante());
 		result.include("titular", getTitular());
 		result.include("lotaTitular", getLotaTitular());
+		result.include("outrasLotacoes", getOutrasLotacoes());
 		result.include("meusTitulares", getMeusTitulares());
 		result.include("identidadeCadastrante",getIdentidadeCadastrante());
 	}
@@ -200,6 +204,14 @@ public class SigaController {
 	protected void setLotaTitular(DpLotacao lotaTitular) {
 		so.setLotaTitular(lotaTitular);
 	}	
+
+	protected List<DpLotacao> getOutrasLotacoes() {
+		return so.getOutrasLotacoes();
+	}
+
+	protected void setOutrasLotacoes(List<DpLotacao> outrasLotacoes) {
+		so.setOutrasLotacoes(outrasLotacoes);
+	}
 
 	protected DpPessoa getTitular() {
 		return so.getTitular();
@@ -316,7 +328,27 @@ public class SigaController {
 	protected void setRequest(HttpServletRequest request) {
 		this.request = request;
 	}
-	
+
+	protected HttpServletResponse getResponse() {
+		return response;
+	}
+
+	protected void setResponse(HttpServletResponse response) {
+		this.response = response;
+	}
+
+	public String getBaseUrl() {
+		StringBuilder urlBuilder = new StringBuilder()
+				.append(this.request.getScheme())
+				.append("://")
+				.append(this.request.getServerName());
+
+		if (80 != this.request.getServerPort()) {
+			urlBuilder.append(":").append(this.request.getServerPort());
+		}
+		return urlBuilder.toString();
+	}
+
 	protected void assertAcesso(final String pathServico) {
 		so.assertAcesso(pathServico);
 	}	
@@ -343,7 +375,20 @@ public class SigaController {
 	}
 
 	protected List<CpOrgaoUsuario> getOrgaosUsu() throws AplicacaoException {
-		return dao().listarOrgaosUsuarios();
+		
+		List<CpOrgaoUsuario> listaOrgaos = dao().listarOrgaosUsuarios();
+		
+		List<CpOrgaoUsuario> listaOrgaosSemZZZ = new ArrayList<>();
+		
+		for (CpOrgaoUsuario orgao : listaOrgaos) {
+			
+			if (!orgao.getSiglaOrgaoUsu().equalsIgnoreCase("zzz")) {
+				listaOrgaosSemZZZ.add(orgao);
+			}
+			
+		}
+		
+		return listaOrgaosSemZZZ;
 	}
 	
 	protected Paginador getP() {

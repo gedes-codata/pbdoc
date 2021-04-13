@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,7 +13,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
 
 /**
  * Extrai dados do banco de dados em formato SQL.
@@ -127,7 +125,7 @@ public class DumpApp {
 	 * @throws IOException
 	 */
 	private void dump() throws SQLException, IOException {
-		DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+		DriverManager.registerDriver(new org.postgresql.Driver());
 		connection = DriverManager.getConnection(urlDB, userDB, passDB);
 
 		inicioScript.add(getInicioScript());

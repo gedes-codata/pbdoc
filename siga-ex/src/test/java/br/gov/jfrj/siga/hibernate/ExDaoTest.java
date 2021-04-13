@@ -29,27 +29,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
-
 import org.hibernate.Query;
-import org.hibernate.cfg.Configuration;
 
 import br.gov.jfrj.itextpdf.ConversorHtml;
 import br.gov.jfrj.itextpdf.FOP;
-import br.gov.jfrj.siga.base.AplicacaoException;
-import br.gov.jfrj.siga.cp.CpConfiguracao;
-import br.gov.jfrj.siga.cp.bl.CpAmbienteEnumBL;
 import br.gov.jfrj.siga.dp.DpPessoa;
-import br.gov.jfrj.siga.dp.dao.CpDao;
 import br.gov.jfrj.siga.dp.dao.DpPessoaDaoFiltro;
 import br.gov.jfrj.siga.ex.ExConfiguracao;
 import br.gov.jfrj.siga.ex.ExMobil;
 import br.gov.jfrj.siga.ex.ExMovimentacao;
 import br.gov.jfrj.siga.ex.bl.Ex;
 import br.gov.jfrj.siga.model.dao.DaoFiltro;
-import br.gov.jfrj.siga.model.dao.HibernateUtil;
-import br.gov.jfrj.siga.model.dao.ModeloDao;
 import br.gov.jfrj.siga.persistencia.ExMobilDaoFiltro;
+import junit.framework.TestCase;
 
 public class ExDaoTest extends TestCase {
 
@@ -257,8 +249,8 @@ public class ExDaoTest extends TestCase {
 								.verificarAssinatura(
 										mov.getExDocumento()
 												.getConteudoBlobPdf(),
-										mov.getConteudoBlobMov2(),
-										mov.getConteudoTpMov(), mov.getData());
+										mov.getConteudoBlobInicializarOuAtualizarCache(),
+										mov.getMimeType(), mov.getData());
 						// System.out.println(mov.getExDocumento().getCodigo()
 						// + ": " + mov.getDtRegMovDDMMYY() + " - "
 						// + mov.getSubscritor().getSiglaCompleta()
@@ -320,9 +312,9 @@ public class ExDaoTest extends TestCase {
 								.getBL()
 								.verificarAssinatura(
 										mov.getExMovimentacaoRef()
-												.getConteudoBlobpdf(),
-										mov.getConteudoBlobMov2(),
-										mov.getConteudoTpMov(), mov.getData());
+												.getConteudoBlobPdf(),
+										mov.getConteudoBlobInicializarOuAtualizarCache(),
+										mov.getMimeType(), mov.getData());
 						// System.out.println(mov.getExDocumento().getCodigo()
 						// + ": " + mov.getDtRegMovDDMMYY() + " - "
 						// + mov.getSubscritor().getSiglaCompleta()

@@ -14,11 +14,10 @@ import br.gov.jfrj.siga.vraptor.SigaObjects;
 
 public class PpController extends SigaController {
 
-    HttpServletResponse response;
     ServletContext context;
     
-    public PpController(HttpServletRequest request, Result result, CpDao dao, SigaObjects so, EntityManager em) {
-        super(request, result, dao, so, em);
+    public PpController(HttpServletRequest request, HttpServletResponse response, Result result, CpDao dao, SigaObjects so, EntityManager em) {
+        super(request, response, result, dao, so, em);
     }
 
     @Override
@@ -29,10 +28,6 @@ public class PpController extends SigaController {
     @Override
     protected void assertAcesso(String pathServico) throws AplicacaoException {
         super.assertAcesso("SR:Módulo de Serviços;" + pathServico);
-    }
-    
-    protected  HttpServletResponse getResponse() {
-        return response;
     }
 
     protected ServletContext getContext() {

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="sigarh.richfaces" slot="3.3.2">
+		<resources>
+			<resource-root path="darkX-3.3.2.SR1.jar"/>
+			<resource-root path="richfaces-ui-3.3.2.SR1.jar"/>
+			<resource-root path="richfaces-api-3.3.2.SR1.jar"/>
+			<resource-root path="richfaces-impl-3.3.2.SR1.jar"/>
+			<resource-root path="commons-beanutils-1.8.2.jar"/>
+			<resource-root path="commons-collections-3.2.1.jar"/>
+			<resource-root path="commons-digester-1.8.1.jar"/>
+			<resource-root path="commons-logging.jar"/>
+			<resource-root path="jhighlight-1.0.jar"/>
+		</resources>
+		
+		<dependencies>
+		    <module name="javax.el.api" export="true"/>
+            <module name="javax.servlet.api" export="true"/>
+            <module name="javax.servlet.jsp.api" export="true"/>
+            <module name="javax.servlet.jstl.api" export="true"/>
+			<module name="com.sigarh.jsf" slot="1.1.12"/>
+			<module name="javax.xml.bind.api"/>
+			<module name="javax.xml.jaxp-provider"/>
+			<module name="org.apache.log4j"/>
+		</dependencies>
+</module>
+

@@ -40,8 +40,8 @@ import br.gov.jfrj.siga.model.Objeto;
 @NamedNativeQueries({
 		@NamedNativeQuery(name = "consultarPorResponsavel", query = "select * from ("
 				+ "		select est.id_Estado_Doc id, est.desc_Estado_Doc desc,"
-				+ "		(select count(*) from SIGA.ex_movimentacao movR where (movR.id_resp = :resp || (movR.id_estado_doc = 11 && (movR.cadastrante.idPessoa = :resp || movR.subscritor.idPessoa = :resp))) and movR.dt_Fim_Mov is null and movR.id_estado_doc = est.id_estado_doc) c1 ,"
-				+ "		(select count(*) from SIGA.ex_movimentacao movL where (movL.id_lota_resp = :lotaResp || (movL.id_estado_doc = 11 && (movL.lotaCadastrante.idlotacao = :lotaresp || movL.lotaSubscritor.idlotacao = :lotaresp))) and movL.dt_Fim_Mov is null and movL.id_estado_doc = est.id_estado_doc) c2"
+				+ "		(select count(*) from SIGA.ex_movimentacao movR where (movR.id_resp = :resp OR (movR.id_estado_doc = 11 AND (movR.cadastrante.idPessoa = :resp OR movR.subscritor.idPessoa = :resp))) and movR.dt_Fim_Mov is null and movR.id_estado_doc = est.id_estado_doc) c1 ,"
+				+ "		(select count(*) from SIGA.ex_movimentacao movL where (movL.id_lota_resp = :lotaResp OR (movL.id_estado_doc = 11 AND (movL.lotaCadastrante.idlotacao = :lotaresp OR movL.lotaSubscritor.idlotacao = :lotaresp))) and movL.dt_Fim_Mov is null and movL.id_estado_doc = est.id_estado_doc) c2"
 				+ "		from SIGA.Ex_Estado_Doc est)"
 				+ "		where c1 > 0 or c2 > 0"
 				+ "		and id <> 9"),

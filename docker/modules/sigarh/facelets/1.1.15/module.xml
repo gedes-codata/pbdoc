@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="sigarh.facelets">
+     <resources>
+		<resource-root path="jsf-facelets-1.1.15.jar"/>
+		<resource-root path="portlet.jar"/>
+		<resource-root path="servlet-api-2.4.jar"/>
+		<resource-root path="el-impl-1.0.jar"/>
+    </resources>
+	
+	<dependencies>
+	   <module name="javax.faces.api" slot="1.2"/>
+	   <module name="com.sun.jsf-impl" slot="1.2"/>
+	 </dependencies>
+	
+	
+</module>

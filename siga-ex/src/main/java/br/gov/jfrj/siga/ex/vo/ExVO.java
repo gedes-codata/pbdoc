@@ -18,15 +18,18 @@
  ******************************************************************************/
 package br.gov.jfrj.siga.ex.vo;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 
-import br.gov.jfrj.siga.ex.bl.Ex;
+import org.apache.commons.lang.StringUtils;
+
+import br.gov.jfrj.siga.ex.bl.ExBL;
 
 public class ExVO {
+
 	List<ExAcaoVO> acoes = new ArrayList<ExAcaoVO>();
 
 	private class NomeExAcaoVOComparator implements Comparator<ExAcaoVO> {
@@ -50,13 +53,19 @@ public class ExVO {
 
 	protected void addAcao(String icone, String nome, String nameSpace,
 			String action, boolean pode) {
-		addAcao(icone, nome, nameSpace, action, pode, null, null, null, null, null);
+		addAcao(icone, nome, nameSpace, action, pode, null, null, null, null, null, nome);
 	}
 
 	protected void addAcao(String icone, String nome, String nameSpace,
 			String action, boolean pode, String msgConfirmacao,
 			String parametros, String pre, String pos, String classe) {
-		TreeMap<String, String> params = new TreeMap<String, String>();
+		addAcao(icone, nome, nameSpace, action, pode, msgConfirmacao, parametros, pre, pos, classe, nome);
+	}
+
+	protected void addAcao(String icone, String nome, String nameSpace,
+			String action, boolean pode, String msgConfirmacao,
+			String parametros, String pre, String pos, String classe, String hint) {
+		TreeMap<String, Object> params = new TreeMap<String, Object>();
 
 		if (this instanceof ExMovimentacaoVO) {
 			params.put("id",
@@ -70,22 +79,18 @@ public class ExVO {
 		}
 
 		if (parametros != null) {
-			if (parametros.startsWith("&"))
+			if (parametros.startsWith("&")) {
 				parametros = parametros.substring(1);
-			else
+			} else {
 				params.clear();
-			try {
-				Ex.getInstance()
-						.getBL()
-						.mapFromUrlEncodedForm(params,
-								parametros.getBytes("iso-8859-1"));
-			} catch (UnsupportedEncodingException e) {
 			}
+			ExBL.mapFromUrlEncodedForm(params, parametros.getBytes(StandardCharsets.ISO_8859_1));
 		}
 
 		if (pode) {
+			String hintEscapado = StringUtils.replace(nome, "_", "");
 			ExAcaoVO acao = new ExAcaoVO(icone, nome, nameSpace, action, pode,
-					msgConfirmacao, params, pre, pos, classe);
+					msgConfirmacao, params, pre, pos, classe, hintEscapado);
 			acoes.add(acao);
 		}
 	}

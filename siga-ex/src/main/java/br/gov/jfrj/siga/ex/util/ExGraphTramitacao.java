@@ -36,7 +36,7 @@ public class ExGraphTramitacao extends ExGraph {
 					atendenteInicial = mov.getLotaResp();
 
 				adicionar(new Nodo(mov.getLotaResp().getSiglaCompleta())
-						.setLabel(mov.getLotaResp().getSigla())
+						.setLabel(mov.getLotaResp().getSigla() + "/" + mov.getLotaResp().getOrgaoUsuario().getSiglaOrgaoUsuCompleta())
 						.setShape(
 								mov.getLotaResp().equals(atendenteInicial) ? "oval"
 										: "rectangle")

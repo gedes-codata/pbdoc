@@ -28,10 +28,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.BatchSize;
-
 import br.gov.jfrj.siga.cp.CpUnidadeMedida;
-import br.gov.jfrj.siga.dp.CpMarcador;
 import br.gov.jfrj.siga.model.Assemelhavel;
 
 /**
@@ -117,16 +114,16 @@ public class ExTemporalidade extends AbstractExTemporalidade implements
 	// Solução para não precisar criar HIS_ATIVO em todas as tabelas que herdam de HistoricoSuporte.
 	//
 	@Column(name = "HIS_ATIVO")
-	private Integer hisAtivo;
+	private boolean hisAtivo;
 	
 	@Override
-	public Integer getHisAtivo() {
+	public boolean getHisAtivo() {
 		this.hisAtivo = super.getHisAtivo();
 		return this.hisAtivo;
 	}
 	
 	@Override
-	public void setHisAtivo(Integer hisAtivo) {
+	public void setHisAtivo(boolean hisAtivo) {
 		super.setHisAtivo(hisAtivo);
 		this.hisAtivo = getHisAtivo();
 	}

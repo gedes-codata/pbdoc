@@ -37,6 +37,7 @@
 		<class>br.gov.jfrj.siga.cp.CpTipoServico</class>
 		<class>br.gov.jfrj.siga.cp.CpTipoIdentidade</class>
 		<class>br.gov.jfrj.siga.cp.CpIdentidade</class>
+		<class>br.gov.jfrj.siga.cp.AAA</class>
 		<class>br.gov.jfrj.siga.cp.CpModelo</class>
 		<class>br.gov.jfrj.siga.cp.CpUnidadeMedida</class>
 		<class>br.gov.jfrj.siga.cp.CpComplexo</class>
@@ -75,7 +76,7 @@
 				value="classpath:ehcache.xml" />
 			<property name="hibernate.cache.region.factory_class"
 				value="org.jboss.as.jpa.hibernate4.infinispan.InfinispanRegionFactory" />
-			<property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
 			<property name="hibernate.show_sql" value="false" />
 			
 						<!-- Cache Region QUERY_CACHE_SECONDS -->

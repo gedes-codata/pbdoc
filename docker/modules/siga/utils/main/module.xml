@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.0" name="siga.utils">
+    <resources>
+		<resource-root path="bcmail-jdk16-144.jar"/>
+		<resource-root path="bcprov-ext-jdk16-144.jar"/>
+		<resource-root path="bcprov-jdk16-144.jar"/>
+		<resource-root path="bctsp-jdk16-144.jar"/>
+		<resource-root path="US_export_policy.jar"/>
+		<resource-root path="rife-continuations.jar"/>
+		<resource-root path="ognl.jar"/>
+		<resource-root path="oscore.jar"/>
+		<resource-root path="freemarker.jar"/>
+		<resource-root path="commons-beanutils.jar"/>
+		<resource-root path="commons-digester.jar"/>
+		<resource-root path="commons-discovery-0.2.jar"/>
+		<resource-root path="commons-fileupload.jar"/>
+		<resource-root path="commons-lang.jar"/>
+		<resource-root path="jasperreports-4.0.2.jar"/>
+		<resource-root path="DynamicJasper-3.0.6.jar"/>
+		<resource-root path="ehcache-1.5.0.jar"/>
+		<resource-root path="backport-util-concurrent.jar"/>
+    </resources>
+	
+	<dependencies>
+        <module name="javax.api"/>
+		<module name="javax.servlet.api"/>
+		<module name="javax.servlet.jsp.api"/>
+		<module name="javax.servlet.jstl.api"/>
+		<module name="org.apache.log4j"/>
+        <module name="org.apache.commons.beanutils"/>
+        <module name="org.apache.commons.collections"/>
+        <module name="org.apache.commons.logging"/>
+    </dependencies>
+	
+</module>
